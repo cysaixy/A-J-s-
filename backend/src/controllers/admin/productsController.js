@@ -1,0 +1,662 @@
+// src/controllers/admin/productsController.js
+import pool from '../../config/db.js';
+import { calculateBulkCapacity, getCapacityBreakdown } from '../../services/capacityService.js';
+
+// --- Categories ---
+
+export const listCategories = async (req, res, next) => {
+  try {
+    const { rows } = await pool.query(
+      'SELECT id, name FROM categories ORDER BY name ASC'
+    );
+
+    return res.status(200).json({
+      success: true,
+      data: rows,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const createCategory = async (req, res, next) => {
+  try {
+    const name = String(req.body?.name || '').trim();
+    if (!name) return res.status(400).json({ error: 'Name is required.' });
+    if (name.length > 100) return res.status(400).json({ error: 'Category name must be 100 characters or fewer.' });
+
+    const { rows } = await pool.query(
+      'INSERT INTO categories (name) VALUES ($1) RETURNING id, name',
+      [name]
+    );
+    res.status(201).json({ category: rows[0] });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const updateCategory = async (req, res, next) => {
+  try {
+    const name = String(req.body?.name || '').trim();
+    if (!name) return res.status(400).json({ error: 'Name is required.' });
+    if (name.length > 100) return res.status(400).json({ error: 'Category name must be 100 characters or fewer.' });
+    const { rows } = await pool.query(
+      'UPDATE categories SET name = $1 WHERE id = $2 RETURNING id, name',
+      [name, req.params.id]
+    );
+    if (!rows[0]) return res.status(404).json({ error: 'Category not found.' });
+    res.json({ category: rows[0] });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const deleteCategory = async (req, res, next) => {
+  try {
+    const { rowCount } = await pool.query('DELETE FROM categories WHERE id = $1', [req.params.id]);
+    if (rowCount === 0) return res.status(404).json({ error: 'Category not found.' });
+    res.status(204).send();
+  } catch (err) {
+    if (err.code === '23503') {
+      return res.status(409).json({ error: 'Cannot delete category referenced by menu items.' });
+    }
+    next(err);
+  }
+};
+
+// --- Menu Items (Products) ---
+
+export const listAllMenuItems = async (req, res, next) => {
+  try {
+    const { rows: items } = await pool.query(
+      `SELECT mi.id, mi.category_id, mi.name, mi.description, mi.price, mi.cost,
+              mi.image_url, mi.stock_quantity, mi.status, mi.tracking_mode,
+              mi.flavors, c.name AS category_name
+       FROM menu_items mi
+       LEFT JOIN categories c ON c.id = mi.category_id
+       ORDER BY mi.name`
+    );
+
+    const itemsWithInv = await Promise.all(
+      items.map(async (item) => {
+        const { rows: invComp } = await pool.query(
+          `SELECT mii.id, mii.inventory_id, mii.quantity, mii.unit, ii.name AS inventory_name, ii.stock_quantity
+           FROM menu_item_inventory mii
+           JOIN inventory_items ii ON ii.id = mii.inventory_id
+           WHERE mii.menu_id = $1`,
+          [item.id]
+        );
+        return {
+          ...item,
+          inventory_components: invComp,
+        };
+      })
+    );
+
+    // Calculate real-time capacity for recipe-tracked items
+    const menuIds = items.map(i => i.id);
+    const capacityMap = await calculateBulkCapacity(menuIds);
+
+    const itemsWithCapacity = itemsWithInv.map(item => {
+      // For recipe-tracked items, use calculated capacity instead of stock_quantity
+      const trackingMode = item.tracking_mode || 'direct';
+      const availableQty = trackingMode === 'recipe' 
+        ? (capacityMap[item.id] || 0)
+        : item.stock_quantity;
+
+      return {
+        ...item,
+        available_quantity: availableQty,
+        is_calculated: trackingMode === 'recipe'
+      };
+    });
+
+    res.json({ items: itemsWithCapacity });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getMenuItem = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const { rows } = await pool.query(
+      `SELECT mi.id, mi.category_id, mi.name, mi.description, mi.price, mi.cost,
+              mi.image_url, mi.stock_quantity, mi.status, mi.flavors, c.name AS category_name
+       FROM menu_items mi
+       LEFT JOIN categories c ON c.id = mi.category_id
+       WHERE mi.id = $1`,
+      [id]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: `Menu item with ID ${id} not found.`,
+      });
+    }
+
+    const { rows: invComp } = await pool.query(
+      `SELECT mii.id, mii.inventory_id, mii.quantity, mii.unit, ii.name AS inventory_name, ii.stock_quantity
+       FROM menu_item_inventory mii
+       JOIN inventory_items ii ON ii.id = mii.inventory_id
+       WHERE mii.menu_id = $1`,
+      [id]
+    );
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        ...rows[0],
+        inventory_components: invComp,
+      },
+    });
+  } catch (err) {
+    if (err.code === '22P02') {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid menu item ID format.',
+      });
+    }
+    next(err);
+  }
+};
+
+export const createMenuItem = async (req, res, next) => {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+
+    const { category_id, name, description, price, cost, image_url, stock_quantity, status, inventory_components, flavors } = req.body;
+    if (!category_id || !name || price === undefined) {
+      return res.status(400).json({ error: 'category_id, name, and price are required.' });
+    }
+
+    const hasRecipe = Array.isArray(inventory_components) && inventory_components.some(c => c.inventory_id && Number(c.quantity) > 0);
+    const trackingMode = hasRecipe ? 'recipe' : 'direct';
+    const flavorsArr = Array.isArray(flavors) ? flavors.map(f => String(f).trim()).filter(Boolean) : [];
+
+    const { rows } = await client.query(
+      `INSERT INTO menu_items (category_id, name, description, price, cost, image_url, stock_quantity, status, tracking_mode, flavors)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+       RETURNING id, category_id, name, description, price, cost, image_url, stock_quantity, status, tracking_mode, flavors`,
+      [category_id, name, description || null, price, cost || 0, image_url || null, stock_quantity || 0, status || 'available', trackingMode, flavorsArr]
+    );
+    const item = rows[0];
+
+    // Insert linked inventory components
+    if (Array.isArray(inventory_components)) {
+      for (const comp of inventory_components) {
+        if (comp.inventory_id && Number(comp.quantity) > 0) {
+          await client.query(
+            `INSERT INTO menu_item_inventory (menu_id, inventory_id, quantity, unit)
+             VALUES ($1, $2, $3, $4)`,
+            [item.id, comp.inventory_id, comp.quantity, comp.unit || 'g']
+          );
+        }
+      }
+    }
+
+    await client.query('COMMIT');
+
+    const { rows: invComp } = await pool.query(
+      `SELECT mii.id, mii.inventory_id, mii.quantity, mii.unit, ii.name AS inventory_name, ii.stock_quantity
+       FROM menu_item_inventory mii
+       JOIN inventory_items ii ON ii.id = mii.inventory_id
+       WHERE mii.menu_id = $1`,
+      [item.id]
+    );
+
+    res.status(201).json({ item: { ...item, inventory_components: invComp } });
+  } catch (err) {
+    await client.query('ROLLBACK');
+    next(err);
+  } finally {
+    client.release();
+  }
+};
+
+export const updateMenuItem = async (req, res, next) => {
+  const client = await pool.connect();
+  try {
+    const { category_id, name, description, price, cost, image_url, status, stock_quantity, inventory_components, flavors } = req.body;
+
+    await client.query('BEGIN');
+
+    let trackingMode = undefined;
+    if (Array.isArray(inventory_components)) {
+      const hasRecipe = inventory_components.some(c => c.inventory_id && Number(c.quantity) > 0);
+      trackingMode = hasRecipe ? 'recipe' : 'direct';
+    }
+    const flavorsArr = Array.isArray(flavors) ? flavors.map(f => String(f).trim()).filter(Boolean) : undefined;
+
+    const { rows } = await client.query(
+      `UPDATE menu_items
+       SET category_id = COALESCE($1, category_id),
+           name = COALESCE($2, name),
+           description = COALESCE($3, description),
+           price = COALESCE($4, price),
+           cost = COALESCE($5, cost),
+           image_url = COALESCE($6, image_url),
+           status = COALESCE($7, status),
+           stock_quantity = COALESCE($8, stock_quantity),
+           tracking_mode = COALESCE($9, tracking_mode),
+           flavors = COALESCE($10, flavors)
+       WHERE id = $11
+       RETURNING id, category_id, name, description, price, cost, image_url, status, stock_quantity, tracking_mode, flavors`,
+      [category_id, name, description, price, cost !== undefined ? Number(cost) : undefined, image_url, status, stock_quantity, trackingMode, flavorsArr, req.params.id]
+    );
+    if (!rows[0]) {
+      await client.query('ROLLBACK');
+      return res.status(404).json({ error: 'Menu item not found.' });
+    }
+
+    // Re-create inventory components if supplied
+    if (Array.isArray(inventory_components)) {
+      await client.query('DELETE FROM menu_item_inventory WHERE menu_id = $1', [req.params.id]);
+      for (const comp of inventory_components) {
+        if (comp.inventory_id && Number(comp.quantity) > 0) {
+          await client.query(
+            'INSERT INTO menu_item_inventory (menu_id, inventory_id, quantity, unit) VALUES ($1, $2, $3, $4)',
+            [req.params.id, comp.inventory_id, comp.quantity, comp.unit || 'g']
+          );
+        }
+      }
+    }
+
+    await client.query('COMMIT');
+
+    const { rows: invComp } = await pool.query(
+      `SELECT mii.id, mii.inventory_id, mii.quantity, mii.unit, ii.name AS inventory_name, ii.stock_quantity
+       FROM menu_item_inventory mii
+       JOIN inventory_items ii ON ii.id = mii.inventory_id
+       WHERE mii.menu_id = $1`,
+      [req.params.id]
+    );
+
+    res.json({ item: { ...rows[0], inventory_components: invComp } });
+  } catch (err) {
+    await client.query('ROLLBACK');
+    next(err);
+  } finally {
+    client.release();
+  }
+};
+
+export const deleteMenuItem = async (req, res, next) => {
+  try {
+    const { rowCount } = await pool.query('DELETE FROM menu_items WHERE id = $1', [req.params.id]);
+    if (rowCount === 0) return res.status(404).json({ error: 'Menu item not found.' });
+    res.status(204).send();
+  } catch (err) {
+    if (err.code === '23503') {
+      return res.status(409).json({ error: 'Cannot delete item because it has order or bundle history.' });
+    }
+    next(err);
+  }
+};
+
+// --- ADD-ONS ---
+
+export const listAddons = async (req, res, next) => {
+  try {
+    const { rows: addons } = await pool.query(
+      'SELECT id, name, description, price, cost, category, status, created_at FROM add_ons ORDER BY name ASC'
+    );
+
+    const result = await Promise.all(
+      addons.map(async (addon) => {
+        // Linked inventory items
+        const { rows: invComp } = await pool.query(
+          `SELECT ai.id, ai.inventory_id, ai.quantity, ai.unit, ii.name AS inventory_name, ii.stock_quantity
+           FROM addon_inventory ai
+           JOIN inventory_items ii ON ii.id = ai.inventory_id
+           WHERE ai.addon_id = $1`,
+          [addon.id]
+        );
+
+        // Applicable products
+        const { rows: prodList } = await pool.query(
+          `SELECT ap.menu_id, mi.name AS product_name
+           FROM addon_products ap
+           JOIN menu_items mi ON mi.id = ap.menu_id
+           WHERE ap.addon_id = $1`,
+          [addon.id]
+        );
+
+        // Check stock availability based on linked inventory
+        let isStockAvailable = true;
+        invComp.forEach(comp => {
+          if (Number(comp.stock_quantity) < Number(comp.quantity)) {
+            isStockAvailable = false;
+          }
+        });
+
+        const computedStatus = (addon.status === 'unavailable' || !isStockAvailable)
+          ? 'unavailable'
+          : 'available';
+
+        return {
+          ...addon,
+          status: computedStatus,
+          is_stock_available: isStockAvailable,
+          inventory_components: invComp,
+          products: prodList,
+        };
+      })
+    );
+
+    res.json({ addons: result });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const createAddon = async (req, res, next) => {
+  const client = await pool.connect();
+  try {
+    const { name, description, price, cost, category, status, inventory_components, product_ids } = req.body || {};
+    if (!name || price === undefined) {
+      return res.status(400).json({ error: 'Add-On name and price are required.' });
+    }
+
+    await client.query('BEGIN');
+
+    const { rows } = await client.query(
+      `INSERT INTO add_ons (name, description, price, cost, category, status)
+       VALUES ($1, $2, $3, $4, $5, $6)
+       RETURNING *`,
+      [name, description || null, Number(price), Number(cost || 0), category || 'General Add-On', status || 'available']
+    );
+    const addon = rows[0];
+
+    // Insert linked inventory components
+    if (Array.isArray(inventory_components)) {
+      for (const comp of inventory_components) {
+        if (comp.inventory_id && comp.quantity > 0) {
+          await client.query(
+            `INSERT INTO addon_inventory (addon_id, inventory_id, quantity, unit)
+             VALUES ($1, $2, $3, $4)`,
+            [addon.id, comp.inventory_id, comp.quantity, comp.unit || 'g']
+          );
+        }
+      }
+    }
+
+    // Insert applicable products
+    if (Array.isArray(product_ids)) {
+      for (const menuId of product_ids) {
+        await client.query(
+          'INSERT INTO addon_products (addon_id, menu_id) VALUES ($1, $2)',
+          [addon.id, menuId]
+        );
+      }
+    }
+
+    await client.query('COMMIT');
+    res.status(201).json({ addon });
+  } catch (err) {
+    await client.query('ROLLBACK');
+    next(err);
+  } finally {
+    client.release();
+  }
+};
+
+export const updateAddon = async (req, res, next) => {
+  const client = await pool.connect();
+  try {
+    const { id } = req.params;
+    const { name, description, price, cost, category, status, inventory_components, product_ids } = req.body || {};
+
+    await client.query('BEGIN');
+
+    const { rows } = await client.query(
+      `UPDATE add_ons
+       SET name = COALESCE($1, name),
+           description = COALESCE($2, description),
+           price = COALESCE($3, price),
+           cost = COALESCE($4, cost),
+           category = COALESCE($5, category),
+           status = COALESCE($6, status)
+       WHERE id = $7
+       RETURNING *`,
+      [name, description, price !== undefined ? Number(price) : undefined, cost !== undefined ? Number(cost) : undefined, category, status, id]
+    );
+
+    if (rows.length === 0) {
+      await client.query('ROLLBACK');
+      return res.status(404).json({ error: 'Add-On not found.' });
+    }
+
+    // Re-create inventory components if supplied
+    if (Array.isArray(inventory_components)) {
+      await client.query('DELETE FROM addon_inventory WHERE addon_id = $1', [id]);
+      for (const comp of inventory_components) {
+        if (comp.inventory_id && comp.quantity > 0) {
+          await client.query(
+            'INSERT INTO addon_inventory (addon_id, inventory_id, quantity, unit) VALUES ($1, $2, $3, $4)',
+            [id, comp.inventory_id, comp.quantity, comp.unit || 'g']
+          );
+        }
+      }
+    }
+
+    // Re-create product links if supplied
+    if (Array.isArray(product_ids)) {
+      await client.query('DELETE FROM addon_products WHERE addon_id = $1', [id]);
+      for (const menuId of product_ids) {
+        await client.query(
+          'INSERT INTO addon_products (addon_id, menu_id) VALUES ($1, $2)',
+          [id, menuId]
+        );
+      }
+    }
+
+    await client.query('COMMIT');
+    res.json({ addon: rows[0] });
+  } catch (err) {
+    await client.query('ROLLBACK');
+    next(err);
+  } finally {
+    client.release();
+  }
+};
+
+export const deleteAddon = async (req, res, next) => {
+  try {
+    const { rowCount } = await pool.query('DELETE FROM add_ons WHERE id = $1', [req.params.id]);
+    if (rowCount === 0) return res.status(404).json({ error: 'Add-On not found.' });
+    res.status(204).send();
+  } catch (err) {
+    next(err);
+  }
+};
+
+// --- BUNDLES ---
+
+export const listBundles = async (req, res, next) => {
+  try {
+    const { rows: bundles } = await pool.query(
+      'SELECT id, name, description, bundle_price, discount_percent, image_url, status, created_at FROM bundles ORDER BY name ASC'
+    );
+
+    const result = await Promise.all(
+      bundles.map(async (bundle) => {
+        // Linked products
+        const { rows: prods } = await pool.query(
+          `SELECT bp.id, bp.menu_id, bp.quantity, mi.name AS product_name, mi.price, mi.status AS product_status, mi.stock_quantity
+           FROM bundle_products bp
+           JOIN menu_items mi ON mi.id = bp.menu_id
+           WHERE bp.bundle_id = $1`,
+          [bundle.id]
+        );
+
+        let regularTotal = 0;
+        let isStockAvailable = true;
+
+        prods.forEach(p => {
+          regularTotal += Number(p.price) * Number(p.quantity);
+          if (p.product_status !== 'available' || (p.stock_quantity !== null && Number(p.stock_quantity) < Number(p.quantity))) {
+            isStockAvailable = false;
+          }
+        });
+
+        const savings = Math.max(0, regularTotal - Number(bundle.bundle_price));
+        const computedStatus = (bundle.status === 'unavailable' || !isStockAvailable) ? 'unavailable' : 'available';
+
+        return {
+          ...bundle,
+          status: computedStatus,
+          is_stock_available: isStockAvailable,
+          regular_total: regularTotal,
+          savings: savings,
+          products: prods,
+        };
+      })
+    );
+
+    res.json({ bundles: result });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const createBundle = async (req, res, next) => {
+  const client = await pool.connect();
+  try {
+    const { name, description, bundle_price, discount_percent, image_url, status, products } = req.body || {};
+    if (!name || bundle_price === undefined) {
+      return res.status(400).json({ error: 'Bundle name and bundle_price are required.' });
+    }
+
+    await client.query('BEGIN');
+
+    const { rows } = await client.query(
+      `INSERT INTO bundles (name, description, bundle_price, discount_percent, image_url, status)
+       VALUES ($1, $2, $3, $4, $5, $6)
+       RETURNING *`,
+      [name, description || null, Number(bundle_price), Number(discount_percent || 0), image_url || null, status || 'available']
+    );
+    const bundle = rows[0];
+
+    if (Array.isArray(products)) {
+      for (const p of products) {
+        if (p.menu_id && p.quantity > 0) {
+          await client.query(
+            'INSERT INTO bundle_products (bundle_id, menu_id, quantity) VALUES ($1, $2, $3)',
+            [bundle.id, p.menu_id, Number(p.quantity)]
+          );
+        }
+      }
+    }
+
+    await client.query('COMMIT');
+    res.status(201).json({ bundle });
+  } catch (err) {
+    await client.query('ROLLBACK');
+    next(err);
+  } finally {
+    client.release();
+  }
+};
+
+export const updateBundle = async (req, res, next) => {
+  const client = await pool.connect();
+  try {
+    const { id } = req.params;
+    const { name, description, bundle_price, discount_percent, image_url, status, products } = req.body || {};
+
+    await client.query('BEGIN');
+
+    const { rows } = await client.query(
+      `UPDATE bundles
+       SET name = COALESCE($1, name),
+           description = COALESCE($2, description),
+           bundle_price = COALESCE($3, bundle_price),
+           discount_percent = COALESCE($4, discount_percent),
+           image_url = COALESCE($5, image_url),
+           status = COALESCE($6, status)
+       WHERE id = $7
+       RETURNING *`,
+      [name, description, bundle_price !== undefined ? Number(bundle_price) : undefined, discount_percent !== undefined ? Number(discount_percent) : undefined, image_url, status, id]
+    );
+
+    if (rows.length === 0) {
+      await client.query('ROLLBACK');
+      return res.status(404).json({ error: 'Bundle not found.' });
+    }
+
+    if (Array.isArray(products)) {
+      await client.query('DELETE FROM bundle_products WHERE bundle_id = $1', [id]);
+      for (const p of products) {
+        if (p.menu_id && p.quantity > 0) {
+          await client.query(
+            'INSERT INTO bundle_products (bundle_id, menu_id, quantity) VALUES ($1, $2, $3)',
+            [id, p.menu_id, Number(p.quantity)]
+          );
+        }
+      }
+    }
+
+    await client.query('COMMIT');
+    res.json({ bundle: rows[0] });
+  } catch (err) {
+    await client.query('ROLLBACK');
+    next(err);
+  } finally {
+    client.release();
+  }
+};
+
+export const deleteBundle = async (req, res, next) => {
+  try {
+    const { rowCount } = await pool.query('DELETE FROM bundles WHERE id = $1', [req.params.id]);
+    if (rowCount === 0) return res.status(404).json({ error: 'Bundle not found.' });
+    res.status(204).send();
+  } catch (err) {
+    next(err);
+  }
+};
+
+// --- CAPACITY CALCULATION ---
+
+/**
+ * GET /api/admin/products/capacity/:id
+ * Get detailed capacity breakdown for a single menu item
+ */
+export const getItemCapacity = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const breakdown = await getCapacityBreakdown(Number(id));
+    
+    if (breakdown.error) {
+      return res.status(404).json({ error: breakdown.error });
+    }
+    
+    res.json(breakdown);
+  } catch (err) {
+    next(err);
+  }
+};
+
+/**
+ * POST /api/admin/products/capacity/bulk
+ * Get capacity for multiple items at once
+ * Body: { menuIds: [1, 2, 3, ...] }
+ */
+export const getBulkCapacity = async (req, res, next) => {
+  try {
+    const { menuIds } = req.body || {};
+    
+    if (!Array.isArray(menuIds) || menuIds.length === 0) {
+      return res.status(400).json({ error: 'menuIds array is required' });
+    }
+    
+    const capacities = await calculateBulkCapacity(menuIds);
+    res.json({ capacities });
+  } catch (err) {
+    next(err);
+  }
+};

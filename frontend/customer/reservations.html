@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reserve a Table — The~Yo's</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;900&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=5">
+<style>
+  .reserve-section { background: var(--stone); min-height: calc(100vh - 95px); display: flex; align-items: center; }
+  .reserve-wrap { max-width: 520px; margin: 0 auto; width: 100%; padding: 60px 22px; }
+  .reserve-card { background: var(--component-bg); border: 1px solid var(--line); border-radius: 6px; padding: 36px; }
+  @media(max-width:520px) { .reserve-card { padding: 26px 22px; } }
+
+  .reserve-status {
+    font-size: 0.85rem; margin-top: 14px; min-height: 18px; text-align: center;
+    font-family: 'Space Mono', monospace;
+  }
+  .reserve-status.err { color: #e05252; }
+  .reserve-status.ok { color: #4caf7d; }
+  .reserve-status.info { color: var(--brass); }
+
+  .reserve-success {
+    display: none; text-align: center;
+  }
+  .reserve-success.active { display: block; }
+  .reserve-success .check-ring {
+    width: 60px; height: 60px; border-radius: 50%; margin: 0 auto 18px;
+    background: var(--brass); color: #fff; display: flex; align-items: center; justify-content: center;
+    font-size: 1.6rem;
+  }
+
+  .my-reservations { margin-bottom: 28px; }
+  .my-reservations-title {
+    font-family: 'Space Mono', monospace; font-size: 0.7rem; text-transform: uppercase;
+    letter-spacing: 0.08em; opacity: 0.55; margin-bottom: 12px; display: block;
+  }
+  .res-card {
+    border: 1px solid var(--line); border-radius: 6px; padding: 14px 16px;
+    display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;
+    background: var(--stone);
+  }
+  .res-card .res-info { font-size: 0.85rem; }
+  .res-card .res-info strong { display: block; margin-bottom: 3px; }
+  .res-card .res-info span { opacity: 0.6; font-family: 'Space Mono', monospace; font-size: 0.75rem; }
+  .res-status-pill {
+    padding: 4px 11px; border-radius: 20px; font-size: 0.66rem; font-family: 'Space Mono', monospace;
+    font-weight: 700; text-transform: uppercase; flex-shrink: 0; margin-left: 12px;
+  }
+  .res-status-pending { background: rgba(184,134,11,0.14); color: #b8860b; }
+  .res-status-confirmed { background: rgba(163,132,74,0.15); color: var(--brass); }
+  .res-status-completed { background: rgba(46,125,79,0.14); color: #2e7d4f; }
+  .res-status-cancelled { background: rgba(192,57,43,0.14); color: #c0392b; }
+  .res-loading { font-size: 0.82rem; opacity: 0.5; font-family: 'Space Mono', monospace; }
+
+  /* Booking-as account summary */
+  .account-summary {
+    background: rgba(163,132,74,0.06); border: 1px solid var(--line);
+    border-radius: 6px; padding: 14px; margin-bottom: 22px;
+  }
+  .account-summary .form-row > div { margin-bottom: 10px; }
+  .account-summary .form-row > div:last-child { margin-bottom: 0; }
+  .account-summary input { font-size: 0.85rem; }
+
+  /* Guest stepper */
+  .stepper {
+    display: flex; align-items: center; gap: 0;
+    border: 1px solid var(--line); border-radius: 6px; overflow: hidden;
+  }
+  .stepper button {
+    width: 36px; height: 38px; background: none; border: none; cursor: pointer;
+    color: var(--ink); font-family: 'Space Mono', monospace; font-size: 1.05rem; line-height: 1;
+  }
+  .stepper button:hover { background: rgba(163,132,74,0.15); color: var(--brass); }
+  .stepper input {
+    border: none; border-radius: 0; text-align: center; width: 56px; margin: 0;
+    -moz-appearance: textfield;
+     appearance: textfield;
+  }
+  .stepper input::-webkit-outer-spin-button, .stepper input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .reserve-guests-hint { font-size: 0.7rem; opacity: 0.5; margin-top: 5px; font-family: 'Space Mono', monospace; }
+
+  /* Warnings / expectation-setting */
+  .reserve-warn {
+    display: none; margin: 14px 0 2px; padding: 11px 13px; border-radius: 4px;
+    background: rgba(184,134,11,0.12); border: 1px solid rgba(184,134,11,0.4);
+    color: #b8860b; font-size: 0.8rem; line-height: 1.5;
+  }
+  .reserve-note { font-size: 0.78rem; opacity: 0.6; margin-top: 8px; font-family: 'Space Mono', monospace; }
+  .reserve-divider { border: none; border-top: 1px dashed var(--line); margin: 22px 0 6px; }
+
+  /* Post-submit reference */
+  .reserve-ref {
+    font-family: 'Space Mono', monospace; font-size: 0.9rem; font-weight: 700;
+    color: var(--brass); margin: 0 0 10px; line-height: 1.6;
+  }
+
+  /* Reservation workflow note */
+  .workflow-note {
+    background: rgba(163,132,74,0.08); border: 1px solid rgba(163,132,74,0.3);
+    border-radius: 4px; padding: 12px; margin-bottom: 18px;
+    font-size: 0.8rem; line-height: 1.5; color: var(--brass-dark);
+  }
+  .workflow-note strong { display: block; margin-bottom: 6px; }
+</style>
+</head>
+<body>
+
+<header>
+  <a href="index.html" class="logo-link">
+    <img src="../pics&vids/the-yo's_logo.jpg" alt="Logo" class="logo-img">
+    <span class="logo-text">The~Yo's</span>
+  </a>
+  <nav id="siteNav">
+    <ul>
+      <li><a href="about.html">About</a></li>
+      <li><a href="menu.html">Menu</a></li>
+      <li><a href="gallery.html">Gallery</a></li>
+      <li><a href="order.html#feedback">Reviews</a></li>
+      <li><a href="reservations.html" style="color:var(--brass);">Reserve</a></li>
+      <li><a href="my-orders.html">My Orders</a></li>
+      <li><a href="account.html" class="nav-account-btn" id="navAccountLink" title="My Account">
+            <svg class="nav-account-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+          </a></li>
+      <li><a href="order.html" class="nav-btn">Order Now</a></li>
+    </ul>
+  </nav>
+  <button class="nav-toggle" id="navToggle" type="button" aria-label="Toggle navigation menu" aria-expanded="false">
+    <svg class="nav-toggle-icon nav-icon-menu" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+      <line x1="4" y1="6" x2="20" y2="6"></line>
+      <line x1="4" y1="12" x2="20" y2="12"></line>
+      <line x1="4" y1="18" x2="20" y2="18"></line>
+    </svg>
+    <svg class="nav-toggle-icon nav-icon-close" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+      <line x1="18" y1="6" x2="6" y2="18"></line>
+      <line x1="6" y1="6" x2="18" y2="18"></line>
+    </svg>
+  </button>
+</header>
+
+<section class="reserve-section">
+  <div class="reserve-wrap">
+    <div class="reserve-card">
+
+      <div class="my-reservations" id="myReservationsWrap" style="display:none;">
+        <span class="my-reservations-title">Your Reservations</span>
+        <div id="myReservationsList"><div class="res-loading">Loading…</div></div>
+      </div>
+
+      <div id="reserveFormWrap">
+        <p class="eyebrow">Plan Ahead</p>
+        <h2 class="display" style="font-size:1.8rem; margin:8px 0 24px;">Reservation</h2>
+
+        <div class="account-summary">
+          <span class="my-reservations-title" style="margin-bottom:10px;">Booking as</span>
+          <div class="form-row">
+            <div><label for="acctName">Name</label><input id="acctName" type="text" disabled placeholder="Loading…"></div>
+            <div><label for="acctEmail">Email</label><input id="acctEmail" type="email" disabled placeholder="Loading…"></div>
+          </div>
+          <div class="form-row">
+            <div><label for="acctPhone">Mobile Number</label><input id="acctPhone" type="text" disabled placeholder="Loading…"></div>
+          </div>
+        </div>
+
+        <form id="reservationForm">
+          <div class="workflow-note">
+            <strong>How it works:</strong> Submit your request → Our staff will contact you to discuss your order → We'll confirm your reservation once the order is finalized.
+          </div>
+          <div class="form-row">
+            <div><label for="resDate">Date</label><input id="resDate" type="date" required></div>
+            <div><label for="resTime">Time</label><input id="resTime" type="time" min="09:00" max="21:00" required></div>
+          </div>
+          <div class="form-row">
+            <div>
+              <label for="resGuests">Number of Guests</label>
+              <div class="stepper">
+                <button type="button" onclick="stepGuests(-1)" aria-label="Fewer guests">−</button>
+                <input id="resGuests" type="number" min="1" max="20" value="2" required>
+                <button type="button" onclick="stepGuests(1)" aria-label="More guests">+</button>
+              </div>
+              <p class="reserve-guests-hint">1 – 20 guests</p>
+            </div>
+          </div>
+          <div><label for="resNotes">Notes for the Restaurant <span style="opacity:.6; text-transform:none;">(optional)</span></label><textarea id="resNotes" maxlength="500" placeholder="Birthday celebration, dietary needs, etc."></textarea></div>
+
+          <div id="reserveWarn" class="reserve-warn"></div>
+
+          <hr class="reserve-divider">
+          <button type="submit" class="btn" style="width:100%; justify-content:center; padding:14px; margin-top:6px; border-radius:6px;">Request Reservation</button>
+          <p class="reserve-note" style="text-align:center;">We'll contact you within 24 hours to confirm your order and reservation.</p>
+          <div class="reserve-status" id="reserveStatus"></div>
+        </form>
+      </div>
+
+      <div class="reserve-success" id="reserveSuccess">
+        <div class="check-ring"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
+        <h3 style="font-family:'Archivo', sans-serif; text-transform:uppercase; font-size:1.2rem; margin-bottom:10px;">Reservation Requested</h3>
+        <div class="reserve-ref" id="reserveRef"></div>
+        <p style="opacity:0.65; font-size:0.9rem; margin-bottom:12px;">Your reservation request has been received. Our staff will contact you to confirm your order and reservation.</p>
+        <p class="reserve-note" style="text-align:center; margin-bottom:26px;">Submitting a request doesn't guarantee immediate confirmation — we'll follow up shortly.</p>
+        <a href="index.html" class="btn btn-outline" style="width:100%; justify-content:center; padding:14px; border-radius:6px;">Back to Home</a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<script type="module">
+  import { auth, onAuthStateChanged, API_BASE_URL } from "./firebase-init.js";
+
+  let currentUser = null;
+
+  const STATUS_LABEL = { 
+  pending: 'Pending', 
+  contact_customer: 'Contacted', 
+  order_preparing: 'Order Being Prepared', 
+  order_finalized: 'Order Finalized', 
+  confirmed: 'Confirmed', 
+  completed: 'Completed', 
+  cancelled: 'Cancelled' 
+};
+  // Mirrors the server: the room is open 9:00 AM - 9:00 PM.
+  const OPENING_MINUTES = 9 * 60;
+  const CLOSING_MINUTES = 21 * 60;
+
+  function esc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  onAuthStateChanged(auth, (user) => {
+    currentUser = user;
+    if (!user) {
+      window.location.href = 'account.html?redirect=reservations.html';
+      return;
+    }
+    prefillAccount();
+    loadMyReservations();
+    loadBlockedDates();
+  });
+
+  // Pulls the logged-in customer's name/email/phone from the database and
+  // shows it on the form (booking is always attached to this account).
+  async function prefillAccount() {
+    const nameEl = document.getElementById('acctName');
+    const emailEl = document.getElementById('acctEmail');
+    const phoneEl = document.getElementById('acctPhone');
+    if (!nameEl || !currentUser) return;
+    try {
+      const idToken = await currentUser.getIdToken();
+      const res = await fetch(`${API_BASE_URL}/api/customer/auth/me`, {
+        headers: { Authorization: `Bearer ${idToken}` },
+      });
+      const data = await res.json();
+      if (!res.ok || !data.customer) {
+        nameEl.placeholder = emailEl.placeholder = phoneEl.placeholder = 'Profile incomplete';
+        return;
+      }
+      const c = data.customer;
+      nameEl.value = c.name || '';
+      emailEl.value = c.email || currentUser.email || '';
+      phoneEl.value = c.phone || '';
+      // Reset placeholders once a real value is present.
+      nameEl.placeholder = emailEl.placeholder = phoneEl.placeholder = '';
+    } catch (err) {
+      nameEl.placeholder = emailEl.placeholder = phoneEl.placeholder = 'Could not load';
+    }
+  }
+
+  // Guest stepper (+/-), clamped to 1 - 20.
+  window.stepGuests = function(delta) {
+    const input = document.getElementById('resGuests');
+    let val = Math.round(Number(input.value) || 0);
+    if (val < 1) val = 1;
+    const next = val + delta;
+    if (next >= 1 && next <= 20) input.value = next;
+  };
+
+  // Prevent picking dates less than 4 days in advance - the server enforces this too.
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const minDate = new Date(today);
+  minDate.setDate(minDate.getDate() + 4); // 4-day advance booking rule
+  const dateInput = document.getElementById('resDate');
+  if (dateInput) dateInput.min = minDate.toISOString().split('T')[0];
+
+  // Dates (next 90 days) that are already fully booked - the server computes
+  // and enforces this; here it just stops the picker from letting you keep
+  // a full day selected.
+  let blockedDates = new Set();
+  async function loadBlockedDates() {
+    try {
+      const idToken = await currentUser.getIdToken();
+      const res = await fetch(`${API_BASE_URL}/api/customer/reservations/availability`, {
+        headers: { Authorization: `Bearer ${idToken}` },
+      });
+      const data = await res.json();
+      if (res.ok) blockedDates = new Set(data.blocked_dates || []);
+    } catch (err) {
+      // Leave the set empty - the server still rejects full dates on submit.
+    }
+  }
+
+  // Live warnings: past dates, dates less than 4 days away, and
+  // times outside opening hours.
+  function updateWarnings() {
+    const warn = document.getElementById('reserveWarn');
+    if (!warn) return;
+    const msg = [];
+
+    const dateVal = dateInput && dateInput.value;
+    if (dateVal) {
+      const [yy, mm, dd] = dateVal.split('-').map(Number);
+      const selected = new Date(yy, mm - 1, dd);
+      selected.setHours(0, 0, 0, 0);
+      const diffDays = Math.round((selected - today) / 86400000);
+      if (blockedDates.has(dateVal)) msg.push("Sorry — we're fully booked on that date. Please pick another day.");
+      else if (diffDays < 0) msg.push('That date is in the past.');
+      else if (diffDays < 4) msg.push(`Reservations must be made at least 4 days in advance. Please select a later date.`);
+    }
+
+    const timeVal = document.getElementById('resTime').value;
+    if (timeVal) {
+      const [hh, mmm] = timeVal.split(':').map(Number);
+      const minutes = hh * 60 + mmm;
+      if (minutes < OPENING_MINUTES || minutes > CLOSING_MINUTES) {
+        msg.push("We're open from 9:00 AM to 9:00 PM. Please pick a time within those hours.");
+      }
+    }
+
+    if (msg.length) {
+      warn.innerHTML = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-0.15em; margin-right:4px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> ' + msg.map(m => escapeHtml(m)).join(' ');
+      warn.style.display = 'block';
+    } else {
+      warn.style.display = 'none';
+    }
+  }
+  // Refuse fully-booked dates outright: clear the picker so the customer
+  // can't keep a full day selected, and explain why.
+  if (dateInput) dateInput.addEventListener('change', function () {
+    if (this.value && blockedDates.has(this.value)) {
+      this.value = '';
+      const warn = document.getElementById('reserveWarn');
+      warn.innerHTML = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-0.15em; margin-right:4px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Sorry — we\'re fully booked on that date. Please pick another day.';
+      warn.style.display = 'block';
+      return;
+    }
+    updateWarnings();
+  });
+  document.getElementById('resTime').addEventListener('change', updateWarnings);
+
+  async function cancelReservation(id) {
+    if (!currentUser) return;
+    if (!confirm('Cancel this reservation? This can only be undone by the restaurant.')) return;
+    try {
+      const idToken = await currentUser.getIdToken();
+      const res = await fetch(`${API_BASE_URL}/api/customer/reservations/${id}/cancel`, {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${idToken}` },
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.error || 'Could not cancel this reservation.');
+        return;
+      }
+      loadMyReservations();
+    } catch (err) {
+      alert('Network error while cancelling. Please try again.');
+    }
+  }
+  window.cancelReservation = cancelReservation;
+
+  async function loadMyReservations() {
+    const wrap = document.getElementById('myReservationsWrap');
+    const list = document.getElementById('myReservationsList');
+    try {
+      const idToken = await currentUser.getIdToken();
+      const res = await fetch(`${API_BASE_URL}/api/customer/reservations`, {
+        headers: { Authorization: `Bearer ${idToken}` },
+      });
+      const data = await res.json();
+      if (!res.ok) return; // stay quiet - the create form still works either way
+
+      const reservations = data.reservations || [];
+      if (reservations.length === 0) return; // nothing to show yet, keep it hidden
+
+      wrap.style.display = 'block';
+      list.innerHTML = reservations.map(r => {
+        const dateStr = r.reservation_date ? new Date(r.reservation_date).toLocaleDateString('en-PH', { dateStyle: 'medium' }) : '';
+        // Use reservation_status if available, fallback to status
+        const displayStatus = r.reservation_status || r.status;
+        const cancelBtn = displayStatus === 'pending'
+          ? `<button type="button" class="btn btn-outline" style="padding:7px 12px; font-size:0.68rem; margin:10px 0 0; border-radius:4px;" onclick="cancelReservation(${r.id})">Cancel</button>`
+          : '';
+        return `
+          <div class="res-card">
+            <div class="res-info">
+              <strong>${dateStr} at ${(r.reservation_time || '').slice(0, 5)}</strong>
+              <span>${r.guests} guest${r.guests == 1 ? '' : 's'}${r.table_no ? ' · ' + esc(r.table_no) : ''}</span>
+              ${r.notes ? `<span style="display:block; margin-top:4px;">“${esc(r.notes)}”</span>` : ''}
+              ${cancelBtn}
+            </div>
+            <span class="res-status-pill res-status-${displayStatus}">${STATUS_LABEL[displayStatus] || displayStatus}</span>
+          </div>
+        `;
+      }).join('');
+    } catch (err) {
+      // Network error - just leave the list hidden, don't block the form.
+    }
+  }
+
+  document.getElementById('reservationForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!currentUser) {
+      window.location.href = 'account.html?redirect=reservations.html';
+      return;
+    }
+
+    const dateVal = document.getElementById('resDate').value;
+    const timeVal = document.getElementById('resTime').value;
+    const status = document.getElementById('reserveStatus');
+
+    // Client-side validation before submitting
+    if (!dateVal || !timeVal) {
+      status.textContent = 'Please select a date and time.';
+      status.className = 'reserve-status err';
+      return;
+    }
+
+    // Check 4-day advance rule
+    const [yy, mm, dd] = dateVal.split('-').map(Number);
+    const selected = new Date(yy, mm - 1, dd);
+    selected.setHours(0, 0, 0, 0);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const diffDays = Math.round((selected - today) / 86400000);
+    if (diffDays < 4) {
+      status.textContent = `Reservations must be made at least 4 days in advance. Please select a later date.`;
+      status.className = 'reserve-status err';
+      return;
+    }
+    if (blockedDates.has(dateVal)) {
+      status.textContent = `Sorry — we're fully booked on that date. Please pick another day.`;
+      status.className = 'reserve-status err';
+      return;
+    }
+
+    const payload = {
+      reservation_date: dateVal,
+      reservation_time: timeVal,
+      guests: Number(document.getElementById('resGuests').value),
+      notes: document.getElementById('resNotes').value.trim() || null,
+    };
+
+    status.textContent = 'Sending your request…';
+    status.className = 'reserve-status info';
+
+    try {
+      const idToken = await currentUser.getIdToken();
+      const res = await fetch(`${API_BASE_URL}/api/customer/reservations`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${idToken}`,
+        },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        status.className = 'reserve-status err';
+        if (data.suggested_slots && data.suggested_slots.length > 0) {
+          status.innerHTML = `
+            <div>${esc(data.error || 'This time slot is full.')}</div>
+            <div style="margin-top:8px; font-weight:600;">Available time slots:</div>
+            <div style="display:flex; gap:6px; justify-content:center; flex-wrap:wrap; margin-top:6px;">
+              ${data.suggested_slots.map(slot => `<button type="button" class="btn btn-outline" style="padding:4px 10px; font-size:0.75rem; border-radius:4px;" onclick="selectSuggestedSlot('${slot}')">${slot}</button>`).join('')}
+            </div>
+          `;
+        } else {
+          status.textContent = data.error || 'Could not submit your reservation.';
+        }
+        return;
+      }
+
+      // Confirmation state with a reference the customer can track.
+      const r = data.reservation || {};
+      // Handle both "YYYY-MM-DD" and ISO "YYYY-MM-DDTHH:mm:ss.sssZ" formats
+      const dateStr = r.reservation_date
+        ? new Date(r.reservation_date.split('T')[0] + 'T00:00:00').toLocaleDateString('en-PH', { dateStyle: 'medium' })
+        : '';
+      const displayStatus = r.reservation_status || r.status || 'pending';
+      document.getElementById('reserveRef').textContent =
+        `Ref #${r.id} · ${dateStr} at ${(r.reservation_time || '').slice(0, 5)} · Status: ${STATUS_LABEL[displayStatus] || displayStatus}`;
+
+      document.getElementById('reserveFormWrap').style.display = 'none';
+      document.getElementById('reserveSuccess').classList.add('active');
+      loadMyReservations();
+    } catch (err) {
+      status.textContent = 'Network error. Please try again.';
+      status.className = 'reserve-status err';
+    }
+  });
+
+  window.selectSuggestedSlot = function(slot) {
+    const timeInput = document.getElementById('resTime');
+    if (timeInput) {
+      timeInput.value = slot;
+      updateWarnings();
+      const status = document.getElementById('reserveStatus');
+      if (status) status.textContent = `Selected time updated to ${slot}. Click "Request Reservation" to submit.`;
+      if (status) status.className = 'reserve-status info';
+    }
+  };
+</script>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-logo">The~Yo's</div>
+        <p>A comforting community Resto Bar offering delicious meals to Baggao.</p>
+      </div>
+      <div>
+        <h4>Location & Hours</h4>
+        <p>2nd Floor DKB Building, Poblacion, Baggao, Cagayan</p>
+        <p style="color: var(--brass); font-weight:700;">Open Daily: 8:00 AM &ndash; 8:00 PM</p>
+      </div>
+      <div>
+        <h4>Quick Links</h4>
+        <a href="menu.html">View Full Menu</a>
+        <a href="reservations.html">Reserve a Table</a>
+        <a href="my-orders.html">Track My Order</a>
+        <a href="https://www.facebook.com/profile.php?id=61555628762441" target="_blank">Facebook Page</a>
+        <a href="https://www.tiktok.com/@theyos.restaurant" target="_blank">TikTok</a>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>&copy; <span id="year"></span> The~Yo's Resto Bar.</span>
+      <span>Baggao, Cagayan &middot; Made with care.</span>
+    </div>
+  </div>
+</footer>
+
+<script src="global.js"></script>
+<script src="cart.js"></script>
+</body>
+</html>

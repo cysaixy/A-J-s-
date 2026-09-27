@@ -1,0 +1,266 @@
+// src/controllers/admin/staff.controller.js
+import bcrypt from 'bcrypt';
+import crypto from 'crypto';
+import pool from '../../config/db.js';
+import { generateStaffToken } from '../../utils/generateToken.js';
+
+const COOKIE_NAME = 'staff_token';
+const COOKIE_OPTIONS = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+  maxAge: 24 * 60 * 60 * 1000, // 1 day
+  path: '/',
+};
+
+export async function login(req, res, next) {
+  try {
+    const { email, password } = req.body || {};
+
+    if (!email || !password || typeof email !== 'string' || typeof password !== 'string') {
+      return res.status(400).json({ error: 'Email and password are required.' });
+    }
+
+    const { rows } = await pool.query(
+      `SELECT s.*, p.can_access_inventory, p.can_access_stock_in, p.can_access_reports
+       FROM staff s
+       LEFT JOIN staff_permissions p ON p.staff_id = s.id
+       WHERE LOWER(s.email) = LOWER($1)`,
+      [email.trim()]
+    );
+    const staff = rows[0];
+
+    if (!staff || staff.status !== 'active') {
+      return res.status(401).json({ error: 'Invalid email or password.' });
+    }
+
+    if (!staff.password) {
+      return res.status(401).json({ error: 'Invalid email or password.' });
+    }
+
+    let matches = false;
+    try {
+      matches = await bcrypt.compare(password, staff.password);
+    } catch (bcryptErr) {
+      console.error('[staffController.login] bcrypt compare failed:', bcryptErr?.message || bcryptErr);
+      return res.status(401).json({ error: 'Invalid email or password.' });
+    }
+
+    if (!matches) {
+      return res.status(401).json({ error: 'Invalid email or password.' });
+    }
+
+    const token = generateStaffToken(staff.id);
+    delete staff.password;
+
+    // Set httpOnly session cookie
+    res.cookie(COOKIE_NAME, token, COOKIE_OPTIONS);
+
+    // Set separate non-httpOnly CSRF token cookie (frontend reads this,
+    // sends it back as X-CSRF-Token header on state-changing requests)
+    const csrfToken = crypto.randomBytes(32).toString('hex');
+    res.cookie('csrf_token', csrfToken, {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      maxAge: 24 * 60 * 60 * 1000, // 1 day
+      path: '/',
+    });
+
+    res.json({ staff, csrfToken });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function logout(req, res, next) {
+  try {
+    res.clearCookie(COOKIE_NAME, { ...COOKIE_OPTIONS, maxAge: 0 });
+    res.json({ success: true, message: 'Logged out successfully.' });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function me(req, res, next) {
+  try {
+    res.json({ staff: req.staff });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function listStaff(req, res, next) {
+  try {
+    const { rows } = await pool.query(
+      `SELECT s.id, s.name, s.email, s.role, s.status, s.created_at,
+              p.can_access_inventory, p.can_access_stock_in, p.can_access_reports
+       FROM staff s
+       LEFT JOIN staff_permissions p ON p.staff_id = s.id
+       ORDER BY s.created_at DESC`
+    );
+    res.json({ staff: rows });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function getStaffById(req, res, next) {
+  try {
+    const { rows } = await pool.query(
+      `SELECT s.id, s.name, s.email, s.role, s.status, s.created_at,
+              p.can_access_inventory, p.can_access_stock_in, p.can_access_reports
+       FROM staff s
+       LEFT JOIN staff_permissions p ON p.staff_id = s.id
+       WHERE s.id = $1`,
+      [req.params.id]
+    );
+
+    if (!rows[0]) return res.status(404).json({ error: 'Staff member not found.' });
+    res.json({ staff: rows[0] });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function createStaff(req, res, next) {
+  const client = await pool.connect();
+  try {
+    const {
+      name,
+      email,
+      password,
+      role,
+      can_access_inventory,
+      can_access_stock_in,
+      can_access_reports,
+    } = req.body;
+    if (!name || !email || !password) {
+      return res.status(400).json({ error: 'name, email, and password are required.' });
+    }
+
+    // The database permission columns are NOT NULL and have no defaults.
+    // Omitted permissions start disabled; explicit false values stay false.
+    const permissionValues = [
+      can_access_inventory ?? false,
+      can_access_stock_in ?? false,
+      can_access_reports ?? false,
+    ];
+    if (permissionValues.some((value) => typeof value !== 'boolean')) {
+      return res.status(400).json({ error: 'Staff permissions must be boolean values.' });
+    }
+
+    const existingRes = await client.query('SELECT id FROM staff WHERE email = $1', [email]);
+    if (existingRes.rows.length > 0) {
+      return res.status(409).json({ error: 'A staff account with this email already exists.' });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    await client.query('BEGIN');
+
+    const { rows } = await client.query(
+      `INSERT INTO staff (name, email, password, role, status, created_at)
+       VALUES ($1, $2, $3, $4, 'active', NOW())
+       RETURNING id, name, email, role, status, created_at`,
+      [name, email, hashedPassword, role || 'Cashier']
+    );
+    const staff = rows[0];
+
+    await client.query(
+      `INSERT INTO staff_permissions
+         (staff_id, can_access_inventory, can_access_stock_in, can_access_reports)
+       VALUES ($1, $2, $3, $4)`,
+      [staff.id, ...permissionValues]
+    );
+
+    await client.query('COMMIT');
+    res.status(201).json({ staff });
+  } catch (err) {
+    await client.query('ROLLBACK');
+    next(err);
+  } finally {
+    client.release();
+  }
+}
+
+export async function updateStaff(req, res, next) {
+  try {
+    const { name, role, status } = req.body;
+    const { rows } = await pool.query(
+      `UPDATE staff SET
+         name = COALESCE($1, name),
+         role = COALESCE($2, role),
+         status = COALESCE($3, status)
+       WHERE id = $4
+       RETURNING id, name, email, role, status`,
+      [name, role, status, req.params.id]
+    );
+    if (!rows[0]) return res.status(404).json({ error: 'Staff member not found.' });
+    res.json({ staff: rows[0] });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function updatePermissions(req, res, next) {
+  try {
+    const { can_access_inventory, can_access_stock_in, can_access_reports } = req.body;
+    const { rows } = await pool.query(
+      `UPDATE staff_permissions
+       SET can_access_inventory = $2, can_access_stock_in = $3, can_access_reports = $4, updated_at = NOW()
+       WHERE staff_id = $1
+       RETURNING *`,
+      [
+        req.params.id,
+        !!can_access_inventory,
+        !!can_access_stock_in,
+        !!can_access_reports,
+      ]
+    );
+
+    if (!rows[0]) return res.status(404).json({ error: 'Staff member not found.' });
+    res.json({ permissions: rows[0] });
+  } catch (err) {
+    next(err);
+  }
+}
+
+// PUT /api/admin/staff/:id/password — lets a signed-in staff member change
+// their own password (settings.html). Verifies the current password before
+// writing the new one; only the account's owner (or an Admin) may use it.
+export async function changePassword(req, res, next) {
+  try {
+    const { current_password, new_password } = req.body;
+    const { id } = req.params;
+
+    if (req.staff.role !== 'Admin' && String(req.staff.id) !== String(id)) {
+      return res.status(403).json({ error: 'You can only change your own password.' });
+    }
+    if (!current_password || !new_password) {
+      return res.status(400).json({ error: 'Current and new passwords are required.' });
+    }
+    if (typeof new_password !== 'string' || new_password.length < 6) {
+      return res.status(400).json({ error: 'New password must be at least 6 characters.' });
+    }
+
+    const { rows } = await pool.query(
+      'SELECT id, password FROM staff WHERE id = $1',
+      [id]
+    );
+    const staff = rows[0];
+    if (!staff) return res.status(404).json({ error: 'Staff member not found.' });
+
+    const matches = await bcrypt.compare(current_password, staff.password);
+    if (!matches) {
+      return res.status(401).json({ error: 'Current password is incorrect.' });
+    }
+
+    const hashedPassword = await bcrypt.hash(new_password, 10);
+    await pool.query('UPDATE staff SET password = $1 WHERE id = $2', [hashedPassword, staff.id]);
+
+    res.json({ success: true, message: 'Password updated.' });
+  } catch (err) {
+    next(err);
+  }
+}

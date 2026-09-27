@@ -1,0 +1,1772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sales Transactions — The~Yo's Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="admin-shell.css?v=6">
+<style>
+  /* ============================================================
+     SALES TRANSACTIONS — scoped design system (gold/brown theme)
+     ============================================================ */
+  .stx-tabs { display: flex; gap: 4px; border-bottom: 2px solid var(--line); margin-bottom: 22px; }
+  .stx-tab {
+    padding: 11px 20px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.86rem; font-weight: 600;
+    color: var(--ink); opacity: 0.55; cursor: pointer; border: none; background: none;
+    border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all .15s ease;
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .stx-tab:hover { opacity: 0.9; }
+  .stx-tab.active { opacity: 1; color: var(--brass-dark); border-bottom-color: var(--brass); }
+  .stx-tab svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+  /* ---- Summary cards ---- */
+  .stx-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-bottom: 22px; }
+  .stx-card {
+    background: var(--component-bg); border: 1px solid var(--line); border-radius: 12px;
+    padding: 20px 22px; display: flex; align-items: center; justify-content: space-between; gap: 14px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  }
+  .stx-card .label { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.5; }
+  .stx-card .value { font-family: 'Archivo', sans-serif; font-weight: 900; font-size: 1.55rem; line-height: 1.15; color: var(--ink); margin-top: 5px; }
+  .stx-card .value.brass { color: var(--brass-dark); }
+  .stx-card .value.green { color: var(--success); }
+  .stx-card .sub { font-size: 0.72rem; opacity: 0.45; margin-top: 4px; }
+  .stx-ring { flex-shrink: 0; color: var(--ink); }
+
+  /* ---- Period controls ---- */
+  .stx-controls {
+    display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 18px;
+    background: var(--component-bg); border: 1px solid var(--line); border-radius: 12px;
+    padding: 12px 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  }
+  .stx-controls-label {
+    font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.60rem; text-transform: uppercase;
+    letter-spacing: 0.08em; opacity: 0.45; white-space: nowrap; margin-right: 2px;
+  }
+  .stx-period-btns { display: flex; gap: 4px; flex-wrap: wrap; }
+  .stx-period-btn {
+    padding: 7px 14px; border: 1px solid var(--line); border-radius: 8px;
+    background: var(--stone); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.80rem;
+    font-weight: 600; color: var(--ink); cursor: pointer; transition: all .15s ease;
+    white-space: nowrap;
+  }
+  .stx-period-btn:hover { border-color: var(--brass); color: var(--brass-dark); }
+  .stx-period-btn.active {
+    background: var(--brass-dark); color: #fff; border-color: var(--brass-dark);
+    box-shadow: 0 2px 8px rgba(163,132,74,0.3);
+  }
+  .stx-period-divider { width: 1px; height: 28px; background: var(--line); margin: 0 4px; flex-shrink: 0; }
+  .stx-date-wrap { display: flex; align-items: center; gap: 8px; }
+  .stx-date-wrap input[type="date"] {
+    padding: 7px 10px; border: 1px solid var(--line); border-radius: 8px;
+    background: var(--stone); font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 0.82rem; color: var(--ink); cursor: pointer;
+  }
+  .stx-date-wrap span { font-size: 0.78rem; opacity: 0.5; }
+  .stx-period-summary {
+    margin-left: auto; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.68rem;
+    opacity: 0.5; white-space: nowrap;
+  }
+
+  /* ---- Secondary tabs ---- */
+  .stx-subtabs { display: inline-flex; gap: 4px; background: var(--stone); border: 1px solid var(--line); border-radius: 9px; padding: 4px; margin-bottom: 16px; flex-wrap: wrap; }
+  .stx-subtab {
+    padding: 7px 16px; border-radius: 7px; border: none; background: none;
+    font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.80rem; font-weight: 600;
+    color: var(--ink); opacity: 0.55; cursor: pointer; transition: all .15s ease; white-space: nowrap;
+  }
+  .stx-subtab:hover { opacity: 0.9; }
+  .stx-subtab.active { background: var(--component-bg); color: var(--brass-dark); opacity: 1; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+
+  /* ---- Toolbar ---- */
+  .stx-toolbar {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 10px; flex-wrap: wrap; margin-bottom: 14px;
+    background: var(--component-bg); border: 1px solid var(--line);
+    border-radius: 12px; padding: 10px 14px; box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  }
+  .stx-filters { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .stx-filters .fb {
+    font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.60rem; text-transform: uppercase;
+    letter-spacing: 0.06em; opacity: 0.45; white-space: nowrap;
+  }
+  .stx-filter-divider { width: 1px; height: 22px; background: var(--line); margin: 0 2px; }
+  .stx-filters input, .stx-filters select {
+    padding: 7px 11px; border: 1px solid var(--line); border-radius: 8px;
+    background: var(--stone); font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 0.81rem; color: var(--ink); cursor: pointer; transition: border-color .15s;
+  }
+  .stx-filters input:focus, .stx-filters select:focus { outline: none; border-color: var(--brass); }
+  .stx-filters input[type="search"] { width: 210px; cursor: text; }
+  .stx-search-wrap { position: relative; }
+  .stx-search-wrap svg {
+    position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+    width: 14px; height: 14px; fill: none; stroke: var(--ink); opacity: 0.35;
+    stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; pointer-events: none;
+  }
+  .stx-search-wrap input[type="search"] { padding-left: 30px; }
+  .stx-filters select { padding-right: 28px; }
+  .stx-filters select.filtered { border-color: var(--brass); color: var(--brass-dark); background: rgba(163,132,74,.06); font-weight: 600; }
+  .stx-filters .stx-filter-dim {
+    padding: 7px 11px; border: 1px solid var(--line); border-radius: 8px;
+    background: var(--stone); font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 0.81rem; color: var(--ink); white-space: nowrap;
+  }
+  .stx-actions { display: flex; align-items: center; gap: 6px; }
+  .stx-icon-btn {
+    width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;
+    border: 1px solid var(--line); background: var(--stone); border-radius: 8px;
+    cursor: pointer; color: var(--ink); transition: all .15s ease;
+  }
+  .stx-icon-btn:hover { border-color: var(--brass); color: var(--brass-dark); background: rgba(163,132,74,.06); }
+  .stx-icon-btn svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .stx-pos { position: relative; }
+  .stx-pop {
+    position: absolute; right: 0; top: calc(100% + 8px); background: var(--component-bg);
+    border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+    min-width: 220px; z-index: 60; padding: 8px; display: none;
+  }
+  .stx-pop.open { display: block; }
+  .stx-pop-item {
+    display: flex; align-items: center; gap: 10px; width: 100%; text-align: left;
+    padding: 9px 10px; border: none; background: none; border-radius: 7px;
+    font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.82rem; color: var(--ink); cursor: pointer;
+  }
+  .stx-pop-item:hover { background: var(--stone); }
+  .stx-pop-item svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .stx-pop-divider { height: 1px; background: var(--line); margin: 6px 4px; }
+  .stx-toggle { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 10px; font-size: 0.82rem; color: var(--ink); }
+  .stx-toggle input { accent-color: var(--brass); cursor: pointer; }
+
+  /* ---- Result info bar ---- */
+  .stx-result-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 0.78rem; color: var(--ink); opacity: 0.6;
+    margin-bottom: 8px; padding: 0 2px;
+  }
+  .stx-result-bar b { font-weight: 700; color: var(--ink); opacity: 1; }
+  .stx-clear-filters-btn {
+    font-size: 0.74rem; color: var(--brass-dark); background: none; border: none;
+    cursor: pointer; text-decoration: underline; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+
+  /* ---- Table ---- */
+  .stx-table-wrap { overflow-x: auto; background: var(--component-bg); border: 1px solid var(--line); border-radius: 12px; }
+  .stx-table-wrap .admin-table { min-width: 980px; }
+  .stx-table-wrap .admin-table th { background: #faf8f4; white-space: nowrap; }
+  .stx-table-wrap th.sortable { cursor: pointer; user-select: none; }
+  .stx-table-wrap th.sortable:hover { color: var(--brass-dark); opacity: 1; }
+  .stx-table-wrap .caret {
+    display: inline-block; width: 0; height: 0; margin-left: 5px; vertical-align: middle;
+    border-left: 4px solid transparent; border-right: 4px solid transparent; opacity: 0.4;
+  }
+  .stx-table-wrap th.sortable.asc .caret { border-bottom: 5px solid var(--brass-dark); border-top: none; opacity: 1; }
+  .stx-table-wrap th.sortable.desc .caret { border-top: 5px solid var(--brass-dark); border-bottom: none; opacity: 1; }
+  .stx-table-wrap td.mono, .stx-table-wrap td.right { font-family: 'Plus Jakarta Sans', sans-serif; }
+  .stx-table-wrap td.right, .stx-table-wrap th.right { text-align: right; }
+  .stx-empty { padding: 52px 20px; text-align: center; color: var(--ink); opacity: 0.55; font-size: 0.88rem; }
+  .stx-empty svg { width: 30px; height: 30px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; margin-bottom: 10px; opacity: 0.5; }
+
+  /* ---- Pills ---- */
+  .source-pill {
+    display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 20px;
+    font-size: 0.66rem; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; text-transform: uppercase;
+  }
+  .source-online { background: rgba(163,132,74,0.15); color: var(--brass-dark); }
+  .source-pos { background: rgba(21,23,26,0.08); color: var(--ink); opacity: 0.7; }
+  .source-reservation { background: rgba(163,132,74,0.2); color: var(--brass-dark); }
+  .view-daily-orders-btn, .view-daily-order-detail { border:1px solid rgba(163,132,74,.38); border-radius:6px; background:#fff; color:var(--brass-dark); padding:6px 9px; font:700 .67rem 'Plus Jakarta Sans', sans-serif; text-transform:uppercase; cursor:pointer; }
+  .view-daily-orders-btn:hover, .view-daily-order-detail:hover { background:rgba(163,132,74,.12); border-color:var(--brass); }
+  .status-pill { padding: 4px 10px; border-radius: 20px; font-size: 0.66rem; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; text-transform: uppercase; white-space: nowrap; }
+  .status-pending { background: rgba(184,134,11,0.14); color: var(--warning); }
+  .status-confirmed { background: rgba(163,132,74,0.15); color: var(--brass-dark); }
+  .status-preparing { background: rgba(52,109,196,0.14); color: #2c5fb0; }
+  .status-ready { background: rgba(46,125,79,0.14); color: #23633e; }
+  .status-completed { background: rgba(46,125,79,0.14); color: var(--success); }
+  .status-cancelled { background: rgba(192,57,43,0.14); color: var(--danger); }
+  .needs-action td:first-child { border-left: 3px solid var(--warning); }
+  .reservation-order td { background: rgba(163,132,74,0.03); }
+  .reservation-order:hover td { background: rgba(163,132,74,0.06); }
+
+  .row-actions { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+  .row-actions button {
+    font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.66rem; text-transform: uppercase; font-weight: 700;
+    border-radius: 5px; padding: 6px 10px; cursor: pointer; border: 1px solid var(--line);
+    background: var(--component-bg); color: var(--ink); transition: all .15s ease;
+  }
+  .row-actions button:hover { border-color: var(--brass); color: var(--brass-dark); }
+  .row-actions button.primary { background: var(--brass); color: #fff; border-color: var(--brass); }
+  .row-actions button.primary:hover { background: var(--brass-dark); color: #fff; }
+  .row-actions button.danger { color: var(--danger); border-color: rgba(192,57,43,0.3); }
+  .row-actions button.danger:hover { background: rgba(192,57,43,0.08); }
+  .row-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* ---- Order detail modal ---- */
+  .order-modal-box { max-width: 680px; width: 100%; max-height: 92vh; overflow-y: auto; }
+  .om-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 20px; font-size: 0.84rem; margin-bottom: 16px; }
+  .om-meta .row { display: flex; justify-content: space-between; gap: 10px; padding: 5px 0; border-bottom: 1px dashed var(--line); }
+  .om-meta .row span:first-child { opacity: 0.55; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.66rem; text-transform: uppercase; padding-top: 2px; }
+  .om-items { width: 100%; border-collapse: collapse; font-size: 0.82rem; margin-bottom: 16px; }
+  .om-items th { text-align: left; padding: 8px 10px; background: var(--stone); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.6rem; text-transform: uppercase; opacity: 0.55; }
+  .om-items td { padding: 9px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .om-items td.right, .om-items th.right { text-align: right; }
+  .om-totals { width: 100%; font-size: 0.84rem; margin-bottom: 18px; }
+  .om-totals .row { display: flex; justify-content: space-between; padding: 4px 0; }
+  .om-totals .row.grand { font-weight: 700; border-top: 2px solid var(--ink); margin-top: 6px; padding-top: 10px; font-size: 0.95rem; }
+  .addon-line-list { color: var(--brass-dark); opacity: 0.85; }
+  .money-neg { color: var(--danger); }
+  .profit-pos { color: var(--success); font-weight: 700; }
+
+  /* ---- Delivery details block ---- */
+  .om-delivery { margin-bottom: 16px; }
+  .om-delivery-head {
+    font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.66rem; text-transform: uppercase;
+    letter-spacing: 0.06em; opacity: 0.55; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;
+  }
+  .om-delivery-head svg { width: 14px; height: 14px; fill: none; stroke: var(--brass-dark); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .om-delivery .om-meta { margin-bottom: 0; background: var(--stone); border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px; }
+  .om-delivery .om-meta .row { border-bottom-color: rgba(0,0,0,0.06); }
+  .om-delivery .om-meta .row:last-child { border-bottom: none; }
+
+  /* ---- Editable delivery fee ---- */
+  .fee-display-wrap { display: inline-flex; align-items: center; gap: 8px; }
+  .fee-edit-btn {
+    font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.62rem; text-transform: uppercase; font-weight: 700;
+    border: 1px solid var(--line); background: var(--component-bg); color: var(--brass-dark);
+    border-radius: 5px; padding: 3px 8px; cursor: pointer;
+  }
+  .fee-edit-btn:hover { border-color: var(--brass); }
+  .fee-edit-row { display: flex; align-items: center; gap: 8px; justify-content: flex-end; padding: 6px 0 10px; }
+  .fee-edit-row input {
+    width: 110px; padding: 6px 9px; border: 1px solid var(--line); border-radius: 6px;
+    font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.85rem; background: var(--bone); color: var(--ink); text-align: right;
+  }
+  .fee-edit-row input:focus { outline: none; border-color: var(--brass); }
+  .fee-edit-row .btn.small { padding: 6px 12px; font-size: 0.72rem; }
+  .fee-error { font-size: 0.72rem; color: var(--danger); text-align: right; margin-top: -4px; margin-bottom: 8px; display: none; }
+
+  /* ---- Reports ---- */
+  .report-section-title {
+    font-family: 'Archivo', sans-serif; text-transform: uppercase; font-size: 0.85rem;
+    margin: 0 0 12px; display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  }
+
+  @media (max-width: 900px) {
+    .stx-cards { grid-template-columns: 1fr; }
+    .stx-toolbar { align-items: stretch; }
+    .stx-filters { width: 100%; }
+    .stx-filters input[type="search"] { flex: 1; width: auto; }
+    .stx-actions { margin-left: auto; }
+    .om-meta { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 640px) {
+    .stx-controls { flex-direction: column; align-items: stretch; }
+    .stx-period-btns { justify-content: stretch; }
+    .stx-period-btn { flex: 1; text-align: center; }
+  }
+
+  /* ---- Column/export dialog + settings (brass-themed, matches rest of admin) ---- */
+  .stx-dialog-backdrop { position:fixed; inset:0; z-index:400; display:none; align-items:center; justify-content:center; padding:18px; background:rgba(15,16,18,0.5); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
+  .stx-dialog-backdrop.active { display:flex; }
+  .stx-dialog { width:min(100%,430px); max-height:calc(100vh - 36px); overflow:auto; background:#fff; border-radius:var(--radius-lg); box-shadow: var(--shadow-lg); color:var(--ink); border: 1px solid var(--line); animation: modalSlideIn 0.22s cubic-bezier(0.16,1,0.3,1) both; }
+  .stx-dialog-head { display:flex; align-items:center; justify-content:space-between; padding:15px 16px; border-bottom:1px solid var(--line); font-weight:700; font-size:.9rem; font-family: 'Archivo', sans-serif; text-transform: uppercase; letter-spacing: 0.02em; }
+  .stx-dialog-close { border:0; background:none; color:var(--ink-muted); cursor:pointer; font-size:1rem; padding:2px 6px; transition: color .15s ease; }
+  .stx-dialog-close:hover { color: var(--danger); }
+  .stx-dialog-body { padding:10px 16px 16px; }
+  .stx-dialog-intro { display:flex; justify-content:space-between; align-items:center; color:var(--ink-muted); font-size:.75rem; padding:4px 0 8px; }
+  .stx-default-btn { border:0; background:none; color:var(--brass-dark); font-weight:700; cursor:pointer; transition: color .15s ease; }
+  .stx-default-btn:hover { color: var(--brass); text-decoration: underline; }
+  .stx-column-option { display:flex; gap:10px; align-items:center; padding:8px 6px; border-top:1px solid var(--line); font-size:.82rem; cursor:pointer; transition: background .15s ease; border-radius: 6px; }
+  .stx-column-option:hover { background: var(--stone); }
+  .stx-column-option input, .stx-setting-card input { accent-color: var(--brass); }
+  .stx-export-option { display:flex; align-items:center; gap:8px; width:100%; padding:9px 6px; border:0; background:#fff; text-align:left; color:var(--ink); font:500 .82rem 'Plus Jakarta Sans',sans-serif; cursor:pointer; border-radius:6px; transition: all .15s ease; }
+  .stx-export-option:hover { background: rgba(163,132,74,0.08); color: var(--brass-dark); }
+  .stx-dialog-footer { padding:0 16px 16px; }
+  .stx-dialog-footer button { width:100%; border:1px solid var(--line); border-radius:8px; padding:10px; background: var(--stone); color:var(--ink); cursor:pointer; font-weight: 600; transition: all .15s ease; }
+  .stx-dialog-footer button:hover { border-color: var(--brass); color: var(--brass-dark); background: rgba(163,132,74,0.08); }
+  .stx-setting-title { font-weight:800; font-size:.82rem; margin:4px 0 2px; }
+  .stx-setting-help { color:var(--ink-muted); font-size:.72rem; margin-bottom:8px; }
+  .stx-setting-card { display:flex; align-items:flex-start; gap:10px; border:1px solid var(--line); border-radius:8px; padding:11px; margin-bottom:9px; cursor:pointer; transition: all .15s ease; }
+  .stx-setting-card:hover { border-color: var(--line-strong); background: var(--stone); }
+  .stx-setting-card.selected { border-color: var(--brass); background: rgba(163,132,74,0.07); }
+  .stx-setting-card b { display:block; font-size:.82rem; }
+  .stx-setting-card span { display:block; color:var(--ink-muted); font-size:.7rem; margin-top:3px; }
+  .stx-settings-divider { border:0; border-top:1px solid var(--line); margin:13px 0; }
+  .stx-store-select { width:100%; padding:9px; border:1px solid var(--line); border-radius:8px; background: var(--stone); font:inherit; color: var(--ink); }
+  .stx-hours-range { display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:10px; margin-top:10px; padding:9px; border:1px solid var(--line); border-radius:8px; font-size:.7rem; }
+  .stx-hours-range b { display:block; font-size:.74rem; margin-top:2px; }
+  .stx-hours-line { width:66px; height:2px; background: var(--brass-light); position:relative; }
+  .stx-hours-line:before,.stx-hours-line:after { content:''; position:absolute; top:-3px; width:8px; height:8px; border-radius:50%; background: var(--brass-dark); }
+  .stx-hours-line:before { left:0; }.stx-hours-line:after { right:0; }
+  @media(max-width:700px){ .stx-cards{grid-template-columns:1fr}.stx-dialog{max-width:100%}.stx-filters input[type="search"]{width:100%} }
+  .stx-report-fields { display:grid; grid-template-columns:minmax(180px,1fr) minmax(180px,2fr); gap:8px; margin-bottom:12px; align-items:end; }
+  .stx-report-field { position:relative; display:block; border:1px solid var(--line); border-radius:8px; background:#fff; padding:11px 9px 5px; transition: border-color .15s ease; }
+  .stx-report-field:focus-within { border-color: var(--brass); }
+  .stx-report-field > span { position:absolute; top:-7px; left:8px; padding:0 3px; background:#fff; color:var(--ink-muted); font-size:.64rem; }
+  .stx-report-field select, .stx-report-field input { width:100%; border:0; outline:0; background:transparent; color:var(--ink); font:500 .84rem 'Plus Jakarta Sans',sans-serif; }
+  .stx-period-summary { align-self:center; }
+  @media(max-width:640px){.stx-report-fields{grid-template-columns:1fr}}
+
+  @keyframes modalSlideIn {
+    from { opacity: 0; transform: translateY(14px) scale(0.98); }
+    to { opacity: 1; transform: none; }
+  }
+
+  /* ---- Extra hover polish for summary cards ---- */
+  .stx-card { transition: box-shadow var(--transition-base), transform var(--transition-fast), border-color var(--transition-base); }
+  .stx-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); border-color: var(--line-strong); }
+</style>
+</head>
+<body>
+
+<div id="adminShell"></div>
+
+<script type="module">
+  import { renderAdminShell, confirmDialog, showAlert } from "./admin-shell.js";
+  import { adminFetch, peso, formatDate, escapeHtml } from "./admin-api.js";
+  import {
+    openReceiptModal,
+    normalizeOrderData
+  } from "./receipt-printer.js";
+
+  const session = renderAdminShell({ active: 'sales', title: 'Sales Transactions' });
+
+  // Admins bypass the report flag; everyone else needs it for summaries/reports.
+  const canReports = session ? (session.staff.role === 'Admin' || !!session.staff.can_access_reports) : false;
+
+  let allOrders = [];
+  let currentPeriod = { from: null, to: null };
+  let sortState = { key: 'datetime', dir: 'desc' };
+  let showCancelled = true;
+  let autoRefreshTimer = null;
+  let currentModalOrder = null;
+  const DEFAULT_TRANSACTION_COLUMNS = ['receipt', 'sales', 'quantity', 'payment', 'status', 'entryDate', 'time'];
+  const ALL_TRANSACTION_COLUMNS = [
+    ['receipt', 'Receipt No.'], ['sales', 'Sales Amount'], ['quantity', 'Qty Sold'],
+    ['payment', 'Payment Method'], ['status', 'Status'], ['entryDate', 'Entry Date'],
+    ['time', 'Time'], ['saleDate', 'Sale Date'], ['orderType', 'Order Type'],
+    ['name', 'Name'], ['contact', 'Contact No.'], ['address', 'Address'],
+  ];
+  let visibleTransactionColumns = new Set(DEFAULT_TRANSACTION_COLUMNS);
+  let reportDateType = localStorage.getItem('salesReportDateType') === 'sale' ? 'sale' : 'entry';
+  let storeStartHour = Math.min(23, Math.max(0, Number(localStorage.getItem('salesStoreStartHour')) || 0));
+  try {
+    const savedColumns = JSON.parse(localStorage.getItem('salesTransactionColumns') || 'null');
+    if (Array.isArray(savedColumns) && savedColumns.length) visibleTransactionColumns = new Set(savedColumns);
+  } catch { /* keep defaults */ }
+
+  const PAYMENT_LABELS = { cash: 'Cash', card: 'Card', gcash: 'GCash', bank_transfer: 'Bank Transfer', other: 'Other', split: 'Split Payment' };
+
+  if (session) init();
+
+  function orderTypeLabel(v, order = null) {
+    if (v === 'online' && order?.delivery_address) return 'Delivery';
+    const map = { dine_in: 'Dine-in', pickup: 'Takeout', takeout: 'Takeout', delivery: 'Delivery', online: 'Online Order' };
+    return map[v] || String(v || '').replace(/_/g, ' ').replace(/^./, c => c.toUpperCase()) || '—';
+  }
+
+  function statusLabel(s) { return String(s || '').charAt(0).toUpperCase() + String(s || '').slice(1); }
+
+  function ringSVG(pct) {
+    const r = 18, c = 2 * Math.PI * r;
+    const val = Math.round(Math.max(0, Math.min(100, Number(pct) || 0)));
+    const filled = (val / 100) * c;
+    return `<svg class="stx-ring" viewBox="0 0 48 48" width="50" height="50" aria-hidden="true">
+      <circle cx="24" cy="24" r="${r}" fill="none" stroke="var(--line)" stroke-width="4.5"/>
+      <circle cx="24" cy="24" r="${r}" fill="none" stroke="currentColor" stroke-width="4.5" stroke-linecap="round"
+              stroke-dasharray="${filled} ${c - filled}" transform="rotate(-90 24 24)"/>
+      <text x="24" y="27" text-anchor="middle" font-size="10.5" font-weight="700" fill="currentColor">${val}%</text>
+    </svg>`;
+  }
+
+  function init() {
+    const content = document.getElementById('adminContent');
+    content.innerHTML = `
+      <div class="admin-section stx">
+
+        <div class="stx-tabs">
+          <button class="stx-tab active" data-vtab="transactions">
+            <svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/><path d="M9 12h6M9 16h6M9 8h3"/></svg>
+            Transactions
+          </button>
+          <button class="stx-tab" data-vtab="reports">
+            <svg viewBox="0 0 24 24"><path d="M4 20V11M10 20V4M16 20v-6"/><path d="M2 20h20"/></svg>
+            Reports
+          </button>
+        </div>
+
+        ${canReports ? `
+        <div class="stx-cards">
+          <div class="stx-card">
+            <div>
+              <div class="label">Sales</div>
+              <div class="value" id="sumSales">₱0.00</div>
+              <div class="sub" id="sumSalesSub">—</div>
+            </div>
+          </div>
+          <div class="stx-card">
+            <div>
+              <div class="label">Cost of Goods Sold</div>
+              <div class="value" id="sumCogs">₱0.00</div>
+              <div class="sub">ingredients + add-ons</div>
+            </div>
+            <span id="sumCogsRing" style="color:var(--brass-dark);">${ringSVG(0)}</span>
+          </div>
+          <div class="stx-card">
+            <div>
+              <div class="label">Margin</div>
+              <div class="value green" id="sumMargin">₱0.00</div>
+              <div class="sub" id="sumMarginSub">gross profit</div>
+            </div>
+            <span id="sumMarginRing" style="color:var(--success);">${ringSVG(0)}</span>
+          </div>
+        </div>` : ''}
+
+        <div class="stx-report-fields">
+          <label class="stx-report-field">
+            <span>Report Duration</span>
+            <select id="periodSelect">
+              <option value="today">Today</option>
+              <option value="yesterday">Yesterday</option>
+              <option value="week">This Week</option>
+              <option value="month">This Month</option>
+              <option value="custom">Custom Range</option>
+            </select>
+          </label>
+          <label class="stx-report-field">
+            <span>Date</span>
+            <input type="date" id="fromDate">
+          </label>
+          <label class="stx-report-field" id="toDateField" style="display:none;">
+            <span>End Date</span>
+            <input type="date" id="toDate">
+          </label>
+          <span class="stx-period-summary" id="periodSummaryText"></span>
+        </div>
+
+        <div id="stxView-transactions">
+          <div class="stx-subtabs">
+            <button class="stx-subtab active" data-sub="transactions">Transactions</button>
+            <button class="stx-subtab" data-sub="daily">Daily Sales</button>
+            <button class="stx-subtab" data-sub="archives">Archives</button>
+          </div>
+
+          <div id="stxSub-transactions">
+            <div class="stx-toolbar">
+              <div class="stx-filters">
+                <span class="fb">Filter by</span>
+                <div class="stx-search-wrap">
+                  <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+                  <input type="search" id="filterSearch" placeholder="Search receipt #, customer, or cashier…">
+                </div>
+                <span class="stx-filter-dim">Order type</span>
+                <select id="filterOrderType" title="Order Type">
+                  <option value="all">All</option>
+                  <option value="dine_in">Dine-In</option>
+                  <option value="pickup">Takeout / Pickup</option>
+                  <option value="delivery">Delivery</option>
+                  <option value="reservation">Reservation Orders</option>
+                </select>
+                <select id="filterStatus" title="Status" style="display:none;">
+                  <option value="all">All Status</option>
+                  <option value="pending">Pending</option>
+                  <option value="confirmed">Confirmed</option>
+                  <option value="preparing">Preparing</option>
+                  <option value="ready">Ready</option>
+                  <option value="completed">Completed</option>
+                  <option value="cancelled">Cancelled</option>
+                </select>
+              </div>
+              <div class="stx-actions">
+                <button class="stx-icon-btn" id="settingsBtn" title="Report settings" aria-label="Report settings">
+                  <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 3v2.2M12 18.8V21M21 12h-2.2M5.2 12H3M18.4 5.6l-1.5 1.5M7.1 16.9l-1.5 1.5M18.4 18.4l-1.5-1.5M7.1 7.1 5.6 5.6"/></svg>
+                </button>
+                <button class="stx-icon-btn" id="exportBtn" title="Export CSV">
+                  <svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+                </button>
+                <div class="stx-pos">
+                  <button class="stx-icon-btn" id="moreBtn" title="More">
+                    <svg viewBox="0 0 24 24"><path d="m7 10 5 5 5-5"/></svg>
+                  </button>
+                  <div class="stx-pop" id="morePop">
+                    <button class="stx-pop-item" data-more="refresh">
+                      <svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/></svg>
+                      Refresh data
+                    </button>
+                    <button class="stx-pop-item" data-more="print">
+                      <svg viewBox="0 0 24 24"><path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                      Print view
+                    </button>
+                    <div class="stx-pop-divider"></div>
+                    <button class="stx-pop-item" data-more="reports">
+                      <svg viewBox="0 0 24 24"><path d="M4 20V11M10 20V4M16 20v-6"/><path d="M2 20h20"/></svg>
+                      Go to Reports
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="stx-result-bar" id="stxResultBar" style="margin-bottom:8px;"></div>
+            <div style="display:flex; justify-content:flex-end; margin-bottom:4px;">
+              <button class="stx-clear-filters-btn" id="stxClearFiltersBtn" style="display:none;"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-0.15em; margin-right:3px;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>Clear filters</button>
+            </div>
+            <div class="stx-table-wrap" id="ordersTableWrap">
+              <div class="admin-loading">Loading transactions…</div>
+            </div>
+          </div>
+
+          <div id="stxSub-daily" style="display:none;">
+            <div class="stx-table-wrap" id="dailyWrap">
+              <div class="admin-loading">Loading daily sales…</div>
+            </div>
+          </div>
+
+          <div id="stxSub-archives" style="display:none;">
+            <div class="stx-table-wrap">
+              <div class="stx-empty">
+                <svg viewBox="0 0 24 24"><path d="M3 8h18l-1.5 12h-15L3 8Z"/><path d="M3 8l1.8-4h14.4L21 8M9 12h6"/></svg>
+                <div>No archived transactions yet.</div>
+                <div style="font-size:0.78rem;">Archived records will appear here once archiving is enabled.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="stxView-reports" style="display:none;">
+          ${canReports ? `
+          <div class="stx-subtabs">
+            <button class="stx-subtab active" data-rtab="topaddons">Top Add-Ons</button>
+            <button class="stx-subtab" data-rtab="products">Product Sales</button>
+            <button class="stx-subtab" data-rtab="categories">Categories</button>
+            <button class="stx-subtab" data-rtab="payments">Payments</button>
+            <button class="stx-subtab" data-rtab="ordertypes">Order Types</button>
+          </div>
+          <div class="stx-table-wrap" id="reportWrap">
+            <div class="admin-loading">Loading reports…</div>
+          </div>` : `
+          <div class="stx-table-wrap">
+            <div class="stx-empty">You need the "Access Reports" permission to view sales reports. Ask an Admin to grant it.</div>
+          </div>`}
+        </div>
+      </div>
+
+      <div class="modal-backdrop" id="orderModal">
+        <div class="modal-box order-modal-box">
+          <h3 id="orderModalTitle">Order Details</h3>
+          <div id="orderModalBody"><div class="admin-loading">Loading…</div></div>
+          <div class="modal-close-row" style="display:flex; justify-content:space-between; align-items:center;">
+            <button class="btn btn-outline" id="orderModalPrintBtn" type="button" style="display:flex; align-items:center; gap:6px;">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                <rect x="6" y="14" width="12" height="8"></rect>
+              </svg>
+              Print Receipt (58mm)
+            </button>
+            <button class="btn btn-outline" id="orderModalCloseBtn">Close</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="stx-dialog-backdrop" id="columnsDialog" role="dialog" aria-modal="true" aria-labelledby="columnsDialogTitle">
+        <div class="stx-dialog">
+          <div class="stx-dialog-head"><span id="columnsDialogTitle">Manage Columns</span><button class="stx-dialog-close" data-close-dialog="columnsDialog"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button></div>
+          <div class="stx-dialog-body">
+            <div class="stx-dialog-intro"><span>Customize view</span><button class="stx-default-btn" id="columnsDefaultBtn">Default</button></div>
+            <div id="columnsOptions"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="stx-dialog-backdrop" id="exportDialog" role="dialog" aria-modal="true" aria-labelledby="exportDialogTitle">
+        <div class="stx-dialog">
+          <div class="stx-dialog-head"><span id="exportDialogTitle">Export</span><button class="stx-dialog-close" data-close-dialog="exportDialog"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button></div>
+          <div class="stx-dialog-body">
+            <button class="stx-export-option" data-export-report="transactions">Sales Transactions</button>
+            <button class="stx-export-option" data-export-report="daily">Daily Sales</button>
+            <button class="stx-export-option" data-export-report="products">Products Sold</button>
+            <button class="stx-export-option" data-export-report="variants">Sales Per Variant</button>
+            <button class="stx-export-option" data-export-report="categories">Sales Per Category</button>
+            <button class="stx-export-option" data-export-report="payments">Sales Per Payment Method</button>
+          </div>
+          <div class="stx-dialog-footer"><button data-close-dialog="exportDialog">Close</button></div>
+        </div>
+      </div>
+
+      <div class="stx-dialog-backdrop" id="settingsDialog" role="dialog" aria-modal="true" aria-labelledby="settingsDialogTitle">
+        <div class="stx-dialog">
+          <div class="stx-dialog-head"><span id="settingsDialogTitle">Settings</span><button class="stx-dialog-close" data-close-dialog="settingsDialog"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button></div>
+          <div class="stx-dialog-body">
+            <div class="stx-setting-title">Date Type Filter</div>
+            <div class="stx-setting-help">Choose which date should be used when filtering reports</div>
+            <label class="stx-setting-card" data-date-card="entry"><input type="radio" name="reportDateType" value="entry"><span><b>Entry Date</b><span>Filters the report based on when the transaction was entered</span></span></label>
+            <label class="stx-setting-card" data-date-card="sale"><input type="radio" name="reportDateType" value="sale"><span><b>Sale Date</b><span>Filters the report based on when the payment happened</span></span></label>
+            <hr class="stx-settings-divider">
+            <div class="stx-setting-title">Store Hours</div>
+            <div class="stx-setting-help">This defines when your system starts tracking sales transactions for the day</div>
+            <select class="stx-store-select" id="storeStartHour" aria-label="Store reporting start time"></select>
+            <div class="stx-hours-range"><span><small>START</small><b id="storeRangeStart">12:00 AM</b></span><i class="stx-hours-line"></i><span style="text-align:right"><small>END</small><b id="storeRangeEnd">11:59 PM</b></span></div>
+            <label class="stx-column-option" style="display:none"><input type="checkbox" id="showCancelledToggle" checked> Show cancelled / voided orders</label>
+          </div>
+        </div>
+      </div>
+    `;
+
+    /* ---- Period controls ---- */
+    const todayValue = toDateParam(new Date());
+    document.getElementById('fromDate').value = todayValue;
+    document.getElementById('toDate').value = todayValue;
+    document.getElementById('periodSelect').addEventListener('change', (event) => {
+      document.getElementById('toDateField').style.display = event.target.value === 'custom' ? '' : 'none';
+      refresh();
+    });
+    document.getElementById('fromDate').addEventListener('change', refresh);
+    document.getElementById('toDate').addEventListener('change', () => {
+      if (activePeriod() === 'custom') refresh();
+    });
+
+    /* ---- Primary tabs ---- */
+    document.querySelectorAll('.stx-tab').forEach(btn => btn.addEventListener('click', () => {
+      document.querySelectorAll('.stx-tab').forEach(b => b.classList.toggle('active', b === btn));
+      const view = btn.dataset.vtab;
+      document.getElementById('stxView-transactions').style.display = view === 'transactions' ? '' : 'none';
+      document.getElementById('stxView-reports').style.display = view === 'reports' ? '' : 'none';
+      if (view === 'reports') loadActiveReport();
+      else loadSubView();
+    }));
+
+    /* ---- Secondary tabs (Transactions / Daily Sales / Archives) ---- */
+    document.querySelectorAll('.stx-subtab[data-sub]').forEach(btn => btn.addEventListener('click', () => {
+      document.querySelectorAll('.stx-subtab[data-sub]').forEach(b => b.classList.toggle('active', b === btn));
+      loadSubView();
+    }));
+
+    /* ---- Report sub-tabs ---- */
+    if (canReports) {
+      document.querySelectorAll('.stx-subtab[data-rtab]').forEach(btn => btn.addEventListener('click', () => {
+        document.querySelectorAll('.stx-subtab[data-rtab]').forEach(b => b.classList.toggle('active', b === btn));
+        loadActiveReport();
+      }));
+    }
+
+    /* ---- Filters ---- */
+    document.getElementById('filterOrderType').addEventListener('change', () => {
+      updateFilterStyles();
+      renderTable();
+    });
+    document.getElementById('filterStatus').addEventListener('change', () => {
+      updateFilterStyles();
+      renderTable();
+    });
+    document.getElementById('filterSearch').addEventListener('input', renderTable);
+    document.getElementById('stxClearFiltersBtn').addEventListener('click', () => {
+      document.getElementById('filterOrderType').value = 'all';
+      document.getElementById('filterStatus').value = 'all';
+      document.getElementById('filterSearch').value = '';
+      updateFilterStyles();
+      renderTable();
+    });
+
+    /* ---- Toolbar actions and reference dialogs ---- */
+    document.getElementById('settingsBtn').addEventListener('click', () => openSalesDialog('settingsDialog'));
+    document.getElementById('exportBtn').addEventListener('click', () => openSalesDialog('exportDialog'));
+    document.getElementById('moreBtn').addEventListener('click', () => openSalesDialog('columnsDialog'));
+    document.getElementById('moreBtn').title = 'Manage columns';
+    document.getElementById('showCancelledToggle').addEventListener('change', (e) => {
+      showCancelled = e.target.checked;
+      renderTable();
+    });
+    document.querySelectorAll('[data-close-dialog]').forEach((button) => {
+      button.addEventListener('click', () => closeSalesDialog(button.dataset.closeDialog));
+    });
+    document.querySelectorAll('.stx-dialog-backdrop').forEach((dialog) => {
+      dialog.addEventListener('click', (event) => {
+        if (event.target === dialog) closeSalesDialog(dialog.id);
+      });
+    });
+    document.getElementById('columnsDefaultBtn').addEventListener('click', () => {
+      visibleTransactionColumns = new Set(DEFAULT_TRANSACTION_COLUMNS);
+      saveVisibleColumns();
+      renderColumnOptions();
+      renderTable();
+    });
+    document.querySelectorAll('input[name="reportDateType"]').forEach((radio) => {
+      radio.addEventListener('change', () => {
+        reportDateType = radio.value;
+        localStorage.setItem('salesReportDateType', reportDateType);
+        updateSettingsUI();
+        refresh();
+      });
+    });
+    document.getElementById('storeStartHour').addEventListener('change', (event) => {
+      storeStartHour = Number(event.target.value) || 0;
+      localStorage.setItem('salesStoreStartHour', String(storeStartHour));
+      updateSettingsUI();
+      refresh();
+    });
+    document.querySelectorAll('[data-export-report]').forEach((button) => {
+      button.addEventListener('click', async () => {
+        closeSalesDialog('exportDialog');
+        await exportSalesReport(button.dataset.exportReport);
+      });
+    });
+    document.querySelectorAll('.stx-pop-item[data-more]').forEach(btn => btn.addEventListener('click', () => {
+      const act = btn.dataset.more;
+      if (act === 'refresh') refresh();
+      else if (act === 'print') window.print();
+      else if (act === 'reports') document.querySelector('.stx-tab[data-vtab="reports"]').click();
+    }));
+    renderColumnOptions();
+    initializeSettingsControls();
+
+    /* ---- Order modal ---- */
+    document.getElementById('orderModalCloseBtn').addEventListener('click', () => {
+      document.getElementById('orderModal').classList.remove('active');
+    });
+    document.getElementById('orderModalPrintBtn')?.addEventListener('click', () => {
+      if (currentModalOrder) {
+        openReceiptModal(normalizeOrderData(currentModalOrder));
+      }
+    });
+    document.getElementById('orderModal').addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) e.currentTarget.classList.remove('active');
+    });
+
+    refresh();
+    startAutoRefresh();
+  }
+
+  function activePeriod() {
+    return document.getElementById('periodSelect')?.value || 'today';
+  }
+
+  function updateFilterStyles() {
+    const ot = document.getElementById('filterOrderType');
+    const st = document.getElementById('filterStatus');
+    ot.classList.toggle('filtered', ot.value !== 'all');
+    st.classList.toggle('filtered', st.value !== 'all');
+  }
+
+  /* ================================================================
+     LIVE AUTO-REFRESH
+     Orders placed from the customer-facing site (or by another cashier)
+     used to only show up after a manual page reload. This quietly re-pulls
+     the current view on an interval so new/updated orders appear on their
+     own - without yanking focus away from someone mid-search or resetting
+     the order detail modal while they're reading it.
+     ================================================================ */
+
+  function startAutoRefresh() {
+    if (autoRefreshTimer) return;
+    autoRefreshTimer = window.setInterval(() => {
+      if (document.hidden) return; // tab in the background - skip, don't burn calls unseen
+      if (document.getElementById('orderModal').classList.contains('active')) return;
+      if (document.activeElement === document.getElementById('filterSearch')) return;
+
+      const activeView = document.querySelector('.stx-tab.active')?.dataset.vtab;
+      if (activeView !== 'transactions') return; // only the live orders list auto-refreshes
+
+      loadSubView(/* silent */ true);
+      if (canReports) loadSummary();
+    }, 15000);
+
+    // Catch up immediately when the tab regains focus rather than waiting
+    // for the next tick - browsers throttle/pause intervals in background tabs.
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) return;
+      const activeView = document.querySelector('.stx-tab.active')?.dataset.vtab;
+      if (activeView === 'transactions') {
+        loadSubView(true);
+        if (canReports) loadSummary();
+      }
+    });
+  }
+
+  function openSalesDialog(id) {
+    document.getElementById(id)?.classList.add('active');
+  }
+
+  function closeSalesDialog(id) {
+    document.getElementById(id)?.classList.remove('active');
+  }
+
+  function saveVisibleColumns() {
+    localStorage.setItem('salesTransactionColumns', JSON.stringify([...visibleTransactionColumns]));
+  }
+
+  function renderColumnOptions() {
+    const options = document.getElementById('columnsOptions');
+    if (!options) return;
+    options.innerHTML = ALL_TRANSACTION_COLUMNS.map(([key, label]) => `
+      <label class="stx-column-option">
+        <input type="checkbox" data-transaction-column="${key}" ${visibleTransactionColumns.has(key) ? 'checked' : ''}>
+        <span>${label}</span>
+      </label>`).join('');
+    options.querySelectorAll('[data-transaction-column]').forEach((input) => {
+      input.addEventListener('change', () => {
+        if (input.checked) visibleTransactionColumns.add(input.dataset.transactionColumn);
+        else visibleTransactionColumns.delete(input.dataset.transactionColumn);
+        if (visibleTransactionColumns.size === 0) {
+          visibleTransactionColumns.add('receipt');
+          input.checked = input.dataset.transactionColumn === 'receipt';
+        }
+        saveVisibleColumns();
+        renderTable();
+      });
+    });
+  }
+
+  function hourLabel(hour) {
+    const normalized = ((Number(hour) % 24) + 24) % 24;
+    const suffix = normalized >= 12 ? 'PM' : 'AM';
+    const h = normalized % 12 || 12;
+    return `${h}:00 ${suffix}`;
+  }
+
+  function initializeSettingsControls() {
+    const select = document.getElementById('storeStartHour');
+    select.innerHTML = Array.from({ length: 24 }, (_, hour) =>
+      `<option value="${hour}">${hourLabel(hour)}</option>`
+    ).join('');
+    select.value = String(storeStartHour);
+    updateSettingsUI();
+  }
+
+  function updateSettingsUI() {
+    document.querySelectorAll('input[name="reportDateType"]').forEach((radio) => {
+      radio.checked = radio.value === reportDateType;
+      radio.closest('.stx-setting-card')?.classList.toggle('selected', radio.checked);
+    });
+    const select = document.getElementById('storeStartHour');
+    if (select) select.value = String(storeStartHour);
+    const selectedDateValue = document.getElementById('fromDate')?.value || currentPeriod.from;
+    const startDate = selectedDateValue ? new Date(`${selectedDateValue}T00:00:00`) : new Date();
+    const endDate = new Date(startDate);
+    if (storeStartHour > 0) endDate.setDate(endDate.getDate() + 1);
+    const dateLabel = (date) => date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    const endHour = (storeStartHour + 23) % 24;
+    document.getElementById('storeRangeStart').textContent = `${dateLabel(startDate)}, ${hourLabel(storeStartHour)}`;
+    document.getElementById('storeRangeEnd').textContent = `${dateLabel(endDate)}, ${hourLabel(endHour).replace(':00', ':59')}`;
+  }
+
+  function togglePop(id) {
+    const pop = document.getElementById(id);
+    const wasOpen = pop.classList.contains('open');
+    document.querySelectorAll('.stx-pop').forEach(p => p.classList.remove('open'));
+    if (!wasOpen) pop.classList.add('open');
+  }
+
+  /* ================================================================
+     PERIOD
+     ================================================================ */
+  function toDateParam(d) {
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }
+
+  function formatDateShort(d) {
+    if (!d) return '';
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+
+  function computePeriod() {
+    const dur = activePeriod();
+    const now = new Date();
+    const selectedValue = document.getElementById('fromDate')?.value;
+    const selectedDate = selectedValue ? new Date(`${selectedValue}T00:00:00`) : now;
+    const a = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate());
+
+    let from, to;
+    if (dur === 'today') {
+      from = a; to = a;
+    } else if (dur === 'yesterday') {
+      from = new Date(a); from.setDate(a.getDate() - 1);
+      to = new Date(a); to.setDate(a.getDate() - 1);
+    } else if (dur === 'week') {
+      const start = new Date(a);
+      const day = a.getDay();
+      start.setDate(a.getDate() - (day === 0 ? 6 : day - 1)); // Monday start
+      from = start; to = a;
+    } else if (dur === 'month') {
+      from = new Date(a.getFullYear(), a.getMonth(), 1); to = a;
+    } else { // custom
+      const fv = document.getElementById('fromDate').value;
+      const tv = document.getElementById('toDate').value;
+      from = fv ? new Date(`${fv}T00:00:00`) : null;
+      to = tv ? new Date(`${tv}T00:00:00`) : null;
+    }
+    return { from, to };
+  }
+
+  function applyPeriod() {
+    const { from, to } = computePeriod();
+    currentPeriod = { from: from ? toDateParam(from) : null, to: to ? toDateParam(to) : null };
+
+    // Update the period summary text
+    const summaryEl = document.getElementById('periodSummaryText');
+    if (summaryEl) {
+      if (currentPeriod.from && currentPeriod.to && currentPeriod.from === currentPeriod.to) {
+        summaryEl.textContent = formatDateShort(new Date(`${currentPeriod.from}T00:00:00`));
+      } else if (currentPeriod.from && currentPeriod.to) {
+        summaryEl.textContent = `${formatDateShort(new Date(`${currentPeriod.from}T00:00:00`))} — ${formatDateShort(new Date(`${currentPeriod.to}T00:00:00`))}`;
+      } else {
+        summaryEl.textContent = '';
+      }
+    }
+  }
+
+  function periodQuery() {
+    const q = new URLSearchParams();
+    if (currentPeriod.from) q.set('from', currentPeriod.from);
+    if (currentPeriod.to) q.set('to', currentPeriod.to);
+    q.set('date_type', reportDateType);
+    q.set('store_hour', String(storeStartHour));
+    return q.toString();
+  }
+
+  function refresh() {
+    applyPeriod();
+    loadSummary();
+    loadSubView();
+    if (document.getElementById('stxView-reports').style.display !== 'none') loadActiveReport();
+  }
+
+  function loadSubView(silent = false) {
+    const active = document.querySelector('.stx-subtab[data-sub].active');
+    const sub = active ? active.dataset.sub : 'transactions';
+    document.getElementById('stxSub-transactions').style.display = sub === 'transactions' ? '' : 'none';
+    document.getElementById('stxSub-daily').style.display = sub === 'daily' ? '' : 'none';
+    document.getElementById('stxSub-archives').style.display = sub === 'archives' ? '' : 'none';
+    if (sub === 'daily') loadDaily();
+    else if (sub === 'transactions') loadOrders(silent);
+  }
+
+  /* ================================================================
+     SUMMARY CARDS
+     ================================================================ */
+  async function loadSummary() {
+    if (!canReports) return;
+    try {
+      const res = await adminFetch(`/api/admin/sales/summary?${periodQuery()}`, { cache: 'no-store' });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Could not load summary.');
+      const s = data.summary;
+      const sales = Number(s.gross_sales) || 0;
+      const cogs = Number(s.cogs) || 0;
+      const profit = Number(s.profit) || 0;
+      const marginPct = Number(s.margin) || 0;
+
+      document.getElementById('sumSales').textContent = peso(sales);
+      document.getElementById('sumSalesSub').textContent = `${s.order_count} orders · avg ${peso(s.aov)}`;
+      document.getElementById('sumCogs').textContent = peso(cogs);
+      document.getElementById('sumCogsRing').innerHTML = ringSVG(sales > 0 ? (cogs / sales) * 100 : 0);
+      document.getElementById('sumMargin').textContent = peso(profit);
+      document.getElementById('sumMarginRing').innerHTML = ringSVG(marginPct);
+      document.getElementById('sumMarginSub').textContent = `Margin ${marginPct}%`;
+    } catch (err) {
+      console.error('Summary error:', err.message);
+    }
+  }
+
+  /* ================================================================
+     TRANSACTIONS TABLE
+     ================================================================ */
+  async function loadOrders(silent = false) {
+    const wrap = document.getElementById('ordersTableWrap');
+    if (!silent) wrap.innerHTML = `<div class="admin-loading">Loading transactions…</div>`;
+    try {
+      // The report period is the only server-side boundary; everything else
+      // (order-type/status/search) is filtered client-side so switching
+      // filters is instant and doesn't re-hit the API.
+      const res = await adminFetch(`/api/admin/sales/orders?${periodQuery()}`, { cache: 'no-store' });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Could not load orders.');
+      allOrders = data.orders || [];
+      renderTable();
+    } catch (err) {
+      // A silent background refresh failing (e.g. a dropped connection)
+      // shouldn't blow away the table the person is currently looking at -
+      // just leave it as-is and try again on the next tick.
+      if (!silent) wrap.innerHTML = `<div class="stx-empty"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-0.15em; margin-right:4px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>${err.message}</div>`;
+    }
+  }
+
+  function getFilteredRows() {
+    const orderTypeFilter = document.getElementById('filterOrderType').value;
+    const statusFilter = document.getElementById('filterStatus').value;
+    const search = document.getElementById('filterSearch').value.trim().toLowerCase();
+
+    return allOrders.filter(o => {
+      if (!showCancelled && o.status === 'cancelled') return false;
+
+      // Order type filter — 'reservation' maps to orders that have a reservation_id
+      const isReservation = !!o.reservation_id;
+      const effectiveType = (o.order_type === 'online' && o.delivery_address) ? 'delivery' : o.order_type;
+      if (orderTypeFilter === 'reservation') {
+        if (!isReservation) return false;
+      } else if (orderTypeFilter !== 'all') {
+        // For non-reservation filter: match effective type. Also allow reservation orders to show under their type (e.g. dine_in).
+        if (effectiveType !== orderTypeFilter) return false;
+      }
+
+      if (statusFilter !== 'all' && o.status !== statusFilter) return false;
+
+      if (search) {
+        const hay = `${o.customer_name || ''} ${o.staff_name || ''} #${o.id} ${orderTypeLabel(o.order_type, o)}`.toLowerCase();
+        if (!hay.includes(search)) return false;
+      }
+      return true;
+    });
+  }
+
+  function getResultSummaryText(count, total) {
+    const dur = activePeriod();
+    const labels = { today: 'today', yesterday: 'yesterday', week: 'this week', month: 'this month', custom: 'in this range' };
+    return `Showing <b>${count}</b> of <b>${total}</b> transactions ${labels[dur] || ''}`;
+  }
+
+  function sortRows(rows) {
+    const { key, dir } = sortState;
+    const mul = dir === 'asc' ? 1 : -1;
+    const value = (o) => {
+      switch (key) {
+        case 'id': return o.id;
+        case 'datetime': return o.datetime_ordered || '';
+        case 'order_type': return orderTypeLabel(o.order_type, o);
+        case 'customer': return o.customer_name || '';
+        case 'cashier': return o.staff_name || '';
+        case 'items': return Number(o.item_count) || 0;
+        case 'subtotal': return Number(o.total_amount) - Number(o.delivery_fee || 0);
+        case 'payment': return PAYMENT_LABELS[o.payment_method] || o.payment_method || '';
+        case 'total': return Number(o.total_amount) || 0;
+        case 'status': return o.status || '';
+        case 'saleDate': return o.sale_date || '';
+        case 'contact': return o.contact_no || '';
+        case 'address': return o.address || '';
+        default: return '';
+      }
+    };
+    return [...rows].sort((a, b) => {
+      const va = value(a), vb = value(b);
+      if (typeof va === 'number' && typeof vb === 'number') return (va - vb) * mul;
+      return String(va).localeCompare(String(vb)) * mul;
+    });
+  }
+
+  function renderTable() {
+    const allFiltered = getFilteredRows();
+    const rows = sortRows(allFiltered);
+    const wrap = document.getElementById('ordersTableWrap');
+
+    // Update result info bar
+    const bar = document.getElementById('stxResultBar');
+    if (bar) {
+      bar.innerHTML = getResultSummaryText(rows.length, allOrders.length);
+      const clearBtn = document.getElementById('stxClearFiltersBtn');
+      if (clearBtn) {
+        const hasFilter = document.getElementById('filterOrderType').value !== 'all' ||
+          document.getElementById('filterStatus').value !== 'all' ||
+          document.getElementById('filterSearch').value.trim() !== '';
+        clearBtn.style.display = hasFilter ? '' : 'none';
+      }
+    }
+
+    if (rows.length === 0) {
+      wrap.innerHTML = `<div class="stx-empty"><svg viewBox="0 0 24 24"><path d="M3 12h18M3 6h18M3 18h18"/></svg><div>No transactions match the current filters.</div></div>`;
+      return;
+    }
+
+    const columns = ALL_TRANSACTION_COLUMNS
+      .filter(([id]) => visibleTransactionColumns.has(id))
+      .map(([id, label]) => ({
+        id,
+        label,
+        sortKey: {
+          receipt: 'id', sales: 'total', quantity: 'items', payment: 'payment', status: 'status',
+          entryDate: 'datetime', time: 'datetime', saleDate: 'saleDate', orderType: 'order_type',
+          name: 'customer', contact: 'contact', address: 'address',
+        }[id],
+        right: ['sales', 'quantity'].includes(id),
+      }));
+    const sortable = ['id', 'datetime', 'order_type', 'customer', 'items', 'payment', 'total', 'status', 'saleDate', 'contact', 'address'];
+    const th = (label, key, align) => {
+      const cls = [];
+      if (sortable.includes(key)) {
+        cls.push('sortable');
+        if (sortState.key === key) cls.push(sortState.dir);
+      }
+      if (align) cls.push('right');
+      const clsStr = cls.length ? ` class="${cls.join(' ')}"` : '';
+      const caret = sortState.key === key ? `<span class="caret"></span>` : '';
+      return `<th${clsStr} data-sort="${key || ''}">${label}${caret}</th>`;
+    };
+
+    wrap.innerHTML = `
+      <table class="admin-table">
+        <thead><tr>
+          ${columns.map((column) => th(column.label, column.sortKey, column.right)).join('')}
+          <th class="right">Action</th>
+        </tr></thead>
+        <tbody>${rows.map((row) => rowHTML(row, columns)).join('')}</tbody>
+      </table>
+    `;
+
+    wrap.querySelectorAll('th.sortable').forEach(thEl => thEl.addEventListener('click', () => {
+      const key = thEl.dataset.sort;
+      if (sortState.key === key) sortState.dir = sortState.dir === 'asc' ? 'desc' : 'asc';
+      else sortState = { key, dir: key === 'datetime' || key === 'id' ? 'desc' : 'asc' };
+      renderTable();
+    }));
+
+    wrap.querySelectorAll('button[data-action]').forEach(btn => {
+      btn.addEventListener('click', () => handleStatusChange(btn.dataset.id, btn.dataset.action));
+    });
+    wrap.querySelectorAll('button[data-view]').forEach(btn => {
+      btn.addEventListener('click', () => openOrderModal(btn.dataset.view));
+    });
+  }
+
+  function formatTransactionDate(value) {
+    if (!value) return '—';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return '—';
+    return date.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' });
+  }
+
+  function formatTransactionTime(value) {
+    if (!value) return '—';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return '—';
+    return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  }
+
+  function rowHTML(o, columns) {
+    const isOnline = o.source === 'online';
+    const isReservation = !!o.reservation_id;
+    const needsAction = isOnline && o.status === 'pending';
+    const cashier = isOnline ? '—' : escapeHtml(o.staff_name || 'Staff');
+    const cell = (column) => {
+      switch (column.id) {
+        case 'receipt': return `<td class="mono">#${o.id}</td>`;
+        case 'sales': return `<td class="right"><b>${peso(o.total_amount)}</b></td>`;
+        case 'quantity': return `<td class="right">${Number(o.quantity_sold ?? o.item_count) || 0}</td>`;
+        case 'payment': return `<td>${escapeHtml(PAYMENT_LABELS[o.payment_method] || o.payment_method || '—')}</td>`;
+        case 'status': return `<td><span class="status-pill status-${o.status}">${statusLabel(o.status)}</span></td>`;
+        case 'entryDate': return `<td>${formatTransactionDate(o.datetime_ordered)}</td>`;
+        case 'time': return `<td>${formatTransactionTime(o.datetime_ordered)}</td>`;
+        case 'saleDate': return `<td>${formatTransactionDate(o.sale_date)}</td>`;
+        case 'orderType': return `<td>${isReservation ? 'Reservation · ' : ''}${escapeHtml(orderTypeLabel(o.order_type, o))}</td>`;
+        case 'name': return `<td>${escapeHtml(o.customer_name) || '—'}</td>`;
+        case 'contact': return `<td>${escapeHtml(o.contact_no || '—')}</td>`;
+        case 'address': return `<td>${escapeHtml(o.address || '—')}</td>`;
+        default: return '<td>—</td>';
+      }
+    };
+
+    return `
+      <tr class="${needsAction ? 'needs-action' : ''} ${isReservation ? 'reservation-order' : ''}" title="${isOnline ? 'Online order' : `POS · ${cashier}`}">
+        ${columns.map(cell).join('')}
+        <td><div class="row-actions">${actionButtons(o)}</div></td>
+      </tr>
+    `;
+  }
+
+  function actionButtons(o) {
+    const id = o.id;
+    const isReservation = !!o.reservation_id;
+    const view = `<button data-view="${id}">View</button>`;
+    
+    // Reservation orders are confirmed through the reservation system
+    if (isReservation) {
+      return `${view}`;
+    }
+    
+    switch (o.status) {
+      case 'pending':
+        return `${view}<button class="primary" data-action="confirmed" data-id="${id}">Confirm</button><button class="danger" data-action="cancelled" data-id="${id}">Cancel</button>`;
+      case 'confirmed':
+        return `${view}<button class="primary" data-action="preparing" data-id="${id}">Prepare</button><button class="danger" data-action="cancelled" data-id="${id}">Cancel</button>`;
+      case 'preparing':
+        return `${view}<button class="primary" data-action="ready" data-id="${id}">Mark Ready</button><button class="danger" data-action="cancelled" data-id="${id}">Cancel</button>`;
+      case 'ready':
+        return `${view}<button class="primary" data-action="completed" data-id="${id}">Complete</button><button class="danger" data-action="cancelled" data-id="${id}">Cancel</button>`;
+      case 'completed':
+        return `${view}<button class="danger" data-action="cancelled" data-id="${id}">Void</button>`;
+      case 'cancelled':
+        return `${view}`;
+      default:
+        return view;
+    }
+  }
+
+  async function handleStatusChange(orderId, newStatus) {
+    if (newStatus === 'cancelled') {
+      const ok = await confirmDialog(`Cancel/Void Order #${orderId}? This can't be undone.`, { confirmLabel: 'Void Order', danger: true });
+      if (!ok) return;
+    }
+
+    try {
+      const res = await adminFetch(`/api/admin/sales/pos/orders/${orderId}/status`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status: newStatus }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Could not update order status.');
+
+      loadOrders();
+      loadSummary();
+    } catch (err) {
+      showAlert(err.message, { title: 'Update failed' });
+    }
+  }
+
+  /* ================================================================
+     EXPORT (currently filtered rows → CSV)
+     ================================================================ */
+  function exportCSV() {
+    const rows = sortRows(getFilteredRows());
+    if (rows.length === 0) {
+      showAlert('Nothing to export — no transactions match the current filters.', { title: 'Export' });
+      return;
+    }
+    const cols = [
+      ['Transaction ID', o => `#${o.id}`],
+      ['Date & Time', o => formatDate(o.datetime_ordered)],
+      ['Order Type', o => orderTypeLabel(o.order_type, o)],
+      ['Customer', o => o.customer_name || ''],
+      ['Cashier', o => o.source === 'online' ? '' : (o.staff_name || 'Staff')],
+      ['Items', o => Number(o.item_count) || 0],
+      ['Subtotal', o => ((Number(o.total_amount) || 0) - (Number(o.delivery_fee) || 0)).toFixed(2)],
+      ['Payment Method', o => PAYMENT_LABELS[o.payment_method] || o.payment_method || ''],
+      ['Total', o => (Number(o.total_amount) || 0).toFixed(2)],
+      ['Status', o => o.status || ''],
+    ];
+    const csv = [cols.map(c => c[0]).join(',')]
+      .concat(rows.map(o => cols.map(([, fn]) => {
+        const v = String(fn(o) ?? '');
+        return /[",\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v;
+      }).join(',')))
+      .join('\n');
+
+    const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+    const a = document.createElement('a');
+    const stamp = currentPeriod.from || 'all';
+    a.href = URL.createObjectURL(blob);
+    a.download = `sales-transactions-${stamp}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(a.href);
+  }
+
+  function downloadReportCSV(filename, columns, rows) {
+    const escapeCSV = (value) => {
+      const text = String(value ?? '');
+      return /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+    };
+    const csv = [columns.map(([label]) => escapeCSV(label)).join(',')]
+      .concat(rows.map((row) => columns.map(([, key]) => escapeCSV(typeof key === 'function' ? key(row) : row[key])).join(',')))
+      .join('\n');
+    const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `${filename}-${currentPeriod.from || 'all'}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(link.href);
+  }
+
+  async function exportSalesReport(type) {
+    if (type === 'transactions') {
+      exportCSV();
+      return;
+    }
+    if (!canReports) {
+      showAlert('You need the Access Reports permission to export this report.', { title: 'Export' });
+      return;
+    }
+    try {
+      const query = periodQuery();
+      let endpoint = '';
+      let rows = [];
+      let columns = [];
+      let filename = type;
+      if (type === 'daily') {
+        endpoint = `/api/admin/sales/daily?${query}`;
+        const response = await adminFetch(endpoint); const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Could not export daily sales.');
+        rows = data.daily || [];
+        columns = [['Date','date'],['Orders','order_count'],['Gross Sales','gross_sales'],['COGS','cogs'],['Profit','profit'],['Margin %','margin'],['AOV','aov']];
+        filename = 'daily-sales';
+      } else if (type === 'products' || type === 'variants') {
+        endpoint = `/api/admin/sales/report/products?${query}`;
+        const response = await adminFetch(endpoint); const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Could not export product sales.');
+        rows = data.products || [];
+        columns = [['Product','product_name'],['Category','category_name'], ...(type === 'variants' ? [['Variant', () => 'Standard']] : []), ['Qty Sold','quantity_sold'],['Sales','total_revenue'],['COGS','cogs'],['Profit','profit'],['Margin %','margin']];
+        filename = type === 'variants' ? 'sales-per-variant' : 'products-sold';
+      } else if (type === 'categories') {
+        endpoint = `/api/admin/sales/report/categories?${query}`;
+        const response = await adminFetch(endpoint); const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Could not export category sales.');
+        rows = data.categories || [];
+        columns = [['Category','category_name'],['Qty Sold','quantity_sold'],['Sales','revenue'],['COGS','cogs'],['Profit','profit'],['Margin %','margin']];
+        filename = 'sales-per-category';
+      } else if (type === 'payments') {
+        endpoint = `/api/admin/sales/report?${query}`;
+        const response = await adminFetch(endpoint); const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Could not export payment sales.');
+        rows = data.byPaymentMethod || [];
+        columns = [['Payment Method', (row) => PAYMENT_LABELS[row.payment_method] || row.payment_method],['Transactions','transaction_count'],['Total Collected','total_amount']];
+        filename = 'sales-per-payment-method';
+      }
+      if (!rows.length) {
+        showAlert('No entries found for this period.', { title: 'Export' });
+        return;
+      }
+      downloadReportCSV(filename, columns, rows);
+    } catch (error) {
+      showAlert(error.message, { title: 'Export failed' });
+    }
+  }
+
+  /* ================================================================
+     ORDER DETAIL MODAL
+     ================================================================ */
+  async function openOrderModal(orderId) {
+    const modal = document.getElementById('orderModal');
+    modal.classList.add('active');
+    document.getElementById('orderModalTitle').textContent = `Order #${orderId}`;
+    document.getElementById('orderModalBody').innerHTML = `<div class="admin-loading">Loading…</div>`;
+
+    try {
+      const res = await adminFetch(`/api/admin/sales/orders/${orderId}`);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Could not load order.');
+      renderOrderDetail(data.order);
+    } catch (err) {
+      document.getElementById('orderModalBody').innerHTML = `<div class="admin-error"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-0.15em; margin-right:4px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>${err.message}</div>`;
+    }
+  }
+
+  function renderOrderDetail(o) {
+    currentModalOrder = o;
+    const source = o.source === 'online' ? 'Online (Customer)' : `POS · ${escapeHtml(o.staff_name || 'Staff')}`;
+    const payment = (o.payments && o.payments.length)
+      ? o.payments.map(p => `${escapeHtml(PAYMENT_LABELS[p.payment_method] || p.payment_method)} · ${peso(p.amount)} · ${escapeHtml(p.status || 'paid')}`).join('<br>')
+      : (o.payment_method ? `${escapeHtml(PAYMENT_LABELS[o.payment_method] || o.payment_method)} · ${peso(o.total_amount)} · ${escapeHtml(o.status || 'pending')}` : '—');
+
+    // The order's own order_type may still say "online" (the source) rather
+    // than the actual fulfillment method, so fall back to whether we have
+    // delivery-specific data on the order to decide if this is a delivery.
+    const isDelivery = o.order_type === 'delivery' || (o.order_type === 'online' && !!o.delivery_address);
+    const typeLabel = (o.order_type === 'online' && isDelivery) ? 'Delivery' : orderTypeLabel(o.order_type);
+
+    const deliveryBlock = isDelivery ? `
+      <div class="om-delivery">
+        <div class="om-delivery-head">
+          <svg viewBox="0 0 24 24"><path d="M3 7h11v10H3zM14 10h4l3 3v4h-7z"/><circle cx="7.5" cy="18.5" r="1.5"/><circle cx="17.5" cy="18.5" r="1.5"/></svg>
+          Delivery Details
+        </div>
+        <div class="om-meta">
+          <div class="row"><span>Mobile Number</span><b>${escapeHtml(o.customer_mobile || o.mobile_number || '—')}</b></div>
+          <div class="row"><span>Requested Time</span><b>${escapeHtml(o.requested_time || '—')}</b></div>
+          <div class="row" style="grid-column:1/-1;"><span>Delivery Address</span><b>${escapeHtml(o.delivery_address || '—')}</b></div>
+          ${o.special_instructions ? `<div class="row" style="grid-column:1/-1;"><span>Special Prep Instructions</span><b>${escapeHtml(o.special_instructions)}</b></div>` : ''}
+        </div>
+      </div>` : '';
+
+    const itemsRows = (o.items || []).map(it => `
+      <tr>
+        <td>
+          ${escapeHtml(it.product_name || `Menu #${it.menu_id}`)}
+          ${it.notes ? `<div style="font-size:0.72rem; color:var(--ink-muted);">${escapeHtml(it.notes)}</div>` : ''}
+          ${(it.add_ons || []).length ? `
+            <div class="addon-line-list" style="font-size:0.76rem;">
+              + ${it.add_ons.map(a => `${escapeHtml(a.name)} ×${a.quantity} (${peso(a.subtotal)})`).join(', ')}
+            </div>` : ''}
+        </td>
+        <td class="right">${peso(it.price)}</td>
+        <td class="right">${it.quantity}</td>
+        <td class="right">${peso(Number(it.subtotal) + (it.add_ons || []).reduce((s, a) => s + Number(a.subtotal), 0))}</td>
+      </tr>`).join('');
+
+    const body = document.getElementById('orderModalBody');
+    body.innerHTML = `
+      <div class="om-meta">
+        <div class="row"><span>Customer</span><b>${escapeHtml(o.customer_name) || '—'}</b></div>
+        <div class="row"><span>Source</span><b>${source}</b></div>
+        <div class="row"><span>Order Type</span><b>${typeLabel}</b></div>
+        <div class="row"><span>Status</span><b>${statusLabel(o.status)}</b></div>
+        <div class="row"><span>Payment</span><b>${payment}</b></div>
+        <div class="row"><span>Placed</span><b>${formatDate(o.datetime_ordered)}</b></div>
+        ${o.reservation_date ? `<div class="row"><span>Reservation Date</span><b>${formatDate(o.reservation_date)} at ${String(o.reservation_time || '').slice(0, 5)}</b></div>` : ''}
+      </div>
+
+      ${deliveryBlock}
+
+      <table class="om-items">
+        <thead><tr><th>Item</th><th class="right">Unit Price</th><th class="right">Qty</th><th class="right">Total</th></tr></thead>
+        <tbody>${itemsRows}</tbody>
+      </table>
+
+      <div class="om-totals">
+        <div class="row"><span>Subtotal (items + add-ons)</span><span>${peso(Number(o.total_amount) - Number(o.delivery_fee || 0))}</span></div>
+        <div class="row" id="omFeeRow">
+          <span>Delivery Fee</span>
+          <span class="fee-display-wrap">
+            <b id="omFeeDisplay">${peso(o.delivery_fee || 0)}</b>
+            ${isDelivery ? `<button type="button" class="fee-edit-btn" id="omFeeEditBtn">Edit</button>` : ''}
+          </span>
+        </div>
+        ${isDelivery ? `
+          <div class="fee-edit-row" id="omFeeEditRow" style="display:none;">
+            <input type="number" id="omFeeInput" min="0" step="0.01" value="${Number(o.delivery_fee || 0)}">
+            <button type="button" class="btn btn-outline small" id="omFeeCancelBtn">Cancel</button>
+            <button type="button" class="btn small" id="omFeeSaveBtn">Save</button>
+          </div>
+          <div class="fee-error" id="omFeeError"></div>` : ''}
+        <div class="row grand"><span>Grand Total</span><span>${peso(o.total_amount)}</span></div>
+        ${(() => {
+          const paidList = Array.isArray(o.payments) ? o.payments.filter(p => p && (p.status === 'paid' || p.status === 'completed')) : [];
+          const amountPaid = paidList.reduce((s, p) => s + Number(p.amount || 0), 0);
+          const totalAmt = Number(o.total_amount || 0);
+          const rem = Math.max(0, Math.round((totalAmt - amountPaid) * 100) / 100);
+          if (amountPaid > 0 && rem > 0) {
+            return `
+              <div class="row" style="color:#27ae60; font-weight:600;"><span>Paid via GCash (Downpayment)</span><span>-${peso(amountPaid)}</span></div>
+              <div class="row" style="color:var(--gold,#d4af37); font-weight:700; font-size:1.02rem;"><span>Remaining Balance to Collect</span><span>${peso(rem)}</span></div>`;
+          } else if (amountPaid > 0) {
+            return `<div class="row" style="color:#27ae60; font-weight:600;"><span>Paid in Full</span><span>${peso(amountPaid)}</span></div>`;
+          }
+          return '';
+        })()}
+        ${o.cogs !== undefined ? `
+          <div class="row"><span>COGS</span><span>${peso(o.cogs)}</span></div>
+          <div class="row"><span>Gross Profit</span><span class="${o.profit >= 0 ? 'profit-pos' : 'money-neg'}">${peso(o.profit)}</span></div>
+          <div class="row"><span>Margin</span><span>${o.margin}%</span></div>` : ''}
+      </div>
+
+      <div class="row-actions" id="orderModalActions" style="justify-content:flex-end;">
+        ${modalActionButtons(o)}
+      </div>
+    `;
+
+    body.querySelectorAll('button[data-action]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        await handleStatusChange(btn.dataset.id, btn.dataset.action);
+        openOrderModal(btn.dataset.id);
+      });
+    });
+
+    if (isDelivery) {
+      const editBtn = document.getElementById('omFeeEditBtn');
+      const editRow = document.getElementById('omFeeEditRow');
+      const errEl = document.getElementById('omFeeError');
+      editBtn.addEventListener('click', () => {
+        editRow.style.display = 'flex';
+        errEl.style.display = 'none';
+        document.getElementById('omFeeInput').focus();
+      });
+      document.getElementById('omFeeCancelBtn').addEventListener('click', () => {
+        editRow.style.display = 'none';
+        errEl.style.display = 'none';
+      });
+      document.getElementById('omFeeSaveBtn').addEventListener('click', () => saveDeliveryFee(o.id));
+    }
+  }
+
+  /* ================================================================
+     DELIVERY FEE — inline edit inside the order detail modal
+     ================================================================ */
+  async function saveDeliveryFee(orderId) {
+    const errEl = document.getElementById('omFeeError');
+    const input = document.getElementById('omFeeInput');
+    const newFee = Number(input.value);
+
+    if (isNaN(newFee) || newFee < 0) {
+      errEl.textContent = 'Enter a valid, non-negative fee.';
+      errEl.style.display = 'block';
+      return;
+    }
+
+    const saveBtn = document.getElementById('omFeeSaveBtn');
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Saving…';
+
+    try {
+      const res = await adminFetch(`/api/admin/sales/orders/${orderId}/delivery-fee`, {
+        method: 'PATCH',
+        body: JSON.stringify({ delivery_fee: newFee }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Could not update delivery fee.');
+      // Reload the modal so subtotal/grand total/margin all recompute from
+      // the server's atomic total_amount update, then quietly refresh the
+      // table behind it so the Subtotal/Total columns stay in sync.
+      await openOrderModal(orderId);
+      loadOrders(true);
+    } catch (err) {
+      errEl.textContent = err.message;
+      errEl.style.display = 'block';
+      saveBtn.disabled = false;
+      saveBtn.textContent = 'Save';
+    }
+  }
+
+  function modalActionButtons(o) {
+    const id = o.id;
+    switch (o.status) {
+      case 'pending':
+        return `<button class="primary" data-action="confirmed" data-id="${id}">Confirm Order</button><button class="danger" data-action="cancelled" data-id="${id}">Cancel Order</button>`;
+      case 'confirmed':
+        return `<button class="primary" data-action="preparing" data-id="${id}">Start Preparing</button><button class="danger" data-action="cancelled" data-id="${id}">Cancel</button>`;
+      case 'preparing':
+        return `<button class="primary" data-action="ready" data-id="${id}">Mark Ready</button><button class="danger" data-action="cancelled" data-id="${id}">Cancel</button>`;
+      case 'ready':
+        return `<button class="primary" data-action="completed" data-id="${id}">Mark Completed</button><button class="danger" data-action="cancelled" data-id="${id}">Cancel</button>`;
+      case 'completed':
+        return `<button class="danger" data-action="cancelled" data-id="${id}">Void Order</button>`;
+      default:
+        return `<span style="font-size:0.75rem; color:var(--ink-muted);">No further action</span>`;
+    }
+  }
+
+  /* ================================================================
+     DAILY SALES
+     ================================================================ */
+  async function loadDaily() {
+    const wrap = document.getElementById('dailyWrap');
+    if (!canReports) {
+      wrap.innerHTML = `<div class="stx-empty">You need the "Access Reports" permission to view daily sales.</div>`;
+      return;
+    }
+    wrap.innerHTML = `<div class="admin-loading">Loading daily sales…</div>`;
+    try {
+      const res = await adminFetch(`/api/admin/sales/daily?${periodQuery()}`);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Could not load daily sales.');
+      wrap.innerHTML = dailyHTML(data.daily || []);
+      wrap.querySelectorAll('.view-daily-orders-btn').forEach(button => {
+        button.addEventListener('click', () => openDailyOrders(button.dataset.date));
+      });
+    } catch (err) {
+      wrap.innerHTML = `<div class="stx-empty"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-0.15em; margin-right:4px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>${err.message}</div>`;
+    }
+  }
+
+  function dailyHTML(days) {
+    if (!days.length) return `<div class="stx-empty">No entries found for this period.</div>`;
+    return `
+      <table class="admin-table" style="min-width:760px;">
+        <thead><tr>
+          <th>Date</th><th>Orders</th><th class="right">Gross Sales</th>
+          <th class="right">COGS</th><th class="right">Profit</th>
+          <th class="right">Margin</th><th class="right">AOV</th><th class="right">Orders</th>
+        </tr></thead>
+        <tbody>
+          ${days.map(d => `
+            <tr>
+              <td class="mono">${escapeHtml(String(d.date).slice(0, 10))}</td>
+              <td>${d.order_count}</td>
+              <td class="right">${peso(d.gross_sales)}</td>
+              <td class="right">${peso(d.cogs)}</td>
+              <td class="right ${d.profit >= 0 ? 'profit-pos' : 'money-neg'}">${peso(d.profit)}</td>
+              <td class="right">${d.margin}%</td>
+              <td class="right">${peso(d.aov)}</td>
+              <td class="right"><button type="button" class="view-daily-orders-btn" data-date="${escapeHtml(String(d.date).slice(0, 10))}">View Orders</button></td>
+            </tr>`).join('')}
+        </tbody>
+      </table>`;
+  }
+
+  async function openDailyOrders(date) {
+    const modal = document.getElementById('orderModal');
+    modal.classList.add('active');
+    document.getElementById('orderModalTitle').textContent = `Orders — ${date}`;
+    const body = document.getElementById('orderModalBody');
+    body.innerHTML = `<div class="admin-loading">Loading orders…</div>`;
+    try {
+      const res = await adminFetch(`/api/admin/sales/orders?from=${encodeURIComponent(date)}&to=${encodeURIComponent(date)}`);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Could not load orders.');
+      const orders = data.orders || [];
+      body.innerHTML = orders.length ? `
+        <div class="om-meta" style="margin-bottom:14px;"><div class="row"><span>Orders on this day</span><b>${orders.length}</b></div></div>
+        <table class="om-items"><thead><tr><th>Order</th><th>Customer</th><th>Type</th><th class="right">Total</th><th></th></tr></thead>
+        <tbody>${orders.map(order => `<tr>
+          <td>#${order.id}<div style="font-size:.7rem;color:var(--ink-muted);">${formatDate(order.datetime_ordered)}</div></td>
+          <td>${escapeHtml(order.customer_name || '—')}</td>
+          <td>${escapeHtml(orderTypeLabel(order.order_type))}</td>
+          <td class="right">${peso(order.total_amount)}</td>
+          <td class="right"><button type="button" class="view-daily-order-detail" data-id="${order.id}">View</button></td>
+        </tr>`).join('')}</tbody></table>` : '<div class="stx-empty">No orders were recorded on this day.</div>';
+      body.querySelectorAll('.view-daily-order-detail').forEach(button => {
+        button.addEventListener('click', () => openOrderModal(button.dataset.id));
+      });
+    } catch (err) {
+      body.innerHTML = `<div class="admin-error"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-0.15em; margin-right:4px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>${err.message}</div>`;
+    }
+  }
+
+  /* ================================================================
+     REPORTS
+     ================================================================ */
+  function activeReportTab() {
+    const active = document.querySelector('.stx-subtab[data-rtab].active');
+    return active ? active.dataset.rtab : 'topaddons';
+  }
+
+  async function loadActiveReport() {
+    if (!canReports) return;
+    const tab = activeReportTab();
+    const wrap = document.getElementById('reportWrap');
+    wrap.innerHTML = `<div class="admin-loading">Loading…</div>`;
+    try {
+      const q = periodQuery();
+      let html = '';
+      if (tab === 'topaddons') {
+        const res = await adminFetch(`/api/admin/sales/report/top-addons?${q}`);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        html = topAddonsHTML(data.addons || []);
+      } else if (tab === 'products') {
+        const res = await adminFetch(`/api/admin/sales/report/products?${q}`);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        html = productsHTML(data.products || []);
+      } else if (tab === 'categories') {
+        const res = await adminFetch(`/api/admin/sales/report/categories?${q}`);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        html = categoriesHTML(data.categories || []);
+      } else if (tab === 'payments') {
+        const res = await adminFetch(`/api/admin/sales/report?${q}`);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        html = paymentsHTML(data.byPaymentMethod || []);
+      } else if (tab === 'ordertypes') {
+        const res = await adminFetch(`/api/admin/sales/report/order-types?${q}`);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        html = orderTypesHTML(data.orderTypes || []);
+      }
+      wrap.innerHTML = html;
+    } catch (err) {
+      wrap.innerHTML = `<div class="stx-empty"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-0.15em; margin-right:4px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>${err.message}</div>`;
+    }
+  }
+
+  function topAddonsHTML(addons) {
+    if (!addons.length) return `<div class="stx-empty">No entries found for this period.</div>`;
+    return `
+      <table class="admin-table" style="min-width:720px;">
+        <thead><tr>
+          <th>Add-On</th><th>Units Sold</th><th>Orders</th>
+          <th class="right">Revenue</th><th class="right">COGS</th>
+          <th class="right">Profit</th><th class="right">Margin</th>
+        </tr></thead>
+        <tbody>
+          ${addons.map(a => `
+            <tr>
+              <td>${escapeHtml(a.name)}</td>
+              <td>${a.quantity_sold}</td>
+              <td>${a.order_count}</td>
+              <td class="right">${peso(a.revenue)}</td>
+              <td class="right">${peso(a.cogs)}</td>
+              <td class="right ${a.profit >= 0 ? 'profit-pos' : 'money-neg'}">${peso(a.profit)}</td>
+              <td class="right">${a.margin}%</td>
+            </tr>`).join('')}
+        </tbody>
+      </table>`;
+  }
+
+  function productsHTML(products) {
+    if (!products.length) return `<div class="stx-empty">No entries found for this period.</div>`;
+    return `
+      <table class="admin-table" style="min-width:900px;">
+        <thead><tr>
+          <th>Product</th><th>Category</th><th>Units</th>
+          <th class="right">Base Sales</th><th class="right">Add-On Sales</th>
+          <th class="right">Total Sales</th><th class="right">COGS</th>
+          <th class="right">Profit</th><th class="right">Margin</th>
+        </tr></thead>
+        <tbody>
+          ${products.map(p => `
+            <tr>
+              <td>${escapeHtml(p.product_name || `Menu #${p.menu_id}`)}</td>
+              <td>${escapeHtml(p.category_name || '—')}</td>
+              <td>${p.quantity_sold}</td>
+              <td class="right">${peso(p.revenue)}</td>
+              <td class="right">${peso(p.addon_revenue)}</td>
+              <td class="right">${peso(p.total_revenue)}</td>
+              <td class="right">${peso(p.cogs)}</td>
+              <td class="right ${p.profit >= 0 ? 'profit-pos' : 'money-neg'}">${peso(p.profit)}</td>
+              <td class="right">${p.margin}%</td>
+            </tr>`).join('')}
+        </tbody>
+      </table>`;
+  }
+
+  function categoriesHTML(categories) {
+    if (!categories.length) return `<div class="stx-empty">No entries found for this period.</div>`;
+    return `
+      <table class="admin-table" style="min-width:620px;">
+        <thead><tr>
+          <th>Category</th><th>Units Sold</th><th class="right">Revenue</th>
+          <th class="right">COGS</th><th class="right">Profit</th><th class="right">Margin</th>
+        </tr></thead>
+        <tbody>
+          ${categories.map(c => `
+            <tr>
+              <td>${escapeHtml(c.category_name)}</td>
+              <td>${c.quantity_sold}</td>
+              <td class="right">${peso(c.revenue)}</td>
+              <td class="right">${peso(c.cogs)}</td>
+              <td class="right ${c.profit >= 0 ? 'profit-pos' : 'money-neg'}">${peso(c.profit)}</td>
+              <td class="right">${c.margin}%</td>
+            </tr>`).join('')}
+        </tbody>
+      </table>`;
+  }
+
+  function paymentsHTML(payments) {
+    if (!payments.length) return `<div class="stx-empty">No entries found for this period.</div>`;
+    return `
+      <table class="admin-table" style="min-width:420px;">
+        <thead><tr>
+          <th>Payment Method</th><th>Transactions</th><th class="right">Total Collected</th>
+        </tr></thead>
+        <tbody>
+          ${payments.map(p => `
+            <tr>
+              <td>${escapeHtml(PAYMENT_LABELS[p.payment_method] || p.payment_method)}</td>
+              <td>${p.transaction_count}</td>
+              <td class="right">${peso(p.total_amount)}</td>
+            </tr>`).join('')}
+        </tbody>
+      </table>`;
+  }
+
+  function orderTypesHTML(types) {
+    if (!types.length) return `<div class="stx-empty">No entries found for this period.</div>`;
+    return `
+      <table class="admin-table" style="min-width:420px;">
+        <thead><tr>
+          <th>Order Type</th><th>Orders</th><th class="right">Total Sales</th>
+        </tr></thead>
+        <tbody>
+          ${types.map(t => `
+            <tr>
+              <td>${escapeHtml(orderTypeLabel(t.order_type))}</td>
+              <td>${t.order_count}</td>
+              <td class="right">${peso(t.total_amount)}</td>
+            </tr>`).join('')}
+        </tbody>
+      </table>`;
+  }
+</script>
+</body>
+</html>

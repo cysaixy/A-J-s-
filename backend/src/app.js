@@ -1,0 +1,110 @@
+// src/app.js
+import express from 'express';
+import cors from 'cors';
+import cookieParser from 'cookie-parser';
+import dotenv from 'dotenv';
+dotenv.config({ quiet: true });
+
+import errorHandler from './middlewares/error.middleware.js';
+import { globalLimiter, authLimiter } from './middlewares/rateLimit.middleware.js';
+import { requireStaffAuth } from './middlewares/auth.middleware.js';
+
+// Customer routes
+import customerMenuRoutes from './routes/customer/menu.routes.js';
+import customerAuthRoutes from './routes/customer/auth.routes.js';
+import customerOrderRoutes from './routes/customer/order.routes.js';
+import customerReservationRoutes from './routes/customer/reservation.routes.js';
+
+// Admin routes
+import adminStaffRoutes from './routes/admin/staffRoutes.js';
+import adminProductsRoutes from './routes/admin/productsRoutes.js';
+import adminInventoryRoutes from './routes/admin/inventoryRoutes.js';
+import adminPurchasesRoutes from './routes/admin/purchasesRoutes.js';
+import adminSalesRoutes from './routes/admin/salesRoutes.js';
+import adminReservationsRoutes from './routes/admin/reservationsRoutes.js';
+import adminDashboardRoutes from './routes/admin/dashboardRoutes.js';
+import adminCashAccountsRoutes from './routes/admin/cashAccountsRoutes.js';
+import adminCashTransactionsRoutes from './routes/admin/cashTransactionsRoutes.js';
+import adminReportsRoutes from './routes/admin/reportsRoutes.js';
+import adminCustomersRoutes from './routes/admin/customersRoutes.js';
+import webhookRoutes from './routes/webhook.routes.js';
+
+const app = express();
+
+// Trust reverse proxy headers (e.g., Nginx, Render, Railway, AWS ALB, Vercel)
+// Required for express-rate-limit to correctly identify client IP addresses
+app.set('trust proxy', 1);
+
+app.use(cors({
+  origin: process.env.CLIENT_ORIGIN || 'http://localhost:3000',
+  credentials: true,
+}));
+app.use(express.json({
+  limit: '7mb',
+  verify: (req, res, buf) => {
+    req.rawBody = buf.toString('utf8');
+  }
+}));
+app.use(cookieParser());
+
+// Apply global rate limiting across all API endpoints
+app.use('/api', globalLimiter);
+
+import { getFirebaseAuth } from './config/firebase.js';
+
+// Health check — staff-only, hides Firebase credential details from public
+app.get('/api/health', requireStaffAuth, (req, res) => {
+  let fbStatus = 'uninitialized';
+  let fbError = null;
+  try {
+    const auth = getFirebaseAuth();
+    fbStatus = auth ? 'ready' : 'null';
+  } catch (e) {
+    fbStatus = 'error';
+    fbError = e.message || String(e);
+  }
+
+  res.json({
+    status: 'ok',
+    firebase: {
+      status: fbStatus,
+      error: fbError,
+      hasProjectId: Boolean(process.env.FIREBASE_PROJECT_ID),
+      hasClientEmail: Boolean(process.env.FIREBASE_CLIENT_EMAIL),
+      hasPrivateKey: Boolean(process.env.FIREBASE_PRIVATE_KEY),
+    },
+  });
+});
+
+// --- Customer API ---
+app.use('/api/customer/menu', customerMenuRoutes);
+app.use('/api/customer/auth', customerAuthRoutes);
+app.use('/api/customer/orders', customerOrderRoutes);
+app.use('/api/customer/reservations', customerReservationRoutes);
+
+// --- Admin API ---
+app.use('/api/admin/staff/login', authLimiter); // Stricter limit specifically for admin login
+app.use('/api/admin/staff', adminStaffRoutes);
+app.use('/api/admin/products', adminProductsRoutes);
+app.use('/api/admin/inventory', adminInventoryRoutes);
+app.use('/api/admin/purchases', adminPurchasesRoutes);
+app.use('/api/admin/sales', adminSalesRoutes);
+app.use('/api/admin/reservations', adminReservationsRoutes);
+app.use('/api/admin/dashboard', adminDashboardRoutes);
+app.use('/api/admin/cash-accounts', adminCashAccountsRoutes);
+app.use('/api/admin/cash-transactions', adminCashTransactionsRoutes);
+app.use('/api/admin/reports', adminReportsRoutes);
+// Was missing entirely — pos.html's live customer search
+// (GET /api/admin/customers/search) had nowhere to send its requests.
+app.use('/api/admin/customers', adminCustomersRoutes);
+
+// Webhooks (PayMongo, etc.)
+app.use('/api/webhooks', webhookRoutes);
+
+// 404 for unmatched API routes
+app.use('/api', (req, res) => res.status(404).json({ error: 'Route not found.' }));
+
+// Must be last: catches errors passed via next(err) from any controller
+app.use(errorHandler);
+
+export default app;

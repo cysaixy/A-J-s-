@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>About Us — The~Yo's</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;900&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=5">
+</head>
+<body>
+
+<header>
+  <a href="index.html" class="logo-link">
+    <img src="../pics&vids/the-yo's_logo.jpg" alt="Logo" class="logo-img">
+    <span class="logo-text">The~Yo's</span>
+  </a>
+  <nav id="siteNav">
+    <ul>
+      <li><a href="about.html" style="color:var(--brass);">About</a></li>
+      <li><a href="menu.html">Menu</a></li>
+      <li><a href="gallery.html">Gallery</a></li>
+      <li><a href="order.html#feedback">Reviews</a></li>
+      <li><a href="reservations.html">Reserve</a></li>
+      <li><a href="my-orders.html">My Orders</a></li>
+      <li><a href="account.html" class="nav-account-btn" id="navAccountLink" title="My Account">
+            <svg class="nav-account-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+          </a></li>
+      <li><a href="order.html" class="nav-btn">Order Now</a></li>
+    </ul>
+    
+  </nav>
+  <button class="nav-toggle" id="navToggle" type="button" aria-label="Toggle navigation menu" aria-expanded="false">
+    <svg class="nav-toggle-icon nav-icon-menu" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+      <line x1="4" y1="6" x2="20" y2="6"></line>
+      <line x1="4" y1="12" x2="20" y2="12"></line>
+      <line x1="4" y1="18" x2="20" y2="18"></line>
+    </svg>
+    <svg class="nav-toggle-icon nav-icon-close" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+      <line x1="18" y1="6" x2="6" y2="18"></line>
+      <line x1="6" y1="6" x2="18" y2="18"></line>
+    </svg>
+  </button>
+</header>
+
+<section>
+  <div class="wrap about reveal in">
+    <div class="about-figure">
+      <video autoplay loop muted playsinline>
+        <source src="../pics&vids/anniversary.mp4" type="video/mp4">
+      </video>
+    </div>
+    <div class="about-text">
+      <p class="eyebrow">Celebrating 2 Years of Excellence</p>
+      <h2 class="display" style="font-size:clamp(2rem,4.2vw,3rem);margin:14px 0 20px;">Great Food.<br>Warm Company.</h2>
+      <p>Conveniently located in Poblacion, Baggao, The~Yo's Resto Bar brings a curated food and dining experience straight to the community. We focus on serving premium, satisfying local and classic meals without the heavy price tag.</p>
+      <p>From regional favorites like our own Pansit Batil Patung to loaded snacks and top-tier coffee and matcha, we welcome friend groups, study breaks, and big celebrations alike.</p>
+      <div class="stat-row">
+        <div><strong>8AM - 8PM</strong><span>Operating Hours</span></div>
+        <div><strong>20+</strong><span>Espresso & Beverages</span></div>
+        <div><strong>2nd Flr</strong><span>DKB Building Hub</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<footer>
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-logo">The~Yo's</div>
+        <p>A comforting community Resto Bar offering delicious meals to Baggao.</p>
+      </div>
+      <div>
+        <h4>Location & Hours</h4>
+        <p>2nd Floor DKB Building, Poblacion, Baggao, Cagayan</p>
+        <p style="color: var(--brass); font-weight:700;">Open Daily: 8:00 AM &ndash; 8:00 PM</p>
+      </div>
+      <div>
+        <h4>Quick Links</h4>
+        <a href="menu.html">View Full Menu</a>
+        <a href="reservations.html">Reserve a Table</a>
+        <a href="my-orders.html">Track My Order</a>
+        <a href="https://www.facebook.com/profile.php?id=61555628762441" target="_blank">Facebook Page</a>
+        <a href="https://www.tiktok.com/@theyos.restaurant" target="_blank">TikTok</a>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>&copy; <span id="year"></span> The~Yo's Resto Bar.</span>
+      <span>Baggao, Cagayan &middot; Made with care.</span>
+    </div>
+  </div>
+</footer>
+
+<script src="global.js"></script>
+<script src="cart.js"></script>
+</body>
+</html>

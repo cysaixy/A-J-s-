@@ -1,0 +1,20 @@
+import express from 'express';
+import { overview, log, createAdjustment, createItem, updateItem, deleteItem, createIncident, incidents } from '../../controllers/admin/inventoryController.js';
+import { requireStaffAuth } from '../../middlewares/auth.middleware.js';
+import { requirePermission } from '../../middlewares/role.middleware.js';
+import { validateInventoryUnits } from '../../middlewares/unitValidation.middleware.js';
+
+const inventoryRouter = express.Router();
+
+inventoryRouter.use(requireStaffAuth, requirePermission('can_access_inventory'));
+
+inventoryRouter.get('/', overview);
+inventoryRouter.post('/items', validateInventoryUnits, createItem);
+inventoryRouter.patch('/items/:id', validateInventoryUnits, updateItem);
+inventoryRouter.delete('/items/:id', deleteItem);
+inventoryRouter.get('/log', log);
+inventoryRouter.post('/adjustments', createAdjustment);
+inventoryRouter.get('/incidents', incidents);
+inventoryRouter.post('/incidents', createIncident);
+
+export default inventoryRouter;

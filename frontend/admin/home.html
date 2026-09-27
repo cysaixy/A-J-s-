@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="refresh" content="0; url=dashboard.html">
+<link rel="canonical" href="dashboard.html">
+<title>Dashboard — The~Yo's Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="admin-shell.css?v=6">
+<style>
+  .two-col { display: grid; grid-template-columns: 1.3fr 1fr; gap: 20px; align-items: start; }
+  @media (max-width: 900px) { .two-col { grid-template-columns: 1fr; } }
+
+  .section-gap { margin-top: 20px; }
+  .panel-sub {
+    font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.66rem; text-transform: uppercase;
+    letter-spacing: 0.05em; opacity: 0.5;
+  }
+  .panel-body-flush { padding: 0; }
+
+  /* ---------- Inventory overview ---------- */
+  .mini-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px; }
+  .mini-card {
+    background: var(--stone); border: 1px solid var(--line); border-radius: 8px; padding: 16px 18px;
+    transition: background var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
+  }
+  .mini-card:hover { background: var(--stone-hover); border-color: var(--line-strong); transform: translateY(-2px); }
+  .mini-card .label {
+    font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.62rem; text-transform: uppercase;
+    letter-spacing: 0.05em; opacity: 0.55;
+  }
+  .mini-card .value { font-family: 'Archivo', sans-serif; font-weight: 900; font-size: 1.7rem; margin-top: 4px; }
+
+  .stock-legend {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px 16px;
+    font-size: 0.78rem; border-top: 1px solid var(--line); padding-top: 14px;
+  }
+  .stock-legend span { display: flex; align-items: center; gap: 8px; padding: 3px 4px; border-radius: 5px; transition: background var(--transition-fast); }
+  .stock-legend span:hover { background: var(--stone); }
+  .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+  .legend-count { margin-left: auto; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; }
+
+  /* ---------- Tables ---------- */
+  .admin-table-wrap { overflow-x: auto; }
+  .admin-table td.r, .admin-table th.r { text-align: right; }
+  .admin-table td.rank { color: var(--brass); font-weight: 800; width: 40px; }
+  .admin-table td.qty { font-family: 'Plus Jakarta Sans', sans-serif; white-space: nowrap; }
+  .admin-table td.qty .mul { opacity: 0.45; }
+  .admin-table td.amt {
+    font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; color: var(--brass-dark); white-space: nowrap;
+  }
+  .admin-table td.muted { opacity: 0.6; }
+  .admin-table td .sub-line { display: block; font-size: 0.72rem; opacity: 0.55; font-family: 'Plus Jakarta Sans', sans-serif; }
+
+  /* ---------- Stock alert sub-heading ---------- */
+  .alert-head {
+    display: flex; align-items: center; gap: 8px;
+    font-family: 'Archivo', sans-serif; font-weight: 700; text-transform: uppercase;
+    font-size: 0.82rem; letter-spacing: 0.03em; margin-bottom: 14px;
+  }
+  .alert-head svg {
+    width: 18px; height: 18px; fill: none; stroke: var(--warning);
+    stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+  }
+
+  @media (max-width: 420px) {
+    .mini-grid { grid-template-columns: 1fr; }
+    .stock-legend { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div id="adminShell"></div>
+
+<script type="module">
+  import { renderAdminShell } from "./admin-shell.js";
+  import { adminFetch, peso, escapeHtml } from "./admin-api.js";
+
+  const session = renderAdminShell({ active: 'home', title: 'Home' });
+  if (session) init();
+
+  const STATUS_LABEL = {
+    in_stock: ['In Stock', 'pill-success'],
+    below_reorder: ['Below Reorder', 'pill-info'],
+    low_stock: ['Low Stock', 'pill-warning'],
+    out_of_stock: ['Out of Stock', 'pill-danger'],
+  };
+  const STATUS_REMARK = {
+    in_stock: 'Stock level is sufficient.',
+    below_reorder: 'Consider replenishing this item.',
+    low_stock: 'Low stock. Replenishment recommended.',
+    out_of_stock: 'Item requires immediate replenishment.',
+  };
+
+  const lockBox = (msg) => `<div class="panel-empty"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-0.15em; margin-right:4px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>${escapeHtml(msg)}</div>`;
+
+  async function getJSON(path) {
+    const res = await adminFetch(path);
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || 'Could not load data.');
+    return data;
+  }
+
+  function init() {
+    const today = new Date().toLocaleDateString('en-PH', {
+      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+    });
+    const content = document.getElementById('adminContent');
+    content.innerHTML = `
+      <div class="two-col">
+        <div class="admin-panel">
+          <div class="admin-panel-head"><h3>Top 10 Best Sellers as of Today</h3><span class="panel-sub">${today}</span></div>
+          <div class="admin-panel-body panel-body-flush" id="sec-best-sellers"><div class="admin-loading">Loading…</div></div>
+        </div>
+
+        <div class="admin-panel">
+          <div class="admin-panel-head"><h3>Inventory Overview</h3><span class="panel-sub">${today}</span></div>
+          <div class="admin-panel-body" id="sec-inventory-overview"><div class="admin-loading">Loading…</div></div>
+        </div>
+      </div>
+
+      <div class="admin-panel section-gap">
+        <div class="admin-panel-head"><h3>Inventory Usage as of Today</h3><span class="panel-sub">${today}</span></div>
+        <div class="admin-panel-body panel-body-flush" id="sec-inventory-usage"><div class="admin-loading">Loading…</div></div>
+      </div>
+
+      <div class="admin-panel section-gap">
+        <div class="admin-panel-head"><h3>Inventory Status</h3><span class="panel-sub">${today}</span></div>
+        <div class="admin-panel-body" id="sec-inventory-status"><div class="admin-loading">Loading…</div></div>
+      </div>
+    `;
+
+    // Each section loads independently so one slow/failed section never
+    // blanks the rest of the Home page.
+    loadBestSellers();
+    loadInventoryOverview();
+    loadInventoryUsage();
+    loadInventoryStatus();
+  }
+
+  /* ========== 1. Top 10 best sellers as of today ========== */
+  async function loadBestSellers() {
+    const el = document.getElementById('sec-best-sellers');
+    try {
+      const d = await getJSON('/api/admin/dashboard');
+      const items = d.bestSellers || [];
+      el.innerHTML = items.length ? `
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead><tr><th>#</th><th>Product</th><th class="r">Qty Sold</th><th class="r">Sales</th></tr></thead>
+            <tbody>
+              ${items.map((b, i) => `
+                <tr>
+                  <td class="rank">${i + 1}</td>
+                  <td>${escapeHtml(b.name)}</td>
+                  <td class="r qty"><span class="mul">×</span>${b.qty_sold}</td>
+                  <td class="r amt">${peso(b.sales_amount)}</td>
+                </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>`
+      : `<div class="panel-empty">No sales recorded today.</div>`;
+    } catch (err) {
+      el.innerHTML = lockBox(err.message);
+    }
+  }
+
+  /* ========== 2. Inventory overview ========== */
+  async function loadInventoryOverview() {
+    const el = document.getElementById('sec-inventory-overview');
+    try {
+      const d = await getJSON('/api/admin/dashboard/inventory-overview');
+      const needsAttention = d.below_reorder + d.low_stock + d.out_of_stock;
+      el.innerHTML = `
+        <div class="mini-grid">
+          <div class="mini-card"><div class="label">Total Items</div><div class="value">${d.total_items}</div></div>
+          <div class="mini-card"><div class="label">Needs Attention</div><div class="value">${needsAttention}</div></div>
+        </div>
+        <div class="stock-legend">
+          <span><i class="dot" style="background:var(--success);"></i>In Stock<span class="legend-count">${d.in_stock}</span></span>
+          <span><i class="dot" style="background:#2c5fb0;"></i>Below Reorder<span class="legend-count">${d.below_reorder}</span></span>
+          <span><i class="dot" style="background:var(--warning);"></i>Low Stock<span class="legend-count">${d.low_stock}</span></span>
+          <span><i class="dot" style="background:var(--danger);"></i>Out of Stock<span class="legend-count">${d.out_of_stock}</span></span>
+        </div>`;
+    } catch (err) {
+      el.innerHTML = lockBox(err.message);
+    }
+  }
+
+  /* ========== 3. Inventory usage as of today ========== */
+  async function loadInventoryUsage() {
+    const el = document.getElementById('sec-inventory-usage');
+    try {
+      const d = await getJSON('/api/admin/dashboard/inventory-usage');
+      const items = d.items || [];
+      el.innerHTML = items.length ? `
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead><tr><th>Description</th><th class="r">Opening Qty</th><th class="r">Closing Qty</th><th class="r">Used Qty</th><th class="r">Usage</th></tr></thead>
+            <tbody>
+              ${items.map((it) => `
+                <tr>
+                  <td>${escapeHtml(it.description)}<span class="sub-line">per ${escapeHtml(it.unit)}</span></td>
+                  <td class="r qty">${it.opening_qty}</td>
+                  <td class="r qty">${it.closing_qty}</td>
+                  <td class="r qty">${it.used_qty}</td>
+                  <td class="r amt">${it.used_qty} ${escapeHtml(it.unit)}</td>
+                </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>`
+      : `<div class="panel-empty">No items available.</div>`;
+    } catch (err) {
+      el.innerHTML = lockBox(err.message);
+    }
+  }
+
+  /* ========== 4. Inventory status ========== */
+  async function loadInventoryStatus() {
+    const el = document.getElementById('sec-inventory-status');
+    try {
+      const d = await getJSON('/api/admin/dashboard/inventory-status');
+      const items = d.items || [];
+      el.innerHTML = `
+        <div class="alert-head">
+          <svg viewBox="0 0 24 24"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></svg>
+          Stock Alert
+        </div>
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead><tr><th>Description</th><th class="r">Quantity</th><th>Status</th><th class="r">Days of Stock</th><th>Remarks</th></tr></thead>
+            <tbody>
+              ${items.length
+                ? items.map((it) => {
+                    const [label, cls] = STATUS_LABEL[it.stock_status] || [it.stock_status, 'pill-neutral'];
+                    const remark = STATUS_REMARK[it.stock_status] || '';
+                    return `
+                      <tr>
+                        <td>${escapeHtml(it.name)}${it.sku ? `<span class="sub-line">${escapeHtml(it.sku)}</span>` : ''}</td>
+                        <td class="r qty">${it.quantity} <span class="muted">${escapeHtml(it.unit)}</span></td>
+                        <td><span class="pill ${cls}">${label}</span></td>
+                        <td class="r muted">${it.days_of_stock != null ? it.days_of_stock : 'N/A'}</td>
+                        <td class="muted">${escapeHtml(remark)}</td>
+                      </tr>`;
+                  }).join('')
+                : `<tr><td colspan="5"><div class="panel-empty">No items available.</div></td></tr>`}
+            </tbody>
+          </table>
+        </div>`;
+    } catch (err) {
+      el.innerHTML = lockBox(err.message);
+    }
+  }
+</script>
+</body>
+</html>

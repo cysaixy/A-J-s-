@@ -1,0 +1,1815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Products, Add-Ons & Bundles — The~Yo's Admin</title>
+<meta name="description" content="Manage The~Yo's menu products, add-ons, and combo bundles with inventory connections.">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="admin-shell.css?v=6">
+<style>
+/* ================================================================
+   PRODUCTS PAGE — Scoped styles (.prd-* namespace)
+   ================================================================ */
+
+.prd-page { display: flex; flex-direction: column; gap: 0; }
+
+/* ---- Header row ---- */
+.prd-header-row {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 20px; flex-wrap: wrap; gap: 12px;
+}
+.prd-header-row h2 {
+  font-family: 'Archivo', sans-serif; font-size: 1.4rem; font-weight: 900;
+  text-transform: uppercase; letter-spacing: 0.02em; margin: 0;
+}
+.prd-header-actions { display: flex; align-items: center; gap: 10px; }
+.prd-header-search { position: relative; }
+.prd-header-search svg {
+  position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+  width: 14px; height: 14px; fill: none; stroke: var(--ink); opacity: 0.35;
+  stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; pointer-events: none;
+}
+.prd-header-search input {
+  padding: 9px 12px 9px 32px; border: 1px solid var(--line); border-radius: 7px;
+  background: #fff; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.83rem;
+  color: var(--ink); outline: none; width: 230px; transition: border-color .15s;
+}
+.prd-header-search input:focus { border-color: var(--brass); }
+
+/* ---- Buttons ---- */
+.prd-btn {
+  display: inline-flex; align-items: center; gap: 7px; padding: 9px 18px;
+  border-radius: 7px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.83rem;
+  font-weight: 600; cursor: pointer; border: 1px solid; transition: all .15s; white-space: nowrap;
+}
+.prd-btn-gold  { background: var(--brass); color: #fff; border-color: var(--brass); }
+.prd-btn-gold:hover  { background: var(--brass-dark); border-color: var(--brass-dark); }
+.prd-btn-ghost { background: none; color: var(--ink); border-color: var(--line); }
+.prd-btn-ghost:hover { border-color: var(--brass); color: var(--brass); }
+.prd-btn-danger { background: var(--danger); color: #fff; border-color: var(--danger); }
+.prd-btn-danger:hover { background: #a3271b; }
+.prd-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.prd-btn svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; }
+
+/* ---- Summary cards ---- */
+.prd-summary-row {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px;
+}
+.prd-stat-card {
+  background: #fff; border: 1px solid var(--line); border-radius: 10px;
+  padding: 18px 20px; display: flex; flex-direction: column; gap: 6px;
+  transition: box-shadow var(--transition-base), border-color var(--transition-base), transform var(--transition-fast);
+}
+.prd-stat-card:hover { box-shadow: var(--shadow-md); border-color: var(--line-strong); transform: translateY(-3px); }
+.prd-stat-card .psc-label {
+  font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.62rem; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--ink); opacity: 0.5;
+}
+.prd-stat-card .psc-value {
+  font-family: 'Archivo', sans-serif; font-weight: 900; font-size: 1.9rem; line-height: 1; color: var(--ink);
+}
+.prd-stat-card .psc-value.gold   { color: var(--brass-dark); }
+.prd-stat-card .psc-value.green  { color: var(--success); }
+.prd-stat-card .psc-sub { font-size: 0.74rem; opacity: 0.45; margin-top: 1px; }
+
+/* ---- Main page tabs ---- */
+.prd-tabs {
+  display: flex; align-items: center; gap: 2px;
+  border-bottom: 2px solid var(--line); margin-bottom: 22px;
+}
+.prd-tab {
+  padding: 10px 20px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.84rem; font-weight: 600;
+  color: var(--ink); opacity: 0.5; cursor: pointer; border: none; background: none;
+  border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all .15s; white-space: nowrap;
+}
+.prd-tab:hover { opacity: 0.85; }
+.prd-tab.active { opacity: 1; color: var(--brass); border-bottom-color: var(--brass); }
+
+/* ---- Panel visibility ---- */
+.prd-panel { display: none; }
+.prd-panel.active { display: block; }
+
+/* ---- Secondary tabs (Menu Items / Categories) ---- */
+.prd-sub-tabs {
+  display: flex; align-items: center; gap: 2px;
+  background: var(--stone); border: 1px solid var(--line); border-radius: 8px;
+  padding: 4px; width: fit-content; margin-bottom: 18px;
+}
+.prd-sub-tab {
+  padding: 7px 16px; border-radius: 6px; border: none; background: none;
+  font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.80rem; font-weight: 600;
+  color: var(--ink); opacity: 0.55; cursor: pointer; transition: all .15s; white-space: nowrap;
+}
+.prd-sub-tab:hover { opacity: 0.85; }
+.prd-sub-tab.active {
+  background: #fff; color: var(--brass-dark); opacity: 1; box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+/* ---- Toolbar ---- */
+.prd-toolbar {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 14px; flex-wrap: wrap;
+}
+.prd-search-wrap { position: relative; flex: 1; min-width: 180px; max-width: 320px; }
+.prd-search-wrap svg {
+  position: absolute; left: 11px; top: 50%; transform: translateY(-50%);
+  width: 14px; height: 14px; stroke: var(--ink); opacity: 0.35; fill: none;
+  stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; pointer-events: none;
+}
+.prd-search {
+  width: 100%; padding: 9px 12px 9px 33px; border: 1px solid var(--line); border-radius: 7px;
+  background: #fff; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.84rem; color: var(--ink);
+  outline: none; transition: border-color .15s;
+}
+.prd-search:focus { border-color: var(--brass); }
+.prd-filter-group { display: flex; align-items: center; gap: 8px; }
+.prd-filter-label {
+  font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.63rem; text-transform: uppercase;
+  letter-spacing: 0.06em; opacity: 0.45;
+}
+.prd-select {
+  padding: 8px 12px; border: 1px solid var(--line); border-radius: 7px;
+  background: #fff; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.82rem;
+  color: var(--ink); cursor: pointer; outline: none; transition: border-color .15s;
+}
+.prd-select:focus { border-color: var(--brass); }
+.prd-toolbar-right { margin-left: auto; }
+
+/* ---- Product / Add-on / Bundle table ---- */
+.prd-table-wrap {
+  background: #fff; border: 1px solid var(--line); border-radius: 10px;
+  overflow-x: auto; -webkit-overflow-scrolling: touch;
+}
+.prd-table { width: 100%; min-width: 720px; border-collapse: collapse; font-size: 0.84rem; }
+.prd-table thead tr { background: var(--stone); border-bottom: 1px solid var(--line); }
+.prd-table th {
+  padding: 11px 16px; text-align: left; font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.61rem; text-transform: uppercase; letter-spacing: 0.06em; opacity: 0.55;
+  font-weight: 700; white-space: nowrap;
+}
+.prd-table th.right, .prd-table td.right { text-align: right; }
+.prd-table td {
+  padding: 13px 16px; border-bottom: 1px solid var(--line); vertical-align: middle; color: var(--ink);
+}
+.prd-table tbody tr:last-child td { border-bottom: none; }
+.prd-table tbody tr:hover td { background: rgba(163,132,74,0.04); }
+.prd-table .item-name { font-weight: 600; }
+.prd-table .item-desc { font-size: 0.76rem; opacity: 0.5; margin-top: 2px; }
+.prd-table .price-val { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.84rem; }
+.prd-table .stock-qty { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; }
+
+/* ---- Status badges ---- */
+.prd-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 10px; border-radius: 20px; font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.60rem; font-weight: 700; text-transform: uppercase; white-space: nowrap;
+}
+.badge-available { background: rgba(46,125,79,0.12);  color: #1e6b41; }
+.badge-unavailable { background: rgba(21,23,26,0.08); color: var(--ink); opacity: 0.65; }
+.badge-low      { background: rgba(192,125,11,0.14); color: #8a5c00; }
+.badge-out      { background: rgba(192,57,43,0.12);  color: #a3271b; }
+
+/* ---- Three-dot action menu ---- */
+.prd-action-wrap { position: relative; }
+.prd-action-btn {
+  width: 30px; height: 30px; border-radius: 6px; border: 1px solid var(--line);
+  background: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all .15s;
+}
+.prd-action-btn:hover { border-color: var(--brass); background: rgba(163,132,74,0.07); }
+.prd-action-btn svg { width: 15px; height: 15px; fill: none; stroke: var(--ink); stroke-width: 2; stroke-linecap: round; }
+.prd-action-dropdown {
+  position: absolute; right: 0; top: 36px; z-index: 40;
+  background: #fff; border: 1px solid var(--line); border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.10); min-width: 160px; overflow: hidden; display: none;
+}
+.prd-action-dropdown.open { display: block; }
+.prd-action-dropdown button {
+  width: 100%; text-align: left; padding: 10px 14px; border: none; background: none;
+  font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.82rem; font-weight: 500; cursor: pointer;
+  color: var(--ink); display: flex; align-items: center; gap: 9px; transition: background .1s;
+}
+.prd-action-dropdown button:hover { background: var(--stone); }
+.prd-action-dropdown button svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+.prd-action-dropdown button.danger { color: var(--danger); }
+.prd-action-dropdown .dd-sep { height: 1px; background: var(--line); margin: 3px 0; }
+
+/* ---- Item avatar ---- */
+.prd-item-avatar {
+  width: 34px; height: 34px; border-radius: 8px; background: var(--stone);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Archivo', sans-serif; font-weight: 900; font-size: 0.78rem;
+  color: var(--brass-dark); flex-shrink: 0;
+}
+
+/* ---- Component / Product Selectors in Modals ---- */
+.multi-comp-box {
+  background: var(--stone); border: 1px solid var(--line); border-radius: 8px;
+  padding: 12px; margin-top: 6px; display: flex; flex-direction: column; gap: 10px;
+}
+.multi-comp-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(80px, 140px) minmax(60px, 90px) 32px;
+  gap: 8px; align-items: center;
+}
+.multi-comp-row > * {
+  min-width: 0;
+}
+.remove-row-btn {
+  width: 28px; height: 28px; border: 1px solid rgba(192,57,43,0.3); border-radius: 6px;
+  background: #fff; color: var(--danger); font-size: 1.1rem; line-height: 1; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.remove-row-btn:hover { background: rgba(192,57,43,0.08); }
+
+/* Ensure form controls in multi-comp-row fit properly */
+.multi-comp-row select,
+.multi-comp-row input {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+/* Hide placeholder divs in bundle rows */
+.multi-comp-row .bundle-prod-placeholder { display: none; }
+
+/* Responsive stacking for multi-comp-row */
+@media (max-width: 700px) {
+  .multi-comp-row {
+    grid-template-columns: minmax(0, 1fr) minmax(70px, 120px);
+    grid-template-areas:
+      "selector selector"
+      "qty unit"
+      "remove remove";
+    gap: 6px 8px;
+  }
+  .multi-comp-row > select,
+  .multi-comp-row > input:not([type="number"]):not(.addon-inv-unit):not(.bundle-prod-placeholder) {
+    grid-area: selector;
+  }
+  .multi-comp-row > input[type="number"] {
+    grid-area: qty;
+  }
+  .multi-comp-row > .remove-row-btn {
+    grid-area: remove;
+    justify-self: end;
+  }
+  .multi-comp-row .addon-inv-unit {
+    grid-area: unit;
+  }
+  .multi-comp-row .bundle-prod-placeholder {
+    grid-area: unit;
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .multi-comp-row {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "selector"
+      "qty"
+      "unit"
+      "remove";
+    gap: 6px;
+  }
+  .multi-comp-row > * { grid-area: auto; }
+  .multi-comp-row .remove-row-btn { justify-self: start; }
+  .multi-comp-row .bundle-prod-placeholder { display: none; }
+}
+
+.prod-checkbox-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(180px, 100%), 1fr));
+  gap: 8px 12px;
+  max-height: 160px; overflow-y: auto; background: var(--stone); padding: 10px;
+  border: 1px solid var(--line); border-radius: 8px; margin-top: 4px;
+}
+.prd-form-field .prod-checkbox-item {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr);
+  align-items: start;
+  gap: 8px;
+  padding: 3px 2px;
+  color: var(--ink);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.78rem;
+  line-height: 1.3;
+  text-transform: none;
+  letter-spacing: normal;
+  opacity: 1;
+  cursor: pointer;
+}
+.prd-form-field .prod-checkbox-item input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  max-width: none;
+  margin: 1px 0 0;
+  padding: 0;
+  border: 0;
+  border-radius: 2px;
+  background: transparent;
+  box-sizing: border-box;
+  accent-color: var(--brass);
+  cursor: pointer;
+}
+.prd-form-field .prod-checkbox-item span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* ---- Modals ---- */
+.prd-modal-backdrop {
+  position: fixed; inset: 0; background: rgba(15,16,18,0.55);
+  display: none; align-items: center; justify-content: center; z-index: 200; padding: 20px;
+}
+.prd-modal-backdrop.open { display: flex; }
+.prd-modal-backdrop.nested { z-index: 220; }
+.prd-modal {
+  background: #fff; border-radius: 12px; padding: 28px;
+  width: 100%; max-width: 540px; max-height: 90vh; overflow-y: auto;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.15);
+  box-sizing: border-box;
+}
+.prd-modal.wide { max-width: 660px; }
+.prd-modal.narrow { max-width: 440px; }
+.prd-modal-head {
+  display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 22px;
+}
+.prd-modal-head h2 {
+  margin: 0; font-family: 'Archivo', sans-serif; font-size: 1.1rem;
+  text-transform: uppercase; letter-spacing: 0.02em;
+}
+.prd-modal-head .close-btn {
+  width: 30px; height: 30px; border: 1px solid var(--line); border-radius: 6px;
+  background: none; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: all .15s;
+}
+.prd-modal-head .close-btn:hover { border-color: var(--danger); color: var(--danger); }
+.prd-modal-head .close-btn svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; }
+.prd-modal-footer {
+  display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px;
+  padding-top: 20px; border-top: 1px solid var(--line);
+}
+
+/* ---- Form ---- */
+.prd-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.prd-form-field { display: flex; flex-direction: column; gap: 5px; }
+.prd-form-field.span2 { grid-column: 1 / -1; }
+.prd-form-field label {
+  font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.62rem; text-transform: uppercase;
+  letter-spacing: 0.06em; opacity: 0.55;
+}
+.prd-form-field input, .prd-form-field select, .prd-form-field textarea {
+  padding: 9px 12px; border: 1px solid var(--line); border-radius: 7px;
+  font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.84rem; background: var(--bone);
+  color: var(--ink); outline: none; transition: border-color .15s;
+  box-sizing: border-box; width: 100%; max-width: 100%;
+}
+.prd-form-field input:focus, .prd-form-field select:focus, .prd-form-field textarea:focus {
+  border-color: var(--brass);
+}
+.prd-form-field textarea { resize: vertical; min-height: 70px; }
+
+.prd-error-msg {
+  background: rgba(192,57,43,0.08); border: 1px solid rgba(192,57,43,0.2);
+  color: var(--danger); border-radius: 7px; padding: 10px 14px;
+  font-size: 0.82rem; margin-top: 14px; display: none;
+}
+.prd-error-msg.show { display: block; }
+
+@media (max-width: 900px) {
+  .prd-summary-row { grid-template-columns: 1fr 1fr; }
+  .prd-header-search input { width: 160px; }
+}
+@media (max-width: 640px) {
+  .prd-summary-row { grid-template-columns: 1fr; }
+  .prd-tabs, .prd-sub-tabs { overflow-x: auto; }
+  .prd-form-grid { grid-template-columns: 1fr; }
+  .prd-header-row { flex-direction: column; align-items: flex-start; }
+  .prd-header-search input { width: 100%; }
+}
+</style>
+</head>
+<body>
+
+<div id="adminShell"></div>
+
+<script type="module">
+import { renderAdminShell } from "./admin-shell.js";
+import { adminFetch, peso, escapeHtml } from "./admin-api.js";
+
+const session = renderAdminShell({ active: 'products', title: 'Products' });
+if (session) init();
+
+/* ================================================================
+   STATE
+   ================================================================ */
+let categories   = [];   // [{ id, name }]
+let menuItems    = [];   // [{ id, name, price, stock_quantity, status }]
+let inventoryItems = []; // [{ id, name, category, stock_quantity, unit, unit_cost }]
+let addons       = [];   // [{ id, name, price, cost, category, status, inventory_components, products }]
+let bundles      = [];   // [{ id, name, bundle_price, savings, status, products }]
+let searchQuery  = '';   // live filter applied to Menu Items + Add-Ons tables
+
+let deletingTarget = null; // { type, id, name }
+let categoryPickerActive = false;
+let previousProductCategory = '';
+
+/* ================================================================
+   INIT
+   ================================================================ */
+function init() {
+  document.getElementById('adminContent').innerHTML = buildPageHTML();
+  bindAll();
+  loadAll();
+}
+
+/* ================================================================
+   PAGE HTML SKELETON
+   ================================================================ */
+function buildPageHTML() {
+  return `
+<div class="prd-page">
+
+  <!-- ===== HEADER ===== -->
+  <div class="prd-header-row">
+    <h2>Products & Menu Management</h2>
+    <div class="prd-header-actions">
+      <div class="prd-header-search">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="text" id="hdrSearch" placeholder="Search menu & add-ons…" autocomplete="off">
+      </div>
+      <button class="prd-btn prd-btn-gold" id="topActionBtn">
+        <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+        Add Product
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== SUMMARY CARDS ===== -->
+  <div class="prd-summary-row">
+    <div class="prd-stat-card">
+      <div class="psc-label">Menu Products</div>
+      <div class="psc-value" id="statProducts">—</div>
+      <div class="psc-sub">Standalone menu items</div>
+    </div>
+    <div class="prd-stat-card">
+      <div class="psc-label">Add-Ons</div>
+      <div class="psc-value" id="statAddons">—</div>
+      <div class="psc-sub">Optional extras</div>
+    </div>
+    <div class="prd-stat-card">
+      <div class="psc-label">Bundles & Deals</div>
+      <div class="psc-value" id="statBundles">—</div>
+      <div class="psc-sub">Combo packages</div>
+    </div>
+    <div class="prd-stat-card">
+      <div class="psc-label">Categories</div>
+      <div class="psc-value" id="statCategories">—</div>
+      <div class="psc-sub">Product categories</div>
+    </div>
+  </div>
+
+  <!-- ===== MAIN PAGE TABS ===== -->
+  <div class="prd-tabs" role="tablist">
+    <button class="prd-tab active" data-ptab="products"      role="tab">Products</button>
+    <button class="prd-tab"        data-ptab="addons"        role="tab">Add-Ons</button>
+    <button class="prd-tab"        data-ptab="bundles"       role="tab">Bundles</button>
+    <button class="prd-tab"        data-ptab="profitability" role="tab">Profitability</button>
+    <button class="prd-tab"        data-ptab="analysis"      role="tab">Analysis</button>
+  </div>
+
+  <!-- ===== PRODUCTS PANEL ===== -->
+  <div class="prd-panel active" id="ptab-products">
+    <div class="prd-sub-tabs" role="tablist">
+      <button class="prd-sub-tab active" data-stab="items"      role="tab">Menu Items</button>
+      <button class="prd-sub-tab"        data-stab="categories" role="tab">Categories</button>
+    </div>
+
+    <!-- Menu Items -->
+    <div id="stab-items">
+      <div class="prd-table-wrap">
+        <table class="prd-table">
+          <thead><tr>
+            <th>Product Name</th>
+            <th>Category</th>
+            <th class="right">Selling Price</th>
+            <th class="right">Stock Qty</th>
+            <th>Status</th>
+            <th></th>
+          </tr></thead>
+          <tbody id="itemsTbody">
+            <tr><td colspan="6"><div class="admin-loading">Loading products…</div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Categories -->
+    <div id="stab-categories" style="display:none;">
+      <div style="margin-bottom:14px; display:flex; justify-content:space-between; align-items:center;">
+        <h3 style="margin:0; font-family:'Archivo',sans-serif; text-transform:uppercase; font-size:0.95rem;">Product Categories</h3>
+        <button class="prd-btn prd-btn-gold" id="openAddCatBtn">+ Add Category</button>
+      </div>
+      <div class="prd-table-wrap">
+        <table class="prd-table">
+          <thead><tr>
+            <th>Category Name</th>
+            <th>Products Count</th>
+            <th></th>
+          </tr></thead>
+          <tbody id="catsTbody">
+            <tr><td colspan="3"><div class="admin-loading">Loading categories…</div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== ADD-ONS PANEL ===== -->
+  <div class="prd-panel" id="ptab-addons">
+    <div style="margin-bottom:14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+      <div>
+        <h3 style="margin:0; font-family:'Archivo',sans-serif; text-transform:uppercase; font-size:0.95rem;">Optional Extras & Add-Ons</h3>
+        <span style="font-size:0.78rem; color:var(--ink-muted);">Add-ons linked to inventory ingredients and applicable products.</span>
+      </div>
+      <button class="prd-btn prd-btn-gold" id="openAddAddonBtn">+ Add Add-On</button>
+    </div>
+
+    <div class="prd-table-wrap">
+      <table class="prd-table">
+        <thead><tr>
+          <th>Add-On Name</th>
+          <th class="right">Price</th>
+          <th class="right">Cost</th>
+          <th>Inventory Components</th>
+          <th>Available Products</th>
+          <th>Status</th>
+          <th></th>
+        </tr></thead>
+        <tbody id="addonsTbody">
+          <tr><td colspan="7"><div class="admin-loading">Loading add-ons…</div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===== BUNDLES PANEL ===== -->
+  <div class="prd-panel" id="ptab-bundles">
+    <div style="margin-bottom:14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+      <div>
+        <h3 style="margin:0; font-family:'Archivo',sans-serif; text-transform:uppercase; font-size:0.95rem;">Combo Deals & Bundles</h3>
+        <span style="font-size:0.78rem; color:var(--ink-muted);">Group existing menu products together with special package pricing.</span>
+      </div>
+      <button class="prd-btn prd-btn-gold" id="openAddBundleBtn">+ Add Bundle</button>
+    </div>
+
+    <div class="prd-table-wrap">
+      <table class="prd-table">
+        <thead><tr>
+          <th>Bundle Name</th>
+          <th>Included Products</th>
+          <th class="right">Regular Total</th>
+          <th class="right">Bundle Price</th>
+          <th class="right">Savings</th>
+          <th>Status</th>
+          <th></th>
+        </tr></thead>
+        <tbody id="bundlesTbody">
+          <tr><td colspan="7"><div class="admin-loading">Loading bundles…</div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===== PROFITABILITY PANEL ===== -->
+  <div class="prd-panel" id="ptab-profitability">
+    <div style="margin-bottom:14px;">
+      <h3 style="margin:0; font-family:'Archivo',sans-serif; text-transform:uppercase; font-size:0.95rem;">Product Profitability & Margins</h3>
+    </div>
+    <div class="prd-table-wrap">
+      <table class="prd-table">
+        <thead><tr>
+          <th>Product</th>
+          <th>Category</th>
+          <th class="right">Selling Price</th>
+          <th class="right">Stock Qty</th>
+          <th>Status</th>
+        </tr></thead>
+        <tbody id="profTbody">
+          <tr><td colspan="5"><div class="admin-loading">Loading…</div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===== ANALYSIS PANEL ===== -->
+  <div class="prd-panel" id="ptab-analysis">
+    <div style="margin-bottom:14px;"><h3 style="margin:0; font-family:'Archivo',sans-serif; text-transform:uppercase; font-size:0.95rem;">Product Overview & Analysis</h3></div>
+    <div id="analysisGrid" style="display:grid; grid-template-columns:1fr 1fr; gap:16px;"></div>
+  </div>
+
+</div><!-- /prd-page -->
+
+<!-- ================================================================
+     MODAL — ADD / EDIT MENU ITEM (PRODUCT)
+     ================================================================ -->
+<div class="prd-modal-backdrop" id="itemModal">
+  <div class="prd-modal wide">
+    <div class="prd-modal-head">
+      <h2 id="itemModalTitle">Add Product</h2>
+      <button class="close-btn" id="itemModalCloseBtn"><svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    </div>
+    <input type="hidden" id="itemId">
+    <div class="prd-form-grid">
+      <div class="prd-form-field span2">
+        <label>Product Name *</label>
+        <input type="text" id="itemName" placeholder="e.g. Americano Coffee">
+      </div>
+      <div class="prd-form-field">
+        <label>Category *</label>
+        <select id="itemCategory"></select>
+      </div>
+      <div class="prd-form-field">
+        <label>Status</label>
+        <select id="itemStatus">
+          <option value="available">Available</option>
+          <option value="unavailable">Unavailable</option>
+        </select>
+      </div>
+      <div class="prd-form-field">
+        <label>Selling Price (₱) *</label>
+        <input type="number" step="0.01" min="0" id="itemPrice" placeholder="90.00">
+      </div>
+      <div class="prd-form-field">
+        <label>Cost (₱)</label>
+        <input type="number" step="0.01" min="0" id="itemCost" placeholder="35.00">
+      </div>
+      <div class="prd-form-field">
+        <label>Stock Quantity</label>
+        <input type="number" min="0" id="itemStock" placeholder="0">
+      </div>
+      <div class="prd-form-field span2">
+        <label>Description (optional)</label>
+        <textarea id="itemDesc" placeholder="Short description…"></textarea>
+      </div>
+      <!-- Flavor Options -->
+      <div class="prd-form-field span2">
+        <label>Flavor Options <small style="font-weight:400; color:var(--ink-muted);">(optional — e.g. for wings, sauced items)</small></label>
+        <div id="itemFlavorsBox" style="display:flex; flex-wrap:wrap; gap:6px; align-items:center; min-height:34px; padding:4px 0;"></div>
+        <div style="display:flex; gap:6px; margin-top:6px;">
+          <input type="text" id="itemFlavorInput" placeholder="e.g. Buffalo, Honey Garlic, BBQ…" style="flex:1; font-size:0.82rem;">
+          <button type="button" class="prd-btn prd-btn-ghost" id="addFlavorBtn" style="white-space:nowrap; font-size:0.78rem; padding:6px 12px;">+ Add</button>
+        </div>
+        <small style="color:var(--ink-muted); margin-top:4px; display:block;">When flavors are set, staff must choose one before adding to an order.</small>
+      </div>
+      <!-- Linked Inventory Components (Ingredients) -->
+      <div class="prd-form-field span2">
+        <label>Consumes Inventory Items (Ingredients)</label>
+        <div class="multi-comp-box" id="itemInvBox"></div>
+        <button class="prd-btn prd-btn-ghost" id="addItemInvRowBtn" type="button" style="margin-top:6px; font-size:0.76rem; padding:5px 10px;">
+          + Add Inventory Component
+        </button>
+      </div>
+      <div class="prd-form-field span2">
+        <label>Product Image (JPG, PNG, or WebP · max 5 MB)</label>
+        <input type="file" id="itemImage" accept="image/jpeg,image/png,image/webp">
+        <input type="hidden" id="itemImageUrl">
+        <small id="itemImageStatus" style="color:var(--ink-muted);">No image selected.</small>
+      </div>
+    </div>
+    <div class="prd-error-msg" id="itemError"></div>
+    <div class="prd-modal-footer">
+      <button class="prd-btn prd-btn-ghost" id="itemCancelBtn">Cancel</button>
+      <button class="prd-btn prd-btn-gold"  id="itemSaveBtn">Save Product</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================
+     MODAL — ADD / EDIT ADD-ON
+     ================================================================ -->
+<div class="prd-modal-backdrop" id="addonModal">
+  <div class="prd-modal wide">
+    <div class="prd-modal-head">
+      <h2 id="addonModalTitle">Add Add-On</h2>
+      <button class="close-btn" id="addonCloseBtn"><svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    </div>
+    <input type="hidden" id="addonId">
+    <div class="prd-form-grid">
+      <div class="prd-form-field span2">
+        <label>Add-On Name *</label>
+        <input type="text" id="addonName" placeholder="e.g. Extra Shot">
+      </div>
+      <div class="prd-form-field">
+        <label>Price (₱) *</label>
+        <input type="number" step="0.01" min="0" id="addonPrice" placeholder="30.00">
+      </div>
+      <div class="prd-form-field">
+        <label>Cost (₱)</label>
+        <input type="number" step="0.01" min="0" id="addonCost" placeholder="12.00">
+      </div>
+      <div class="prd-form-field">
+        <label>Category</label>
+        <input type="text" id="addonCat" placeholder="e.g. Coffee Add-On">
+      </div>
+      <div class="prd-form-field">
+        <label>Status</label>
+        <select id="addonStatus">
+          <option value="available">Available</option>
+          <option value="unavailable">Unavailable</option>
+        </select>
+      </div>
+      <div class="prd-form-field span2">
+        <label>Description</label>
+        <input type="text" id="addonDesc" placeholder="Additional espresso shot">
+      </div>
+
+      <!-- Linked Inventory Components -->
+      <div class="prd-form-field span2">
+        <label>Consumes Inventory Items (Ingredients)</label>
+        <div class="multi-comp-box" id="addonInvBox"></div>
+        <button class="prd-btn prd-btn-ghost" id="addAddonInvRowBtn" type="button" style="margin-top:6px; font-size:0.76rem; padding:5px 10px;">
+          + Add Inventory Component
+        </button>
+      </div>
+
+      <!-- Applicable Products -->
+      <div class="prd-form-field span2">
+        <label>Available For Products</label>
+        <div class="prod-checkbox-grid" id="addonProdGrid"></div>
+      </div>
+    </div>
+    <div class="prd-error-msg" id="addonError"></div>
+    <div class="prd-modal-footer">
+      <button class="prd-btn prd-btn-ghost" id="addonCancelBtn">Cancel</button>
+      <button class="prd-btn prd-btn-gold"  id="addonSaveBtn">Save Add-On</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================
+     MODAL — ADD / EDIT BUNDLE
+     ================================================================ -->
+<div class="prd-modal-backdrop" id="bundleModal">
+  <div class="prd-modal wide">
+    <div class="prd-modal-head">
+      <h2 id="bundleModalTitle">Add Bundle</h2>
+      <button class="close-btn" id="bundleCloseBtn"><svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    </div>
+    <input type="hidden" id="bundleId">
+    <div class="prd-form-grid">
+      <div class="prd-form-field span2">
+        <label>Bundle Name *</label>
+        <input type="text" id="bundleName" placeholder="e.g. Breakfast Bundle">
+      </div>
+      <div class="prd-form-field span2">
+        <label>Description</label>
+        <input type="text" id="bundleDesc" placeholder="Coffee and breakfast meal combo">
+      </div>
+
+      <!-- Included Products Selector -->
+      <div class="prd-form-field span2">
+        <label>Products Included *</label>
+        <div class="multi-comp-box" id="bundleProdBox"></div>
+        <button class="prd-btn prd-btn-ghost" id="addBundleProdRowBtn" type="button" style="margin-top:6px; font-size:0.76rem; padding:5px 10px;">
+          + Add Product
+        </button>
+      </div>
+
+      <div class="prd-form-field">
+        <label>Regular Price Total</label>
+        <input type="text" id="bundleRegTotal" readonly style="background:var(--stone); font-family:'Plus Jakarta Sans', sans-serif; font-weight:700;" value="₱0.00">
+      </div>
+
+      <div class="prd-form-field">
+        <label>Discount % (Optional)</label>
+        <input type="number" id="bundleDiscount" min="0" max="100" placeholder="e.g. 10">
+      </div>
+
+      <div class="prd-form-field">
+        <label>Bundle Price (₱) *</label>
+        <input type="number" step="0.01" min="0" id="bundlePrice" placeholder="170.00">
+      </div>
+
+      <div class="prd-form-field">
+        <label>Customer Savings</label>
+        <input type="text" id="bundleSavings" readonly style="background:var(--stone); font-family:'Plus Jakarta Sans', sans-serif; color:var(--success); font-weight:700;" value="₱0.00">
+      </div>
+    </div>
+    <div class="prd-error-msg" id="bundleError"></div>
+    <div class="prd-modal-footer">
+      <button class="prd-btn prd-btn-ghost" id="bundleCancelBtn">Cancel</button>
+      <button class="prd-btn prd-btn-gold"  id="bundleSaveBtn">Save Bundle</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================
+     MODAL — ADD / EDIT CATEGORY
+     ================================================================ -->
+<div class="prd-modal-backdrop" id="catModal">
+  <div class="prd-modal narrow">
+    <div class="prd-modal-head">
+      <h2 id="catModalTitle">Add Category</h2>
+      <button class="close-btn" id="catCloseBtn"><svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    </div>
+    <input type="hidden" id="catId">
+    <div class="prd-form-field">
+      <label>Category Name *</label>
+      <input type="text" id="catName" maxlength="100" placeholder="e.g. Espresso & Coffee">
+    </div>
+    <div class="prd-error-msg" id="catError"></div>
+    <div class="prd-modal-footer">
+      <button class="prd-btn prd-btn-ghost" id="catCancelBtn">Cancel</button>
+      <button class="prd-btn prd-btn-gold"  id="catSaveBtn">Save Category</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================
+     MODAL — DELETE CONFIRMATION
+     ================================================================ -->
+<div class="prd-modal-backdrop" id="deleteModal">
+  <div class="prd-modal narrow">
+    <div class="prd-modal-head">
+      <h2>Confirm Delete</h2>
+      <button class="close-btn" id="delCloseBtn"><svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    </div>
+    <p id="delMsg">Are you sure you want to delete this item?</p>
+    <div class="prd-error-msg" id="delError"></div>
+    <div class="prd-modal-footer">
+      <button class="prd-btn prd-btn-ghost"  id="delCancelBtn">Cancel</button>
+      <button class="prd-btn prd-btn-danger" id="delConfirmBtn">Delete</button>
+    </div>
+  </div>
+</div>
+  `;
+}
+
+/* ================================================================
+   BIND ALL EVENTS
+   ================================================================ */
+function bindAll() {
+  document.getElementById('hdrSearch').addEventListener('input', e => {
+    searchQuery = e.target.value.trim().toLowerCase();
+    renderMenuItems();
+    renderAddons();
+  });
+  // Main tabs
+  document.querySelectorAll('.prd-tab').forEach(btn =>
+    btn.addEventListener('click', () => switchMainTab(btn.dataset.ptab)));
+
+  // Secondary tabs
+  document.querySelectorAll('.prd-sub-tab').forEach(btn =>
+    btn.addEventListener('click', () => switchSubTab(btn.dataset.stab)));
+
+  // Top Action button updates based on tab
+  document.getElementById('topActionBtn').addEventListener('click', () => {
+    const activeTab = document.querySelector('.prd-tab.active').dataset.ptab;
+    if (activeTab === 'addons')  openAddonModal();
+    else if (activeTab === 'bundles') openBundleModal();
+    else openItemModal();
+  });
+
+  // Modal triggers
+  document.getElementById('openAddCatBtn').addEventListener('click', () => openCatModal());
+  document.getElementById('openAddAddonBtn').addEventListener('click', () => openAddonModal());
+  document.getElementById('openAddBundleBtn').addEventListener('click', () => openBundleModal());
+
+  // Item modal
+  document.getElementById('itemModalCloseBtn').addEventListener('click', () => closeModal('itemModal'));
+  document.getElementById('itemCancelBtn').addEventListener('click',     () => closeModal('itemModal'));
+  document.getElementById('itemCategory').addEventListener('change', handleProductCategoryChange);
+  document.getElementById('addItemInvRowBtn').addEventListener('click', () => addItemInvRow());
+  document.getElementById('itemSaveBtn').addEventListener('click', saveItem);
+
+  // Addon modal
+  document.getElementById('addonCloseBtn').addEventListener('click', () => closeModal('addonModal'));
+  document.getElementById('addonCancelBtn').addEventListener('click', () => closeModal('addonModal'));
+  document.getElementById('addAddonInvRowBtn').addEventListener('click', () => addAddonInvRow());
+  document.getElementById('addonSaveBtn').addEventListener('click', saveAddon);
+
+  // Bundle modal
+  document.getElementById('bundleCloseBtn').addEventListener('click', () => closeModal('bundleModal'));
+  document.getElementById('bundleCancelBtn').addEventListener('click', () => closeModal('bundleModal'));
+  document.getElementById('addBundleProdRowBtn').addEventListener('click', () => addBundleProdRow());
+  document.getElementById('bundleDiscount').addEventListener('input', updateBundlePriceFromDiscount);
+  document.getElementById('bundlePrice').addEventListener('input', recalculateBundleSavings);
+  document.getElementById('bundleSaveBtn').addEventListener('click', saveBundle);
+
+  // Category modal
+  document.getElementById('catCloseBtn').addEventListener('click', closeCategoryModal);
+  document.getElementById('catCancelBtn').addEventListener('click', closeCategoryModal);
+  document.getElementById('catSaveBtn').addEventListener('click', saveCategory);
+
+  // Delete modal
+  document.getElementById('delCloseBtn').addEventListener('click',   () => closeModal('deleteModal'));
+  document.getElementById('delCancelBtn').addEventListener('click',  () => closeModal('deleteModal'));
+  document.getElementById('delConfirmBtn').addEventListener('click', confirmDelete);
+
+  // Close dropdowns
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.prd-action-wrap')) {
+      document.querySelectorAll('.prd-action-dropdown.open').forEach(d => d.classList.remove('open'));
+    }
+  });
+}
+
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+/* ================================================================
+   TAB SWITCHING
+   ================================================================ */
+function switchMainTab(tab) {
+  document.querySelectorAll('.prd-tab').forEach(b => b.classList.toggle('active', b.dataset.ptab === tab));
+  document.querySelectorAll('.prd-panel').forEach(p => p.classList.toggle('active', p.id === `ptab-${tab}`));
+
+  const topBtn = document.getElementById('topActionBtn');
+  if (tab === 'addons') {
+    topBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> Add Add-On';
+  } else if (tab === 'bundles') {
+    topBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> Add Bundle';
+  } else {
+    topBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> Add Product';
+  }
+
+  if (tab === 'profitability') renderProfitability();
+  if (tab === 'analysis')      renderAnalysis();
+}
+
+function switchSubTab(stab) {
+  document.querySelectorAll('.prd-sub-tab').forEach(b => b.classList.toggle('active', b.dataset.stab === stab));
+  document.getElementById('stab-items').style.display      = stab === 'items'      ? '' : 'none';
+  document.getElementById('stab-categories').style.display = stab === 'categories' ? '' : 'none';
+}
+
+/* ================================================================
+   LOAD ALL DATA
+   ================================================================ */
+async function loadAll() {
+  try {
+    const [cRes, mRes, iRes, aRes, bRes] = await Promise.all([
+      adminFetch('/api/admin/products/categories'),
+      adminFetch('/api/admin/products/menuitems'),
+      adminFetch('/api/admin/inventory'),
+      adminFetch('/api/admin/products/addons'),
+      adminFetch('/api/admin/products/bundles'),
+    ]);
+
+    const cData = await cRes.json();
+    const mData = await mRes.json();
+    const iData = await iRes.json();
+    const aData = await aRes.json();
+    const bData = await bRes.json();
+
+    categories     = cData.data || [];
+    menuItems      = mData.items || [];
+    inventoryItems = iData.items || [];
+    addons         = aData.addons || [];
+    bundles        = bData.bundles || [];
+
+    updateSummaryCards();
+    renderMenuItems();
+    renderCategories();
+    renderAddons();
+    renderBundles();
+  } catch (err) {
+    console.error("Error loading products data:", err);
+  }
+}
+
+function updateSummaryCards() {
+  document.getElementById('statProducts').textContent   = menuItems.length;
+  document.getElementById('statAddons').textContent     = addons.length;
+  document.getElementById('statBundles').textContent    = bundles.length;
+  document.getElementById('statCategories').textContent = categories.length;
+}
+
+/* ================================================================
+   RENDER TABLES
+   ================================================================ */
+function renderMenuItems() {
+  const tbody = document.getElementById('itemsTbody');
+  const items = searchQuery
+    ? menuItems.filter(i => i.name.toLowerCase().includes(searchQuery))
+    : menuItems;
+  if (!items.length) {
+    tbody.innerHTML = `<tr><td colspan="6"><div class="prd-empty"><p>${searchQuery ? 'No menu products match your search.' : 'No menu products found.'}</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = items.map(i => {
+    // Use calculated capacity for recipe-tracked items
+    const stockDisplay = i.is_calculated 
+      ? `<span class="stock-qty" title="Calculated from ingredients">${i.available_quantity ?? '0'} <span style="color:var(--accent);display:inline-flex;align-items:center;margin-left:2px;"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-0.15em;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg></span></span>`
+      : `<span class="stock-qty">${i.stock_quantity ?? '0'}</span>`;
+    
+    return `
+    <tr>
+      <td><span class="item-name">${escapeHtml(i.name)}</span></td>
+      <td><span style="font-size:0.80rem;">${escapeHtml(i.category_name || '—')}</span></td>
+      <td class="right"><span class="price-val">${peso(i.price)}</span></td>
+      <td class="right">${stockDisplay}</td>
+      <td><span class="prd-badge ${i.status === 'available' ? 'badge-available' : 'badge-unavailable'}">${escapeHtml(i.status)}</span></td>
+      <td>
+        <div class="prd-action-wrap">
+          <button class="prd-action-btn action-toggle" data-id="item-${i.id}"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.2" fill="currentColor"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/><circle cx="19" cy="12" r="1.2" fill="currentColor"/></svg></button>
+          <div class="prd-action-dropdown" id="dropdown-item-${i.id}">
+            <button class="edit-item-btn" data-id="${i.id}">Edit</button>
+            <div class="dd-sep"></div>
+            <button class="del-item-btn danger" data-id="${i.id}" data-name="${escapeHtml(i.name)}">Delete</button>
+          </div>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+
+  bindActions(tbody, 'item');
+}
+
+function renderCategories() {
+  const tbody = document.getElementById('catsTbody');
+  if (!categories.length) {
+    tbody.innerHTML = `<tr><td colspan="3"><div class="prd-empty"><p>No categories found.</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = categories.map(c => {
+    const count = menuItems.filter(i => i.category_id === c.id).length;
+    return `
+    <tr>
+      <td><span style="font-weight:600;">${escapeHtml(c.name)}</span></td>
+      <td><span style="font-family:'Plus Jakarta Sans', sans-serif;">${count} products</span></td>
+      <td>
+        <div class="prd-action-wrap">
+          <button class="prd-action-btn action-toggle" data-id="cat-${c.id}"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.2" fill="currentColor"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/><circle cx="19" cy="12" r="1.2" fill="currentColor"/></svg></button>
+          <div class="prd-action-dropdown" id="dropdown-cat-${c.id}">
+            <button class="edit-cat-btn" data-id="${c.id}" data-name="${escapeHtml(c.name)}">Edit</button>
+            <div class="dd-sep"></div>
+            <button class="del-cat-btn danger" data-id="${c.id}" data-name="${escapeHtml(c.name)}">Delete</button>
+          </div>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+
+  bindActions(tbody, 'cat');
+}
+
+function renderAddons() {
+  const tbody = document.getElementById('addonsTbody');
+  const items = searchQuery
+    ? addons.filter(a => a.name.toLowerCase().includes(searchQuery))
+    : addons;
+  if (!items.length) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="prd-empty"><p>${searchQuery ? 'No add-ons match your search.' : 'No add-ons created yet.'}</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = items.map(a => {
+    const invStr  = a.inventory_components?.map(c => `${escapeHtml(c.inventory_name)} (${c.quantity}${c.unit})`).join(', ') || 'None';
+    const prodStr = a.products?.map(p => escapeHtml(p.product_name)).join(', ') || 'All Products';
+    const stBadge = a.status === 'available' ? 'badge-available' : 'badge-unavailable';
+
+    return `
+    <tr>
+      <td><span class="item-name">${escapeHtml(a.name)}</span></td>
+      <td class="right"><span class="price-val">${peso(a.price)}</span></td>
+      <td class="right"><span class="price-val">${peso(a.cost)}</span></td>
+      <td><span style="font-size:0.78rem; color:var(--ink-muted);">${invStr}</span></td>
+      <td><span style="font-size:0.78rem; color:var(--ink-muted);">${prodStr}</span></td>
+      <td><span class="prd-badge ${stBadge}">${a.status === 'available' ? 'Available' : 'Unavailable / Out of Stock'}</span></td>
+      <td>
+        <div class="prd-action-wrap">
+          <button class="prd-action-btn action-toggle" data-id="addon-${a.id}"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.2" fill="currentColor"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/><circle cx="19" cy="12" r="1.2" fill="currentColor"/></svg></button>
+          <div class="prd-action-dropdown" id="dropdown-addon-${a.id}">
+            <button class="edit-addon-btn" data-id="${a.id}">Edit</button>
+            <div class="dd-sep"></div>
+            <button class="del-addon-btn danger" data-id="${a.id}" data-name="${escapeHtml(a.name)}">Delete</button>
+          </div>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+
+  bindActions(tbody, 'addon');
+}
+
+function renderBundles() {
+  const tbody = document.getElementById('bundlesTbody');
+  if (!bundles.length) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="prd-empty"><p>No combo bundles created yet.</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = bundles.map(b => {
+    const prodStr = b.products?.map(p => `${escapeHtml(p.product_name)} × ${p.quantity}`).join(', ') || 'None';
+    const stBadge = b.status === 'available' ? 'badge-available' : 'badge-unavailable';
+
+    return `
+    <tr>
+      <td><span class="item-name">${escapeHtml(b.name)}</span></td>
+      <td><span style="font-size:0.78rem; color:var(--ink-muted);">${prodStr}</span></td>
+      <td class="right"><span class="price-val">${peso(b.regular_total)}</span></td>
+      <td class="right"><span class="price-val" style="font-weight:700; color:var(--brass-dark);">${peso(b.bundle_price)}</span></td>
+      <td class="right"><span class="price-val" style="color:var(--success); font-weight:700;">${peso(b.savings)}</span></td>
+      <td><span class="prd-badge ${stBadge}">${b.status === 'available' ? 'Available' : 'Unavailable'}</span></td>
+      <td>
+        <div class="prd-action-wrap">
+          <button class="prd-action-btn action-toggle" data-id="bundle-${b.id}"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.2" fill="currentColor"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/><circle cx="19" cy="12" r="1.2" fill="currentColor"/></svg></button>
+          <div class="prd-action-dropdown" id="dropdown-bundle-${b.id}">
+            <button class="edit-bundle-btn" data-id="${b.id}">Edit</button>
+            <div class="dd-sep"></div>
+            <button class="del-bundle-btn danger" data-id="${b.id}" data-name="${escapeHtml(b.name)}">Delete</button>
+          </div>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+
+  bindActions(tbody, 'bundle');
+}
+
+function bindActions(tbody, type) {
+  tbody.querySelectorAll('.action-toggle').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const dd = document.getElementById(`dropdown-${btn.dataset.id}`);
+      document.querySelectorAll('.prd-action-dropdown.open').forEach(d => { if (d !== dd) d.classList.remove('open'); });
+      dd.classList.toggle('open');
+    });
+  });
+
+  tbody.querySelectorAll(`.edit-${type}-btn`).forEach(btn =>
+    btn.addEventListener('click', () => {
+      closeDropdowns();
+      const id = btn.dataset.id;
+      if (type === 'item') openItemModal(menuItems.find(i => String(i.id) === String(id)));
+      if (type === 'cat')  openCatModal(id, btn.dataset.name);
+      if (type === 'addon') openAddonModal(addons.find(a => String(a.id) === String(id)));
+      if (type === 'bundle') openBundleModal(bundles.find(b => String(b.id) === String(id)));
+    }));
+
+  tbody.querySelectorAll(`.del-${type}-btn`).forEach(btn =>
+    btn.addEventListener('click', () => {
+      closeDropdowns();
+      openDeleteModal(type, btn.dataset.id, btn.dataset.name);
+    }));
+}
+
+function closeDropdowns() {
+  document.querySelectorAll('.prd-action-dropdown.open').forEach(d => d.classList.remove('open'));
+}
+
+/* ================================================================
+   MODAL — PRODUCT (MENU ITEM)
+   ================================================================ */
+function renderItemCategoryOptions(selectedId = '') {
+  const select = document.getElementById('itemCategory');
+  const categoryOptions = categories.map((category) =>
+    `<option value="${category.id}">${escapeHtml(category.name)}</option>`
+  ).join('');
+  select.innerHTML = `<option value="" disabled>Select category…</option>${categoryOptions}<option value="__add_category__">＋ Add new category…</option>`;
+
+  const requestedId = String(selectedId || '');
+  if (requestedId && categories.some((category) => String(category.id) === requestedId)) {
+    select.value = requestedId;
+  } else if (categories.length) {
+    select.value = String(categories[0].id);
+  } else {
+    select.value = '';
+  }
+  previousProductCategory = select.value;
+}
+
+function handleProductCategoryChange(event) {
+  const select = event.currentTarget;
+  if (select.value !== '__add_category__') {
+    previousProductCategory = select.value;
+    return;
+  }
+
+  categoryPickerActive = true;
+  select.value = previousProductCategory || '';
+  document.getElementById('catModal').classList.add('nested');
+  openCatModal();
+  window.setTimeout(() => document.getElementById('catName').focus(), 0);
+}
+
+function openItemModal(item = null) {
+  document.getElementById('itemModalTitle').textContent = item ? `Edit — ${item.name}` : 'Add Product';
+  document.getElementById('itemId').value     = item ? item.id : '';
+  document.getElementById('itemName').value   = item ? item.name : '';
+  document.getElementById('itemPrice').value  = item ? item.price : '';
+  document.getElementById('itemCost').value   = item ? (item.cost ?? '') : '';
+  document.getElementById('itemStock').value  = item ? (item.stock_quantity ?? '') : '';
+  document.getElementById('itemStatus').value = item ? item.status : 'available';
+  document.getElementById('itemDesc').value   = item ? (item.description || '') : '';
+  document.getElementById('itemImage').value = '';
+  document.getElementById('itemImageUrl').value = item ? (item.image_url || '') : '';
+  document.getElementById('itemImageStatus').textContent = item?.image_url ? 'Current image will be kept unless you choose a replacement.' : 'No image selected.';
+
+  renderItemCategoryOptions(item?.category_id || '');
+
+  // Render inventory components builder
+  const box = document.getElementById('itemInvBox');
+  box.innerHTML = '';
+  if (item && item.inventory_components?.length) {
+    item.inventory_components.forEach(c => addItemInvRow(c.inventory_id, c.quantity, c.unit));
+  } else {
+    addItemInvRow();
+  }
+
+  // Render flavor tags
+  renderFlavorTags(item?.flavors || []);
+  document.getElementById('itemFlavorInput').value = '';
+
+  document.getElementById('itemError').classList.remove('show');
+  openModal('itemModal');
+}
+
+// ---- Flavor Tag Helpers ----
+function renderFlavorTags(flavorsArr) {
+  const box = document.getElementById('itemFlavorsBox');
+  box.innerHTML = flavorsArr.map(f => `
+    <span style="display:inline-flex;align-items:center;gap:4px;background:var(--gold,#b8932a);color:#fff;border-radius:20px;padding:3px 10px 3px 12px;font-size:0.78rem;font-weight:600;">
+      ${escapeHtml(f)}
+      <button type="button" onclick="removeFlavor(this)" data-flavor="${escapeHtml(f)}" style="background:none;border:none;color:#fff;cursor:pointer;font-size:1rem;line-height:1;padding:0 2px;opacity:0.8;" title="Remove">×</button>
+    </span>`).join('');
+}
+function removeFlavor(btn) {
+  const f = btn.dataset.flavor;
+  const current = getFlavorTags();
+  renderFlavorTags(current.filter(x => x !== f));
+}
+function getFlavorTags() {
+  return [...document.querySelectorAll('#itemFlavorsBox span')].map(s => s.querySelector('button').dataset.flavor);
+}
+function addFlavorFromInput() {
+  const inp = document.getElementById('itemFlavorInput');
+  const val = inp.value.trim();
+  if (!val) return;
+  const current = getFlavorTags();
+  if (!current.includes(val)) renderFlavorTags([...current, val]);
+  inp.value = '';
+  inp.focus();
+}
+document.getElementById('addFlavorBtn').addEventListener('click', addFlavorFromInput);
+document.getElementById('itemFlavorInput').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); addFlavorFromInput(); } });
+
+function addItemInvRow(invId = '', qty = '', unit = 'g') {
+  const box = document.getElementById('itemInvBox');
+  const div = document.createElement('div');
+  div.className = 'multi-comp-row';
+
+  const invOptions = inventoryItems.map(i => `<option value="${i.id}">${escapeHtml(i.name)} (${i.unit})</option>`).join('');
+
+  div.innerHTML = `
+    <select class="item-inv-id"><option value="">Select Inventory Item…</option>${invOptions}</select>
+    <input type="number" step="0.01" min="0.01" class="item-inv-qty" placeholder="Qty" value="${qty}">
+    <input type="text" class="item-inv-unit" placeholder="Unit" value="${unit}">
+    <button class="remove-row-btn" type="button" onclick="this.parentElement.remove()">×</button>
+  `;
+  if (invId) div.querySelector('.item-inv-id').value = invId;
+
+  const sel = div.querySelector('.item-inv-id');
+  const unitInp = div.querySelector('.item-inv-unit');
+  sel.addEventListener('change', () => {
+    const selectedItem = inventoryItems.find(i => String(i.id) === String(sel.value));
+    if (selectedItem?.unit && (!qty || !unitInp.value)) {
+      unitInp.value = selectedItem.unit;
+    }
+  });
+
+  box.appendChild(div);
+}
+
+async function saveItem() {
+  const id   = document.getElementById('itemId').value;
+  const name = document.getElementById('itemName').value.trim();
+  const cat  = document.getElementById('itemCategory').value;
+  const price = parseFloat(document.getElementById('itemPrice').value);
+  const cost  = document.getElementById('itemCost').value === '' ? 0 : Number(document.getElementById('itemCost').value);
+  const stock = document.getElementById('itemStock').value === '' ? null : Number(document.getElementById('itemStock').value);
+  const status = document.getElementById('itemStatus').value;
+  const desc  = document.getElementById('itemDesc').value.trim();
+  const imageFile = document.getElementById('itemImage').files[0];
+  let imageUrl = document.getElementById('itemImageUrl').value;
+  const errEl = document.getElementById('itemError');
+
+  if (!name || !cat || cat === '__add_category__' || isNaN(price)) {
+    errEl.textContent = 'Name, category, and valid price are required.';
+    errEl.classList.add('show');
+    return;
+  }
+
+  // Gather inventory components
+  const invComponents = [];
+  const seenInvIds = new Set();
+  let hasDuplicate = false;
+  let invalidQty = false;
+
+  document.querySelectorAll('#itemInvBox .multi-comp-row').forEach(row => {
+    const invId = row.querySelector('.item-inv-id').value;
+    const qRaw  = row.querySelector('.item-inv-qty').value;
+    const q     = parseFloat(qRaw);
+    const u     = row.querySelector('.item-inv-unit').value.trim();
+    if (invId) {
+      if (isNaN(q) || q <= 0) {
+        invalidQty = true;
+      } else if (seenInvIds.has(invId)) {
+        hasDuplicate = true;
+      } else {
+        seenInvIds.add(invId);
+        invComponents.push({ inventory_id: Number(invId), quantity: q, unit: u || 'g' });
+      }
+    }
+  });
+
+  if (invalidQty) {
+    errEl.textContent = 'Ingredient quantity must be greater than 0.';
+    errEl.classList.add('show');
+    return;
+  }
+  if (hasDuplicate) {
+    errEl.textContent = 'Duplicate inventory ingredients are not allowed in the same product.';
+    errEl.classList.add('show');
+    return;
+  }
+
+  const saveBtn = document.getElementById('itemSaveBtn');
+  saveBtn.disabled = true; saveBtn.textContent = 'Saving…';
+
+  try {
+    if (imageFile) {
+      if (imageFile.size > 5 * 1024 * 1024) throw new Error('Image must be 5 MB or smaller.');
+      const dataUrl = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(new Error('Could not read the selected image.'));
+        reader.readAsDataURL(imageFile);
+      });
+      saveBtn.textContent = 'Uploading image…';
+      const upload = await adminFetch('/api/admin/products/uploads/product-image', { method: 'POST', body: JSON.stringify({ dataUrl }) });
+      const uploaded = await upload.json();
+      if (!upload.ok) throw new Error(uploaded.error || 'Could not upload image.');
+      imageUrl = uploaded.image_url;
+    }
+    saveBtn.textContent = 'Saving…';
+    const url = id ? `/api/admin/products/menuitems/${id}` : '/api/admin/products/menuitems';
+    const method = id ? 'PATCH' : 'POST';
+
+    const flavors = getFlavorTags();
+    const res = await adminFetch(url, {
+      method,
+      body: JSON.stringify({
+        name,
+        category_id: cat,
+        price,
+        cost,
+        stock_quantity: stock,
+        status,
+        description: desc,
+        image_url: imageUrl || null,
+        inventory_components: invComponents,
+        flavors,
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Could not save product.');
+
+    closeModal('itemModal');
+    await loadAll();
+  } catch (err) {
+    errEl.textContent = err.message;
+    errEl.classList.add('show');
+  } finally {
+    saveBtn.disabled = false; saveBtn.textContent = 'Save Product';
+  }
+}
+
+/* ================================================================
+   MODAL — ADD-ON
+   ================================================================ */
+function openAddonModal(addon = null) {
+  document.getElementById('addonModalTitle').textContent = addon ? `Edit Add-On — ${addon.name}` : 'Add Add-On';
+  document.getElementById('addonId').value     = addon ? addon.id : '';
+  document.getElementById('addonName').value   = addon ? addon.name : '';
+  document.getElementById('addonPrice').value  = addon ? addon.price : '';
+  document.getElementById('addonCost').value   = addon ? addon.cost : '';
+  document.getElementById('addonCat').value    = addon ? (addon.category || '') : 'Coffee Add-On';
+  document.getElementById('addonStatus').value = addon ? addon.status : 'available';
+  document.getElementById('addonDesc').value   = addon ? (addon.description || '') : '';
+
+  // Render inventory components builder
+  const box = document.getElementById('addonInvBox');
+  box.innerHTML = '';
+  if (addon && addon.inventory_components?.length) {
+    addon.inventory_components.forEach(c => addAddonInvRow(c.inventory_id, c.quantity, c.unit));
+  } else {
+    addAddonInvRow();
+  }
+
+  // Render applicable products checkboxes
+  const prodGrid = document.getElementById('addonProdGrid');
+  const selectedProdIds = addon?.products?.map(p => p.menu_id) || [];
+
+  prodGrid.innerHTML = menuItems.map(m => `
+    <label class="prod-checkbox-item">
+      <input type="checkbox" class="addon-prod-chk" value="${m.id}" ${selectedProdIds.includes(m.id) ? 'checked' : ''}>
+      <span>${escapeHtml(m.name)}</span>
+    </label>
+  `).join('');
+
+  document.getElementById('addonError').classList.remove('show');
+  openModal('addonModal');
+}
+
+function addAddonInvRow(invId = '', qty = '', unit = 'g') {
+  const box = document.getElementById('addonInvBox');
+  const div = document.createElement('div');
+  div.className = 'multi-comp-row';
+
+  const invOptions = inventoryItems.map(i => `<option value="${i.id}">${escapeHtml(i.name)} (${i.unit})</option>`).join('');
+
+  div.innerHTML = `
+    <select class="addon-inv-id"><option value="">Select Inventory Item…</option>${invOptions}</select>
+    <input type="number" step="0.01" min="0.01" class="addon-inv-qty" placeholder="Qty" value="${qty}">
+    <input type="text" class="addon-inv-unit" placeholder="Unit" value="${unit}">
+    <button class="remove-row-btn" type="button" onclick="this.parentElement.remove()">×</button>
+  `;
+  if (invId) div.querySelector('.addon-inv-id').value = invId;
+  box.appendChild(div);
+}
+
+async function saveAddon() {
+  const id    = document.getElementById('addonId').value;
+  const name  = document.getElementById('addonName').value.trim();
+  const price = parseFloat(document.getElementById('addonPrice').value);
+  const cost  = parseFloat(document.getElementById('addonCost').value) || 0;
+  const cat   = document.getElementById('addonCat').value.trim();
+  const status = document.getElementById('addonStatus').value;
+  const desc  = document.getElementById('addonDesc').value.trim();
+  const errEl = document.getElementById('addonError');
+
+  if (!name || isNaN(price)) {
+    errEl.textContent = 'Add-on name and valid price are required.';
+    errEl.classList.add('show');
+    return;
+  }
+
+  // Gather inventory components
+  const invComponents = [];
+  document.querySelectorAll('#addonInvBox .multi-comp-row').forEach(row => {
+    const invId = row.querySelector('.addon-inv-id').value;
+    const q     = parseFloat(row.querySelector('.addon-inv-qty').value);
+    const u     = row.querySelector('.addon-inv-unit').value.trim();
+    if (invId && !isNaN(q) && q > 0) {
+      invComponents.push({ inventory_id: Number(invId), quantity: q, unit: u || 'g' });
+    }
+  });
+
+  // Gather applicable products
+  const productIds = [];
+  document.querySelectorAll('.addon-prod-chk:checked').forEach(chk => productIds.push(Number(chk.value)));
+
+  const payload = {
+    name, price, cost, category: cat, status, description: desc,
+    inventory_components: invComponents,
+    product_ids: productIds
+  };
+
+  const saveBtn = document.getElementById('addonSaveBtn');
+  saveBtn.disabled = true; saveBtn.textContent = 'Saving…';
+
+  try {
+    const url = id ? `/api/admin/products/addons/${id}` : '/api/admin/products/addons';
+    const method = id ? 'PATCH' : 'POST';
+
+    const res = await adminFetch(url, { method, body: JSON.stringify(payload) });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Could not save add-on.');
+
+    closeModal('addonModal');
+    await loadAll();
+  } catch (err) {
+    errEl.textContent = err.message;
+    errEl.classList.add('show');
+  } finally {
+    saveBtn.disabled = false; saveBtn.textContent = 'Save Add-On';
+  }
+}
+
+/* ================================================================
+   MODAL — BUNDLE
+   ================================================================ */
+function openBundleModal(bundle = null) {
+  document.getElementById('bundleModalTitle').textContent = bundle ? `Edit Bundle — ${bundle.name}` : 'Add Bundle';
+  document.getElementById('bundleId').value       = bundle ? bundle.id : '';
+  document.getElementById('bundleName').value     = bundle ? bundle.name : '';
+  document.getElementById('bundleDesc').value     = bundle ? (bundle.description || '') : '';
+  document.getElementById('bundleDiscount').value = bundle ? (bundle.discount_percent || '') : '';
+  document.getElementById('bundlePrice').value    = bundle ? bundle.bundle_price : '';
+
+  const box = document.getElementById('bundleProdBox');
+  box.innerHTML = '';
+  if (bundle && bundle.products?.length) {
+    bundle.products.forEach(p => addBundleProdRow(p.menu_id, p.quantity));
+  } else {
+    addBundleProdRow();
+  }
+
+  recalculateBundleRegTotal();
+  document.getElementById('bundleError').classList.remove('show');
+  openModal('bundleModal');
+}
+
+function addBundleProdRow(menuId = '', qty = '1') {
+  const box = document.getElementById('bundleProdBox');
+  const div = document.createElement('div');
+  div.className = 'multi-comp-row';
+
+  const menuOptions = menuItems.map(m => `<option value="${m.id}" data-price="${m.price}">${escapeHtml(m.name)} (₱${m.price})</option>`).join('');
+
+  div.innerHTML = `
+    <select class="bundle-prod-id"><option value="">Select Menu Product…</option>${menuOptions}</select>
+    <input type="number" min="1" class="bundle-prod-qty" placeholder="Qty" value="${qty}">
+    <div class="bundle-prod-placeholder"></div>
+    <button class="remove-row-btn" type="button" onclick="this.parentElement.remove(); window.recalculateBundleRegTotal();">×</button>
+  `;
+  if (menuId) div.querySelector('.bundle-prod-id').value = menuId;
+
+  div.querySelector('.bundle-prod-id').addEventListener('change', recalculateBundleRegTotal);
+  div.querySelector('.bundle-prod-qty').addEventListener('input', recalculateBundleRegTotal);
+
+  box.appendChild(div);
+  recalculateBundleRegTotal();
+}
+
+window.recalculateBundleRegTotal = function() {
+  let regTotal = 0;
+  document.querySelectorAll('#bundleProdBox .multi-comp-row').forEach(row => {
+    const sel = row.querySelector('.bundle-prod-id');
+    const qty = parseInt(row.querySelector('.bundle-prod-qty').value) || 0;
+    const opt = sel.options[sel.selectedIndex];
+    if (opt && opt.dataset.price && qty > 0) {
+      regTotal += parseFloat(opt.dataset.price) * qty;
+    }
+  });
+  document.getElementById('bundleRegTotal').value = peso(regTotal);
+  recalculateBundleSavings();
+};
+
+function updateBundlePriceFromDiscount() {
+  const disc = parseFloat(document.getElementById('bundleDiscount').value);
+  let regTotal = 0;
+  document.querySelectorAll('#bundleProdBox .multi-comp-row').forEach(row => {
+    const sel = row.querySelector('.bundle-prod-id');
+    const qty = parseInt(row.querySelector('.bundle-prod-qty').value) || 0;
+    const opt = sel.options[sel.selectedIndex];
+    if (opt && opt.dataset.price && qty > 0) {
+      regTotal += parseFloat(opt.dataset.price) * qty;
+    }
+  });
+
+  if (!isNaN(disc) && disc > 0 && regTotal > 0) {
+    const discountedPrice = regTotal * (1 - (disc / 100));
+    document.getElementById('bundlePrice').value = discountedPrice.toFixed(2);
+  }
+  recalculateBundleSavings();
+}
+
+function recalculateBundleSavings() {
+  let regTotal = 0;
+  document.querySelectorAll('#bundleProdBox .multi-comp-row').forEach(row => {
+    const sel = row.querySelector('.bundle-prod-id');
+    const qty = parseInt(row.querySelector('.bundle-prod-qty').value) || 0;
+    const opt = sel.options[sel.selectedIndex];
+    if (opt && opt.dataset.price && qty > 0) {
+      regTotal += parseFloat(opt.dataset.price) * qty;
+    }
+  });
+
+  const bundlePrice = parseFloat(document.getElementById('bundlePrice').value) || 0;
+  const savings = Math.max(0, regTotal - bundlePrice);
+  document.getElementById('bundleSavings').value = peso(savings);
+}
+
+async function saveBundle() {
+  const id          = document.getElementById('bundleId').value;
+  const name        = document.getElementById('bundleName').value.trim();
+  const desc        = document.getElementById('bundleDesc').value.trim();
+  const bundlePrice = parseFloat(document.getElementById('bundlePrice').value);
+  const discount    = parseFloat(document.getElementById('bundleDiscount').value) || 0;
+  const errEl       = document.getElementById('bundleError');
+
+  if (!name || isNaN(bundlePrice)) {
+    errEl.textContent = 'Bundle name and valid bundle price are required.';
+    errEl.classList.add('show');
+    return;
+  }
+
+  const prods = [];
+  document.querySelectorAll('#bundleProdBox .multi-comp-row').forEach(row => {
+    const mId = row.querySelector('.bundle-prod-id').value;
+    const q   = parseInt(row.querySelector('.bundle-prod-qty').value);
+    if (mId && !isNaN(q) && q > 0) {
+      prods.push({ menu_id: Number(mId), quantity: q });
+    }
+  });
+
+  if (!prods.length) {
+    errEl.textContent = 'Please add at least one product to the bundle.';
+    errEl.classList.add('show');
+    return;
+  }
+
+  const payload = {
+    name, description: desc, bundle_price: bundlePrice, discount_percent: discount, products: prods
+  };
+
+  const saveBtn = document.getElementById('bundleSaveBtn');
+  saveBtn.disabled = true; saveBtn.textContent = 'Saving…';
+
+  try {
+    const url = id ? `/api/admin/products/bundles/${id}` : '/api/admin/products/bundles';
+    const method = id ? 'PATCH' : 'POST';
+
+    const res = await adminFetch(url, { method, body: JSON.stringify(payload) });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Could not save bundle.');
+
+    closeModal('bundleModal');
+    await loadAll();
+  } catch (err) {
+    errEl.textContent = err.message;
+    errEl.classList.add('show');
+  } finally {
+    saveBtn.disabled = false; saveBtn.textContent = 'Save Bundle';
+  }
+}
+
+/* ================================================================
+   MODAL — CATEGORY
+   ================================================================ */
+function openCatModal(id = '', name = '') {
+  if (id) {
+    categoryPickerActive = false;
+    document.getElementById('catModal').classList.remove('nested');
+  }
+  document.getElementById('catModalTitle').textContent = id ? 'Edit Category' : 'Add Category';
+  document.getElementById('catId').value   = id;
+  document.getElementById('catName').value = name;
+  document.getElementById('catError').classList.remove('show');
+  openModal('catModal');
+}
+
+function closeCategoryModal() {
+  closeModal('catModal');
+  document.getElementById('catModal').classList.remove('nested');
+  const select = document.getElementById('itemCategory');
+  if (categoryPickerActive && select.value === '__add_category__') {
+    select.value = previousProductCategory || '';
+  }
+  categoryPickerActive = false;
+}
+
+async function refreshCategories() {
+  const response = await adminFetch('/api/admin/products/categories');
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.error || 'Could not refresh categories.');
+  categories = data.data || [];
+  document.getElementById('statCategories').textContent = categories.length;
+  renderCategories();
+}
+
+async function saveCategory() {
+  const id   = document.getElementById('catId').value;
+  const name = document.getElementById('catName').value.trim();
+  const errEl = document.getElementById('catError');
+
+  if (!name) {
+    errEl.textContent = 'Category name is required.';
+    errEl.classList.add('show');
+    return;
+  }
+
+  const saveBtn = document.getElementById('catSaveBtn');
+  saveBtn.disabled = true; saveBtn.textContent = 'Saving…';
+
+  try {
+    const url = id ? `/api/admin/products/categories/${id}` : '/api/admin/products/categories';
+    const method = id ? 'PATCH' : 'POST';
+
+    const res = await adminFetch(url, { method, body: JSON.stringify({ name }) });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Could not save category.');
+
+    if (categoryPickerActive && !id) {
+      await refreshCategories();
+      renderItemCategoryOptions(data.category.id);
+      closeCategoryModal();
+    } else {
+      closeCategoryModal();
+      await loadAll();
+    }
+  } catch (err) {
+    errEl.textContent = err.message;
+    errEl.classList.add('show');
+  } finally {
+    saveBtn.disabled = false; saveBtn.textContent = 'Save Category';
+  }
+}
+
+/* ================================================================
+   DELETE MODAL
+   ================================================================ */
+function openDeleteModal(type, id, name) {
+  deletingTarget = { type, id, name };
+  document.getElementById('delMsg').innerHTML = `Are you sure you want to delete ${type} <strong>"${escapeHtml(name)}"</strong>?`;
+  document.getElementById('delError').classList.remove('show');
+  openModal('deleteModal');
+}
+
+async function confirmDelete() {
+  if (!deletingTarget) return;
+  const { type, id } = deletingTarget;
+  const errEl = document.getElementById('delError');
+  const delBtn = document.getElementById('delConfirmBtn');
+
+  delBtn.disabled = true; delBtn.textContent = 'Deleting…';
+
+  let url = '';
+  if (type === 'item')   url = `/api/admin/products/menuitems/${id}`;
+  if (type === 'cat')    url = `/api/admin/products/categories/${id}`;
+  if (type === 'addon')  url = `/api/admin/products/addons/${id}`;
+  if (type === 'bundle') url = `/api/admin/products/bundles/${id}`;
+
+  try {
+    const res = await adminFetch(url, { method: 'DELETE' });
+    if (res.status !== 204) {
+      const data = await res.json();
+      throw new Error(data.error || 'Could not delete item.');
+    }
+
+    closeModal('deleteModal');
+    deletingTarget = null;
+    await loadAll();
+  } catch (err) {
+    errEl.textContent = err.message;
+    errEl.classList.add('show');
+  } finally {
+    delBtn.disabled = false; delBtn.textContent = 'Delete';
+  }
+}
+
+/* ================================================================
+   PROFITABILITY & ANALYSIS
+   ================================================================ */
+function renderProfitability() {
+  const tbody = document.getElementById('profTbody');
+  if (!menuItems.length) {
+    tbody.innerHTML = `<tr><td colspan="5"><div class="prd-empty"><p>No products available.</p></div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = menuItems.map(i => `
+    <tr>
+      <td><span class="item-name">${escapeHtml(i.name)}</span></td>
+      <td>${escapeHtml(i.category_name || '—')}</td>
+      <td class="right"><span class="price-val">${peso(i.price)}</span></td>
+      <td class="right"><span class="stock-qty">${i.stock_quantity ?? '0'}</span></td>
+      <td><span class="prd-badge ${i.status === 'available' ? 'badge-available' : 'badge-unavailable'}">${escapeHtml(i.status)}</span></td>
+    </tr>`).join('');
+}
+
+function renderAnalysis() {
+  const grid = document.getElementById('analysisGrid');
+  const totalProducts = menuItems.length;
+  const totalAddons   = addons.length;
+  const totalBundles  = bundles.length;
+
+  grid.innerHTML = `
+    <div style="background:#fff; border:1px solid var(--line); border-radius:10px; padding:20px;">
+      <h4 style="margin:0 0 10px; font-family:'Archivo',sans-serif; text-transform:uppercase;">Menu Composition</h4>
+      <div style="display:flex; flex-direction:column; gap:8px; font-size:0.85rem;">
+        <div style="display:flex; justify-content:space-between;"><span>Standalone Products:</span><strong>${totalProducts}</strong></div>
+        <div style="display:flex; justify-content:space-between;"><span>Optional Add-Ons:</span><strong>${totalAddons}</strong></div>
+        <div style="display:flex; justify-content:space-between;"><span>Combo Bundles:</span><strong>${totalBundles}</strong></div>
+        <div style="display:flex; justify-content:space-between;"><span>Categories:</span><strong>${categories.length}</strong></div>
+      </div>
+    </div>
+    <div style="background:#fff; border:1px solid var(--line); border-radius:10px; padding:20px;">
+      <h4 style="margin:0 0 10px; font-family:'Archivo',sans-serif; text-transform:uppercase;">Inventory Integrations</h4>
+      <div style="display:flex; flex-direction:column; gap:8px; font-size:0.85rem;">
+        <div style="display:flex; justify-content:space-between;"><span>Tracked Raw Ingredients:</span><strong>${inventoryItems.length}</strong></div>
+        <div style="display:flex; justify-content:space-between;"><span>Products linked to Ingredients:</span><strong>${menuItems.filter(m => m.inventory_components?.length).length}</strong></div>
+        <div style="display:flex; justify-content:space-between;"><span>Add-Ons linked to Inventory:</span><strong>${addons.filter(a => a.inventory_components?.length).length}</strong></div>
+        <div style="display:flex; justify-content:space-between;"><span>Bundles linked to Products:</span><strong>${bundles.filter(b => b.products?.length).length}</strong></div>
+      </div>
+    </div>
+  `;
+}
+</script>
+</body>
+</html>

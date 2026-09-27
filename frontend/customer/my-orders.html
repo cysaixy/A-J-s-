@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Orders — The~Yo's</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;900&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=5">
+<style>
+  .orders-list { display: flex; flex-direction: column; gap: 22px; margin-top: 10px; }
+
+  .order-card {
+    background: var(--component-bg);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 24px;
+  }
+  @media(max-width:520px) { .order-card { padding: 18px; } }
+
+  .order-card-head {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    flex-wrap: wrap; gap: 10px; margin-bottom: 20px;
+    padding-bottom: 16px; border-bottom: 1px dashed var(--line);
+  }
+  .order-id { font-family: 'Archivo', sans-serif; font-weight: 900; font-size: 1.15rem; text-transform: uppercase; }
+  .order-meta { font-family: 'Space Mono', monospace; font-size: 0.75rem; opacity: 0.6; margin-top: 4px; }
+  .order-total { text-align: right; }
+  .order-total .amount { font-family: 'Space Mono', monospace; font-weight: 700; font-size: 1.3rem; color: var(--brass); display: block; }
+  .order-total .label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.6; }
+
+  /* ---------- Totals breakdown (card + modal) ---------- */
+  .order-total .card-totals { min-width: 170px; }
+  .totals-breakdown, .card-totals { font-family: 'Space Mono', monospace; }
+  .totals-row {
+    display: flex; justify-content: space-between; gap: 14px; font-size: 0.82rem;
+    padding: 3px 0; opacity: 0.8;
+  }
+  .card-totals .totals-row { font-size: 0.78rem; }
+  .totals-row.grand {
+    font-size: 1rem; font-weight: 700; opacity: 1; color: var(--brass);
+    border-top: 1px dashed var(--line); margin-top: 4px; padding-top: 6px;
+  }
+  .totals-row .pending-fee { color: var(--brass); font-style: italic; opacity: 0.85; }
+  .delivery-note {
+    display: flex; gap: 8px; align-items: flex-start; margin-top: 14px;
+    padding: 10px 12px; border-radius: 4px; font-size: 0.78rem; line-height: 1.5;
+    background: rgba(163,132,74,0.08); border: 1px solid rgba(163,132,74,0.28); color: var(--ink);
+  }
+
+  /* Status stepper */
+  .status-tracker { display: flex; align-items: flex-start; margin-bottom: 20px; }
+  .status-step { flex: 1; text-align: center; position: relative; }
+  .status-step .dot {
+    width: 22px; height: 22px; border-radius: 50%; margin: 0 auto 8px;
+    background: var(--stone); border: 2px solid var(--line);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Space Mono', monospace; font-size: 0.65rem; color: var(--ink); opacity: 0.5;
+    transition: all 0.25s ease;
+  }
+  .status-step .connector {
+    position: absolute; top: 10px; left: -50%; width: 100%; height: 2px;
+    background: var(--line); z-index: -1;
+  }
+  .status-step:first-child .connector { display: none; }
+  .status-step .step-label {
+    font-family: 'Space Mono', monospace; font-size: 0.62rem; text-transform: uppercase;
+    letter-spacing: 0.04em; opacity: 0.55;
+  }
+  .status-step.done .dot { background: var(--brass); border-color: var(--brass); color: #fff; opacity: 1; }
+  .status-step.done .connector { background: var(--brass); }
+  .status-step.done .step-label { opacity: 1; color: var(--brass); }
+  .status-step.current .dot { background: var(--ink); border-color: var(--ink); color: var(--bone); opacity: 1; box-shadow: 0 0 0 4px rgba(163,132,74,0.18); }
+  .status-step.current .step-label { opacity: 1; font-weight: 700; }
+
+  .status-cancelled {
+    display: flex; align-items: center; gap: 10px;
+    background: rgba(224,82,82,0.08); border: 1px solid rgba(224,82,82,0.3);
+    color: #e05252; padding: 12px 16px; border-radius: 4px;
+    font-family: 'Space Mono', monospace; font-size: 0.78rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 20px;
+  }
+
+  .order-items { display: flex; flex-direction: column; gap: 8px; }
+  .order-item-row { display: flex; justify-content: space-between; font-size: 0.88rem; opacity: 0.85; }
+  .order-item-row .qty { font-family: 'Space Mono', monospace; color: var(--brass); margin-right: 6px; }
+
+  .orders-empty {
+    text-align: center; padding: 70px 20px; border: 1px dashed var(--line); border-radius: 6px;
+  }
+  .orders-empty p { opacity: 0.65; margin: 10px auto 22px; max-width: 340px; }
+
+  .orders-loading { text-align: center; padding: 60px 20px; opacity: 0.6; font-family: 'Space Mono', monospace; font-size: 0.85rem; }
+
+  .view-details-btn {
+    padding: 8px 14px; font-size: 0.72rem; border-radius: 4px;
+    font-family: 'Space Mono', monospace; text-transform: uppercase; letter-spacing: 0.04em;
+  }
+
+  /* ---------- ORDER DETAILS MODAL ---------- */
+  .modal-overlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1000; padding: 20px;
+    opacity: 0; pointer-events: none; transition: opacity 0.2s ease;
+  }
+  .modal-overlay.active { opacity: 1; pointer-events: auto; }
+  .modal-card {
+    background: var(--component-bg); border: 1px solid var(--line);
+    width: 100%; max-width: 560px; max-height: 90vh; overflow-y: auto;
+    border-radius: 8px; padding: 28px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5); color: var(--ink);
+  }
+  @media(max-width:520px) { .modal-card { padding: 20px; } }
+  .modal-head {
+    display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;
+    margin-bottom: 6px;
+  }
+  .modal-head h3 { font-family: 'Archivo', sans-serif; text-transform: uppercase; font-size: 1.15rem; }
+  .detail-meta { font-family: 'Space Mono', monospace; font-size: 0.72rem; opacity: 0.6; margin-top: 4px; }
+  .modal-close {
+    background: none; border: none; font-size: 1.4rem; color: var(--ink);
+    cursor: pointer; opacity: 0.55; line-height: 1; transition: opacity .2s ease;
+  }
+  .modal-close:hover { opacity: 1; }
+  .modal-card input, .modal-card select, .modal-card textarea {
+    width: 100%; margin-bottom: 0;
+  }
+  .modal-card .form-row { margin-bottom: 0; }
+  .modal-card .form-row > div { margin-bottom: 14px; }
+  .locked-note {
+    margin-top: 4px; padding: 10px 12px; border-radius: 4px;
+    background: rgba(224,82,82,0.08); border: 1px solid rgba(224,82,82,0.3);
+    color: #e05252; font-family: 'Space Mono', monospace; font-size: 0.72rem;
+    font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em;
+  }
+  .modal-card input:disabled, .modal-card select:disabled, .modal-card textarea:disabled {
+    opacity: 0.55; cursor: not-allowed;
+  }
+  .modal-actions { display: flex; justify-content: flex-end; align-items: center; gap: 12px; margin-top: 22px; flex-wrap: wrap; }
+  .modal-actions .btn { padding: 11px 20px; border-radius: 6px; margin-bottom: 0; }
+  
+  /* GCash button styling */
+  .btn-gcash-pay {
+    background: linear-gradient(135deg, #0056ff 0%, #0070f3 100%) !important;
+    color: #ffffff !important;
+    border: none !important;
+    font-weight: 700 !important;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.78rem !important;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    box-shadow: 0 4px 14px rgba(0, 86, 255, 0.35);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 11px 22px !important;
+    border-radius: 6px !important;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    cursor: pointer;
+  }
+  .btn-gcash-pay:hover {
+    background: linear-gradient(135deg, #0046d6 0%, #005ce6 100%) !important;
+    box-shadow: 0 6px 20px rgba(0, 86, 255, 0.55);
+    transform: translateY(-1px);
+  }
+  .btn-gcash-pay:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(0, 86, 255, 0.4);
+  }
+  .totals-row.paid-highlight {
+    color: #27ae60;
+    font-weight: 600;
+  }
+  .totals-row.balance-highlight {
+    color: var(--brass);
+    font-weight: 700;
+    border-top: 1px dashed var(--line);
+    margin-top: 4px;
+    padding-top: 6px;
+  }
+  .order-paid-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    font-family: 'Space Mono', monospace;
+    background: rgba(39, 174, 96, 0.12);
+    color: #27ae60;
+    border: 1px solid rgba(39, 174, 96, 0.3);
+    margin-top: 4px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <a href="index.html" class="logo-link">
+    <img src="../pics&vids/the-yo's_logo.jpg" alt="Logo" class="logo-img">
+    <span class="logo-text">The~Yo's</span>
+  </a>
+  <nav id="siteNav">
+    <ul>
+      <li><a href="about.html">About</a></li>
+      <li><a href="menu.html">Menu</a></li>
+      <li><a href="gallery.html">Gallery</a></li>
+      <li><a href="order.html#feedback">Reviews</a></li>
+      <li><a href="reservations.html">Reserve</a></li>
+      <li><a href="my-orders.html" style="color:var(--brass);">My Orders</a></li>
+      <li><a href="account.html" class="nav-account-btn" id="navAccountLink" title="My Account">
+            <svg class="nav-account-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+          </a></li>
+      <li><a href="order.html" class="nav-btn">Order Now</a></li>
+    </ul>
+  </nav>
+  <button class="nav-toggle" id="navToggle" type="button" aria-label="Toggle navigation menu" aria-expanded="false">
+    <svg class="nav-toggle-icon nav-icon-menu" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+      <line x1="4" y1="6" x2="20" y2="6"></line>
+      <line x1="4" y1="12" x2="20" y2="12"></line>
+      <line x1="4" y1="18" x2="20" y2="18"></line>
+    </svg>
+    <svg class="nav-toggle-icon nav-icon-close" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+      <line x1="18" y1="6" x2="6" y2="18"></line>
+      <line x1="6" y1="6" x2="18" y2="18"></line>
+    </svg>
+  </button>
+</header>
+
+<section>
+  <div class="wrap reveal in">
+    <div class="section-head">
+      <div>
+        <p class="eyebrow">Order Tracking</p>
+        <h2 class="display">My Orders</h2>
+      </div>
+      <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap;">
+        <p style="margin:0;">Track every order from the moment it lands in the kitchen to the moment it's ready.</p>
+        <button type="button" class="btn btn-outline" style="padding:10px 16px; margin:0; font-size:0.78rem;" onclick="window.refreshOrders()">↻ Refresh</button>
+      </div>
+    </div>
+
+    <div id="paymentReturnBanner" style="display:none; margin-bottom:20px; padding:14px 18px; border-radius:6px; font-family:'Space Mono', monospace; font-size:0.85rem;"></div>
+    <div id="ordersLoading" class="orders-loading">Loading your orders…</div>
+    <div id="ordersList" class="orders-list"></div>
+    <div id="ordersEmpty" class="orders-empty" style="display:none;">
+      <p class="eyebrow" style="display:block; margin-bottom:10px;">Nothing here yet</p>
+      <p>You haven't placed any orders yet. Once you do, you'll be able to track their status right here.</p>
+      <a href="order.html" class="btn">Place Your First Order</a>
+    </div>
+  </div>
+</section>
+
+<!-- Order Details Modal: view always, edit while still pending -->
+<div class="modal-overlay" id="orderModal">
+  <div class="modal-card">
+    <div class="modal-head">
+      <div>
+        <h3 id="detailOrderTitle">Order Details</h3>
+        <p class="detail-meta" id="detailOrderMeta"></p>
+      </div>
+      <button type="button" class="modal-close" onclick="closeOrderDetails()" aria-label="Close"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+    </div>
+
+    <div id="detailItems" class="order-items" style="margin: 16px 0 22px; padding: 14px; border: 1px dashed var(--line); border-radius: 6px;"></div>
+
+    <div id="detailTotals" class="totals-breakdown" style="margin: -6px 0 22px;"></div>
+
+    <div id="detailForm">
+      <div class="form-row">
+        <div><label for="detailName">Name</label><input id="detailName" type="text"></div>
+        <div><label for="detailPhone">Mobile Number</label><input id="detailPhone" type="text" inputmode="numeric" pattern="[0-9]+" oninput="this.value = this.value.replace(/[^0-9]/g, '');"></div>
+      </div>
+      <div class="form-row">
+        <div>
+          <label for="detailService">Service</label>
+          <select id="detailService">
+            <option value="dine_in">Dine-In (At Table)</option>
+            <option value="pickup">Advanced Takeout Pick-up</option>
+            <option value="online">Delivery</option>
+          </select>
+        </div>
+        <div><label for="detailTime">Preferred Time</label><input id="detailTime" type="text"></div>
+      </div>
+      <div class="form-row">
+        <div>
+          <label for="detailPayment">Payment Method</label>
+          <select id="detailPayment">
+            <option value="gcash">GCash</option>
+            <option value="cash">Cash</option>
+          </select>
+        </div>
+        <div id="detailAddressContainer"><label for="detailAddress">Delivery Address</label><input id="detailAddress" type="text"></div>
+      </div>
+      <div><label for="detailNotes">Special Prep Instructions</label><textarea id="detailNotes"></textarea></div>
+      <div id="detailLockedNote" class="locked-note" style="display:none;"></div>
+    </div>
+
+    <div class="modal-actions">
+      <button type="button" class="btn btn-outline" onclick="closeOrderDetails()">Close</button>
+      <button type="button" class="btn btn-outline" id="btnCancelInModal" style="display:none; color:#e05252; border-color:rgba(224,82,82,.4);" onclick="cancelOrder()">Cancel Order</button>
+      <button type="button" class="btn btn-gcash-pay" id="btnPayInModal" style="display:none;" onclick="payOrderWithPayMongo()"><span>Pay with GCash</span> <span>→</span></button>
+      <button type="button" class="btn" id="btnSaveDetails" onclick="saveOrderDetails()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { auth, onAuthStateChanged, API_BASE_URL } from "./firebase-init.js";
+
+  const STEPS = [
+    { key: 'pending', label: 'Pending' },
+    { key: 'confirmed', label: 'Confirmed' },
+    { key: 'preparing', label: 'Preparing' },
+    { key: 'ready', label: 'Ready' },
+  ];
+  const STEP_ALIASES = { completed: 'ready' };
+
+  function peso(n) {
+    return '₱' + Number(n || 0).toLocaleString('en-PH', { maximumFractionDigits: 2 });
+  }
+
+  function esc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  const TYPE_LABEL = { online: 'Delivery', pickup: 'Takeout', dine_in: 'Dine-In' };
+  const PAYMENT_LABEL = { gcash: 'GCash', cash: 'Cash' };
+
+  function isDeliveryOrder(order) {
+    return order.order_type === 'online';
+  }
+
+  function totalsFor(order) {
+    const grandTotal = Number(order.total_amount || 0);
+    const deliveryFee = Number(order.delivery_fee || 0);
+    const delivery = isDeliveryOrder(order);
+    const subtotal = delivery ? Math.max(0, grandTotal - deliveryFee) : grandTotal;
+    const feePending = delivery && deliveryFee <= 0 && order.status !== 'cancelled';
+
+    const isOnlinePay = ['gcash', 'maya', 'card', 'paymaya', 'paymongo', 'qrph'].includes((order.payment_method || '').toLowerCase());
+    
+    // Check payments array
+    const paidList = Array.isArray(order.payments)
+      ? order.payments.filter(p => p && (p.status === 'paid' || p.status === 'completed'))
+      : [];
+    let amountPaid = paidList.reduce((s, p) => s + Number(p.amount || 0), 0);
+
+    const requiresDeposit = grandTotal >= 300 && isOnlinePay;
+    const depositDue = requiresDeposit ? Math.round((grandTotal / 2) * 100) / 100 : grandTotal;
+
+    // Fallback if payment record not yet returned in array but order was confirmed via GCash
+    if (amountPaid === 0 && order.status !== 'pending' && order.status !== 'cancelled' && isOnlinePay) {
+      amountPaid = depositDue;
+    }
+
+    const remainingBalance = Math.max(0, Math.round((grandTotal - amountPaid) * 100) / 100);
+
+    return {
+      grandTotal,
+      deliveryFee,
+      subtotal,
+      delivery,
+      feePending,
+      amountPaid,
+      remainingBalance,
+      requiresDeposit,
+      depositDue,
+      isOnlinePay,
+      orderType: order.order_type,
+      status: order.status
+    };
+  }
+
+  function totalsRowsHTML(t, { grandClass = 'grand' } = {}) {
+    let rows = '';
+    if (t.delivery) {
+      rows += `<div class="totals-row"><span>Food Total</span><span>${peso(t.subtotal)}</span></div>`;
+      rows += `<div class="totals-row"><span>Delivery Fee (Cash to Rider)</span><span>${t.feePending ? '<span class="pending-fee">Pending Staff Assignment</span>' : peso(t.deliveryFee)}</span></div>`;
+      rows += `<div class="totals-row ${grandClass}"><span>Total Order Amount</span><span>${peso(t.grandTotal)}</span></div>`;
+    } else {
+      rows += `<div class="totals-row ${grandClass}"><span>Total Order Amount</span><span>${peso(t.grandTotal)}</span></div>`;
+    }
+
+    if (t.amountPaid > 0) {
+      rows += `
+        <div class="totals-row paid-highlight">
+          <span><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-0.15em; margin-right:3px;"><polyline points="20 6 9 17 4 12"></polyline></svg>${t.remainingBalance > 0 ? 'Downpayment Paid (GCash)' : 'Full Payment Paid (GCash)'}</span>
+          <span>-${peso(t.amountPaid)}</span>
+        </div>
+        <div class="totals-row balance-highlight">
+          <span>Remaining Balance Due</span>
+          <span>${peso(t.remainingBalance)}</span>
+        </div>`;
+    } else if (t.status === 'pending' && t.requiresDeposit) {
+      rows += `
+        <div class="totals-row" style="color:#0056ff; font-weight:600; padding-top:2px;">
+          <span>50% Downpayment Due (GCash)</span>
+          <span>${peso(t.depositDue)}</span>
+        </div>
+        <div class="totals-row" style="opacity:0.75; font-size:0.75rem;">
+          <span>Remaining Balance (Cash)</span>
+          <span>${peso(t.grandTotal - t.depositDue)}</span>
+        </div>`;
+    }
+
+    return rows;
+  }
+
+  function deliveryNoteHTML(t) {
+    let html = '';
+    if (t.delivery) {
+      if (t.feePending) {
+        html += `<div class="delivery-note"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0; vertical-align:-0.18em; margin-right:6px;"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg><span><strong>Delivery Notice:</strong> Your food is confirmed! Our staff will assign the delivery fee for your address shortly. The delivery fee will be paid in cash directly to your rider.</span></div>`;
+      } else {
+        html += `<div class="delivery-note" style="border-left-color:#27ae60; background:rgba(39,174,96,0.08);"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0; vertical-align:-0.18em; margin-right:6px;"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg><span><strong>Delivery Fee: ${peso(t.deliveryFee)}</strong> — Please prepare cash to pay directly to the rider upon delivery.</span></div>`;
+      }
+    }
+
+    if (t.amountPaid > 0 && t.remainingBalance > 0) {
+      if (t.delivery) {
+        html += `<div class="delivery-note" style="border-left-color:var(--brass); background:rgba(163,132,74,0.08); margin-top:8px;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0; vertical-align:-0.18em; margin-right:4px;"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg><span><strong>Remaining Balance: ${peso(t.remainingBalance)}</strong> — Pay cash to rider upon delivery (plus delivery fee).</span></div>`;
+      } else if (t.orderType === 'pickup') {
+        html += `<div class="delivery-note" style="border-left-color:var(--brass); background:rgba(163,132,74,0.08); margin-top:8px;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0; vertical-align:-0.18em; margin-right:4px;"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg><span><strong>Remaining Balance: ${peso(t.remainingBalance)}</strong> — Pay cash upon pickup at the counter.</span></div>`;
+      } else {
+        html += `<div class="delivery-note" style="border-left-color:var(--brass); background:rgba(163,132,74,0.08); margin-top:8px;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0; vertical-align:-0.18em; margin-right:4px;"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg><span><strong>Remaining Balance: ${peso(t.remainingBalance)}</strong> — Pay cash at the restaurant.</span></div>`;
+      }
+    }
+    return html;
+  }
+
+  let currentUser = null;
+  let ordersById = new Map();
+  let currentDetailOrder = null;
+
+  function setVal(id, value) {
+    const el = document.getElementById(id);
+    if (el) el.value = (value == null ? '' : value);
+  }
+
+  function setSelect(id, value) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.value = value;
+    if (el.value !== value) el.selectedIndex = 0;
+  }
+
+  
+  function handlePaymentReturn(orders) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const paymentStatus = urlParams.get('payment_status');
+    const orderId = urlParams.get('order_id');
+    if (!paymentStatus || !orderId) return;
+
+    const banner = document.getElementById('paymentReturnBanner');
+    if (!banner) return;
+
+    if (paymentStatus === 'success') {
+      try { sessionStorage.removeItem('yo-order-tray'); } catch (e) {}
+      banner.style.display = 'block';
+      banner.style.background = 'rgba(46, 204, 113, 0.15)';
+      banner.style.border = '1px solid rgba(46, 204, 113, 0.4)';
+      banner.style.color = '#27ae60';
+      banner.innerHTML = `<strong><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-0.15em; margin-right:3px;"><polyline points="20 6 9 17 4 12"></polyline></svg>Payment Received via GCash!</strong> Order #${orderId} is confirmed. Kitchen preparation will begin shortly.`;
+
+      (async () => {
+        try {
+          const idToken = await currentUser.getIdToken();
+          await fetch(`${API_BASE_URL}/api/customer/orders/${orderId}/confirm-payment`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${idToken}`,
+            }
+          });
+          try {
+            window.history.replaceState({}, document.title, window.location.pathname);
+          } catch (e) {}
+          const res = await fetch(`${API_BASE_URL}/api/customer/orders`, {
+            headers: { Authorization: `Bearer ${idToken}` },
+          });
+          const data = await res.json();
+          if (data.orders) {
+            ordersById = new Map(data.orders.map(o => [o.id, o]));
+            const list = document.getElementById('ordersList');
+            if (list) list.innerHTML = data.orders.map(renderOrder).join('');
+            openOrderDetails(Number(orderId));
+          }
+        } catch (e) {
+          console.warn('Auto confirm error:', e);
+          openOrderDetails(Number(orderId));
+        }
+      })();
+    } else if (paymentStatus === 'cancelled') {
+      banner.style.display = 'block';
+      banner.style.background = 'rgba(231, 76, 60, 0.12)';
+      banner.style.border = '1px solid rgba(231, 76, 60, 0.35)';
+      banner.style.color = '#c0392b';
+      banner.innerHTML = `<strong>Payment was cancelled.</strong> Order #${orderId} is still pending. You can click "Pay via PayMongo" to complete payment.`;
+      
+      const matched = orders.find(o => String(o.id) === String(orderId));
+      if (matched) {
+        setTimeout(() => openOrderDetails(matched.id), 500);
+      }
+    }
+  }
+
+  window.openOrderDetails = function(id) {
+    const numId = Number(id);
+    const order = ordersById.get(numId) || ordersById.get(id);
+    if (!order) return;
+    currentDetailOrder = order;
+    window.currentDetailOrder = order;
+    const editable = order.status === 'pending';
+
+    document.getElementById('detailOrderTitle').textContent = `Order #${order.id} Details`;
+    document.getElementById('detailOrderMeta').textContent =
+      `Status: ${(order.status || '').toUpperCase()} · ${esc(TYPE_LABEL[order.order_type] || order.order_type)} · Placed ${order.datetime_ordered ? new Date(order.datetime_ordered).toLocaleString('en-PH', { dateStyle: 'medium', timeStyle: 'short' }) : ''}`;
+
+    const items = Array.isArray(order.items) ? order.items.filter(it => it && it.menu_id !== null) : [];
+    document.getElementById('detailItems').innerHTML = items.length
+      ? items.map(it => {
+          const addons = (it.add_ons || []).filter(a => a && a.quantity > 0)
+            .map(a => `<span style="display:block; font-size:0.78rem; color:var(--brass); opacity:0.85; margin-top:1px;">+ ${a.quantity}× ${esc(a.name)} <span style="opacity:.7;">(${peso(a.subtotal)})</span></span>`)
+            .join('');
+          return `<div class="order-item-row">
+            <span><span class="qty">×${it.quantity}</span>${esc(it.item_name) || 'Item #' + it.menu_id}${it.notes ? ` <span style="opacity:.6; font-size:0.8em;">(${esc(it.notes)})</span>` : ''}${addons}</span>
+            <span>${peso(it.subtotal)}</span>
+          </div>`;
+        }).join('')
+      : '<div class="order-item-row" style="opacity:.5;">No item details available.</div>';
+
+    const t = totalsFor(order);
+    document.getElementById('detailTotals').innerHTML = totalsRowsHTML(t) + deliveryNoteHTML(t);
+
+    setVal('detailName', order.customer_name);
+    setVal('detailPhone', order.customer_phone);
+    setVal('detailTime', order.requested_time || '');
+    setVal('detailAddress', order.delivery_address);
+    setVal('detailNotes', order.notes);
+    setSelect('detailService', order.order_type);
+    setSelect('detailPayment', order.payment_method);
+
+    ['detailName', 'detailPhone', 'detailService', 'detailTime', 'detailAddress', 'detailPayment', 'detailNotes'].forEach(sel => {
+      const el = document.getElementById(sel);
+      if (el) el.disabled = !editable;
+    });
+    const btnSave = document.getElementById('btnSaveDetails');
+    if (btnSave) btnSave.style.display = editable ? '' : 'none';
+    const btnPay = document.getElementById('btnPayInModal');
+    if (btnPay) {
+      const isOnlinePay = ['gcash', 'maya', 'card', 'paymaya', 'paymongo', 'qrph'].includes((order.payment_method || '').toLowerCase());
+      const canPay = editable && isOnlinePay && t.amountPaid <= 0;
+      btnPay.style.display = canPay ? 'inline-flex' : 'none';
+      if (canPay) {
+        const payAmount = t.requiresDeposit ? t.depositDue : t.grandTotal;
+        btnPay.innerHTML = `<span>Pay with GCash (${peso(payAmount)})</span> <span>→</span>`;
+      }
+    }
+    const btnCancelModal = document.getElementById('btnCancelInModal');
+    if (btnCancelModal) btnCancelModal.style.display = editable ? '' : 'none';
+    const lockedNote = document.getElementById('detailLockedNote');
+    if (lockedNote) {
+      if (!editable) {
+        lockedNote.style.display = 'block';
+        lockedNote.textContent = order.status === 'cancelled'
+          ? 'This order was cancelled and can no longer be edited.'
+          : 'This order has already been confirmed and is locked. You can only view these details.';
+      } else {
+        lockedNote.style.display = 'none';
+      }
+    }
+
+    document.getElementById('orderModal').classList.add('active');
+  };
+
+  window.closeOrderDetails = function() {
+    document.getElementById('orderModal').classList.remove('active');
+    currentDetailOrder = null;
+    window.currentDetailOrder = null;
+  };
+
+  
+  window.payOrderWithPayMongo = async function(id) {
+    const orderId = id || currentDetailOrder?.id || window.currentDetailOrder?.id;
+    if (!orderId) {
+      alert("Please select an order first.");
+      return;
+    }
+
+    const order = currentDetailOrder || window.currentDetailOrder;
+    if (order && order.status && order.status !== 'pending') {
+      alert(`This order is already ${order.status}. No further payment is needed.`);
+      return;
+    }
+
+    const btn = document.getElementById('btnPayInModal');
+    try {
+      const user = auth.currentUser;
+      if (!user) {
+        alert("Please sign in to proceed.");
+        return;
+      }
+      const idToken = await user.getIdToken();
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = `<span>Connecting to GCash...</span>`;
+      }
+      const res = await fetch(`${API_BASE_URL}/api/customer/orders/${orderId}/checkout-session`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${idToken}`
+        }
+      });
+      const data = await res.json();
+      if (res.ok && data.checkout_url) {
+        window.location.href = data.checkout_url;
+      } else {
+        alert(data.error || "Could not generate payment link.");
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = `<span>Pay with GCash</span> <span>→</span>`;
+        }
+      }
+    } catch (err) {
+      console.error("PayMongo Checkout error:", err);
+      alert("Network error connecting to payment gateway: " + (err.message || 'Please try again.'));
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = `<span>Pay with GCash</span> <span>→</span>`;
+      }
+    }
+  };
+
+  window.cancelOrder = async function(id) {
+    const orderId = id || currentDetailOrder?.id || window.currentDetailOrder?.id;
+    if (!orderId) {
+      alert("Please select an order first.");
+      return;
+    }
+    if (!confirm(`Are you sure you want to cancel Order #${orderId}?`)) return;
+    if (!currentUser) return;
+
+    try {
+      const idToken = await currentUser.getIdToken();
+      const res = await fetch(`${API_BASE_URL}/api/customer/orders/${orderId}/cancel`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${idToken}`,
+        },
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.error || 'Could not cancel your order.');
+        return;
+      }
+      alert('✓ Order cancelled successfully.');
+      if ((currentDetailOrder && currentDetailOrder.id === orderId) || (window.currentDetailOrder && window.currentDetailOrder.id === orderId)) {
+        window.closeOrderDetails();
+      }
+      window.refreshOrders();
+    } catch (err) {
+      alert('Network error while cancelling order. Please try again.');
+    }
+  };
+
+  window.saveOrderDetails = async function() {
+    const order = currentDetailOrder;
+    if (!order || order.status !== 'pending') return;
+    if (!currentUser) return;
+
+    const btn = document.getElementById('btnSaveDetails');
+    btn.disabled = true;
+    btn.textContent = 'Saving…';
+
+    const timeVal = document.getElementById('detailTime').value.trim();
+    const payload = {
+      customer_name: document.getElementById('detailName').value.trim(),
+      customer_phone: document.getElementById('detailPhone').value.trim(),
+      order_type: document.getElementById('detailService').value,
+      delivery_address: document.getElementById('detailAddress').value.trim(),
+      payment_method: document.getElementById('detailPayment').value,
+      notes: [timeVal ? `Preferred Time: ${timeVal}` : '', document.getElementById('detailNotes').value.trim()].filter(Boolean).join(' · '),
+    };
+
+    try {
+      const idToken = await currentUser.getIdToken();
+      const res = await fetch(`${API_BASE_URL}/api/customer/orders/${order.id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${idToken}`,
+        },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.error || 'Could not save your changes.');
+        return;
+      }
+      alert('✓ Order details updated successfully.');
+      window.closeOrderDetails();
+      window.refreshOrders();
+    } catch (err) {
+      alert('Network error while saving. Please try again.');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Save Changes';
+    }
+  };
+
+  function renderTracker(status, order = null) {
+    const normalized = STEP_ALIASES[status] || status;
+    if (normalized === 'cancelled') {
+      return `<div class="status-cancelled"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-0.15em; margin-right:3px;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>This order was cancelled</div>`;
+    }
+    const currentIndex = STEPS.findIndex(s => s.key === normalized);
+    let tracker = `<div class="status-tracker">
+      ${STEPS.map((step, i) => {
+        let cls = 'status-step';
+        if (currentIndex >= 0 && i < currentIndex) cls += ' done';
+        if (i === currentIndex) cls += ' current';
+        return `<div class="${cls}">
+          <div class="connector"></div>
+          <div class="dot">${i < currentIndex ? '✓' : i + 1}</div>
+          <div class="step-label">${step.label}</div>
+        </div>`;
+      }).join('')}
+    </div>`;
+    
+    // Show reservation status if this order is linked to a reservation
+    if (order?.reservation_id && order.reservation_status) {
+      const RES_LABELS = {
+        pending: 'Pending',
+        contact_customer: 'Contacted',
+        order_preparing: 'Order Being Prepared',
+        order_finalized: 'Order Finalized',
+        confirmed: 'Confirmed',
+        completed: 'Completed',
+        cancelled: 'Cancelled'
+      };
+      tracker += `
+        <div style="margin-top:12px; padding:10px; background:rgba(163,132,74,0.08); border:1px solid rgba(163,132,74,0.2); border-radius:4px;">
+          <div style="font-family:'Space Mono',monospace; font-size:0.62rem; text-transform:uppercase; opacity:0.55; margin-bottom:4px;">
+            Reservation Status
+          </div>
+          <div style="font-weight:700; color:var(--brass-dark);">
+            ${RES_LABELS[order.reservation_status] || order.reservation_status}
+          </div>
+        </div>`;
+    }
+    return tracker;
+  }
+
+  function renderOrder(order) {
+    const date = order.datetime_ordered
+      ? new Date(order.datetime_ordered).toLocaleString('en-PH', { dateStyle: 'medium', timeStyle: 'short' })
+      : '';
+    const items = Array.isArray(order.items) ? order.items.filter(it => it && it.menu_id !== null) : [];
+    const t = totalsFor(order);
+
+    return `<div class="order-card">
+      <div class="order-card-head">
+        <div>
+          <div class="order-id">Order #${order.id}</div>
+          <div class="order-meta">${date} · ${(order.order_type || '').replace('_', ' ')}</div>
+          ${(order.order_type === 'online' && order.delivery_address) ? `<div class="order-meta">Deliver to: ${order.delivery_address}</div>` : ''}
+        </div>
+        <div class="order-total">
+          <div class="card-totals">${totalsRowsHTML(t)}</div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; margin-top:10px;">
+            <button type="button" class="btn btn-outline view-details-btn" onclick="openOrderDetails(${order.id})">View Details</button>
+            ${order.status === 'pending' ? `<button type="button" class="btn btn-outline" style="color:#e05252; border-color:rgba(224,82,82,.4); padding:8px 12px; font-size:0.72rem;" onclick="cancelOrder(${order.id})">Cancel</button>` : ''}
+          </div>
+        </div>
+      </div>
+      ${renderTracker(order.status, order)}
+      ${deliveryNoteHTML(t)}
+      <div class="order-items">
+        ${items.length
+          ? items.map(it => {
+              const addons = (it.add_ons || []).filter(a => a && a.quantity > 0)
+                .map(a => `<span style="display:block; font-size:0.78rem; color:var(--brass); opacity:0.85; margin-top:1px;">+ ${a.quantity}× ${esc(a.name)} <span style="opacity:.7;">(${peso(a.subtotal)})</span></span>`)
+                .join('');
+              return `<div class="order-item-row">
+                <span><span class="qty">×${it.quantity}</span>${esc(it.item_name) || 'Item #' + it.menu_id}${it.notes ? ` <span style="opacity:.6; font-size:0.8em;">(${esc(it.notes)})</span>` : ''}${addons}</span>
+                <span>${peso(it.subtotal)}</span>
+              </div>`;
+            }).join('')
+          : '<div class="order-item-row" style="opacity:.5;">No item details available.</div>'}
+      </div>
+    </div>`;
+  }
+
+  async function loadOrders(idToken) {
+    const loading = document.getElementById('ordersLoading');
+    const list = document.getElementById('ordersList');
+    const empty = document.getElementById('ordersEmpty');
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/customer/orders`, {
+        headers: { Authorization: `Bearer ${idToken}` },
+      });
+      const data = await res.json();
+      loading.style.display = 'none';
+
+      if (!res.ok) {
+        list.innerHTML = `<div class="orders-empty"><p>${data.error || 'Could not load your orders right now.'}</p></div>`;
+        return;
+      }
+
+      const orders = data.orders || [];
+      if (orders.length === 0) {
+        empty.style.display = 'block';
+        return;
+      }
+      ordersById = new Map(orders.map(o => [o.id, o]));
+      list.innerHTML = orders.map(renderOrder).join('');
+      handlePaymentReturn(orders);
+    } catch (err) {
+      loading.style.display = 'none';
+      list.innerHTML = `<div class="orders-empty"><p>Network error while loading your orders. Please try again.</p></div>`;
+    }
+  }
+
+  window.refreshOrders = async function() {
+    if (!currentUser) return;
+    const loading = document.getElementById('ordersLoading');
+    const list = document.getElementById('ordersList');
+    if (loading) loading.style.display = 'block';
+    if (list) list.innerHTML = '';
+    const idToken = await currentUser.getIdToken();
+    await loadOrders(idToken);
+  };
+
+  onAuthStateChanged(auth, async (user) => {
+    currentUser = user;
+    if (!user) {
+      window.location.href = 'account.html?redirect=my-orders.html';
+      return;
+    }
+    const idToken = await user.getIdToken();
+    loadOrders(idToken);
+  });
+</script>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-logo">The~Yo's</div>
+        <p>A comforting community Resto Bar offering delicious meals to Baggao.</p>
+      </div>
+      <div>
+        <h4>Location & Hours</h4>
+        <p>2nd Floor DKB Building, Poblacion, Baggao, Cagayan</p>
+        <p style="color: var(--brass); font-weight:700;">Open Daily: 8:00 AM &ndash; 8:00 PM</p>
+      </div>
+      <div>
+        <h4>Quick Links</h4>
+        <a href="menu.html">View Full Menu</a>
+        <a href="reservations.html">Reserve a Table</a>
+        <a href="my-orders.html">Track My Order</a>
+        <a href="https://www.facebook.com/profile.php?id=61555628762441" target="_blank">Facebook Page</a>
+        <a href="https://www.tiktok.com/@theyos.restaurant" target="_blank">TikTok</a>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>&copy; <span id="year"></span> The~Yo's Resto Bar.</span>
+      <span>Baggao, Cagayan &middot; Made with care.</span>
+    </div>
+  </div>
+</footer>
+
+<script src="global.js"></script>
+<script src="cart.js"></script>
+</body>
+</html>

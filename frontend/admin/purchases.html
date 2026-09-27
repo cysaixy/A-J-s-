@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Purchases — The~Yo's Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="admin-shell.css?v=6">
+</head>
+<body>
+
+<div id="adminShell"></div>
+
+<script type="module">
+  import { renderAdminShell } from "./admin-shell.js";
+  import { adminFetch, formatDate, escapeHtml } from "./admin-api.js";
+
+  const session = renderAdminShell({ active: 'purchases', title: 'Purchases' });
+  if (session) init();
+
+  let inventoryItems = [];
+  let menuItems = [];
+  let supportsMigration = false; // Will be detected by checking if inventory endpoint works
+
+  function init() {
+    const content = document.getElementById('adminContent');
+    content.innerHTML = `
+      <div class="admin-panel">
+        <div class="admin-panel-head">
+          <h3>Purchase / Stock-In History</h3>
+          <button class="btn small" id="newPurchaseBtn">+ Record Purchase</button>
+        </div>
+        <div class="admin-panel-body" style="padding:0;" id="purchasesWrap"><div class="admin-loading">Loading…</div></div>
+      </div>
+
+      <div class="modal-backdrop" id="purchaseModal">
+        <div class="modal-box">
+          <h3>Record Purchase (Stock-In)</h3>
+          <div class="form-grid">
+            <div class="form-field" style="grid-column:1/-1;">
+              <label>Item Type</label>
+              <select id="pItemType">
+                <option value="inventory">Raw Ingredient</option>
+                <option value="menu">Direct Product (legacy)</option>
+              </select>
+            </div>
+            <div class="form-field" style="grid-column:1/-1;">
+              <label>Item</label>
+              <select id="pItemId"></select>
+            </div>
+            <div class="form-field">
+              <label>Quantity</label><input type="number" id="pQty" min="1" step="any">
+            </div>
+            <div class="form-field">
+              <label>Expiration Date (optional)</label><input type="date" id="pExpiry">
+            </div>
+            <div class="form-field" style="grid-column:1/-1;">
+              <label>Remarks (optional)</label><input type="text" id="pRemarks" placeholder="Supplier, batch, etc.">
+            </div>
+          </div>
+          <div class="modal-close-row">
+            <button class="btn btn-outline" id="pCancelBtn">Cancel</button>
+            <button class="btn" id="pSaveBtn">Save Purchase</button>
+          </div>
+          <div class="admin-error" id="pError" style="display:none; padding:10px 0 0; text-align:left;"></div>
+        </div>
+      </div>
+    `;
+
+    document.getElementById('newPurchaseBtn').addEventListener('click', openModal);
+    document.getElementById('pCancelBtn').addEventListener('click', () => toggleModal(false));
+    document.getElementById('pSaveBtn').addEventListener('click', savePurchase);
+    document.getElementById('pItemType').addEventListener('change', updateItemDropdown);
+
+    loadPurchases();
+    loadInventoryItems();
+    loadMenuItems();
+  }
+
+  function toggleModal(show) { document.getElementById('purchaseModal').classList.toggle('active', show); }
+
+  async function loadInventoryItems() {
+    try {
+      const res = await adminFetch('/api/admin/inventory');
+      const data = await res.json();
+      if (res.ok && data.items) {
+        inventoryItems = data.items;
+        supportsMigration = true; // Inventory endpoint works, migration likely applied
+      }
+    } catch { 
+      supportsMigration = false;
+      inventoryItems = [];
+    }
+  }
+
+  async function loadMenuItems() {
+    try {
+      const res = await adminFetch('/api/admin/products/menuitems');
+      const data = await res.json();
+      if (res.ok) menuItems = data.items || [];
+    } catch { /* handled silently - modal will just show empty select */ }
+  }
+
+  async function loadPurchases() {
+    try {
+      const res = await adminFetch('/api/admin/purchases/list');
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Could not load purchases.');
+      const rows = data.purchases || [];
+      const wrap = document.getElementById('purchasesWrap');
+      wrap.innerHTML = rows.length
+        ? `<table class="admin-table">
+            <thead><tr><th>Item</th><th>Qty</th><th>Expiration</th><th>Staff</th><th>Date</th><th>Remarks</th></tr></thead>
+            <tbody>${rows.map(p => `
+              <tr>
+                <td>${escapeHtml(p.item_name)}</td>
+                <td>+${p.quantity}${p.unit ? ' ' + escapeHtml(p.unit) : ''}</td>
+                <td>${p.expiration_date ? new Date(p.expiration_date).toLocaleDateString('en-PH') : '—'}</td>
+                <td>${p.staff_name || '—'}</td>
+                <td style="font-size:0.78rem; color:var(--ink-muted);">${formatDate(p.stockin_date)}</td>
+                <td style="font-size:0.8rem; color:var(--ink-muted);">${escapeHtml(p.remarks || '—')}</td>
+              </tr>`).join('')}</tbody>
+          </table>`
+        : `<div class="panel-empty" style="padding:20px;">No purchases recorded yet.</div>`;
+    } catch (err) {
+      document.getElementById('purchasesWrap').innerHTML = `<div class="admin-error"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-0.15em; margin-right:4px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>${err.message}</div>`;
+    }
+  }
+
+  function updateItemDropdown() {
+    const itemType = document.getElementById('pItemType').value;
+    const itemSelect = document.getElementById('pItemId');
+    
+    if (itemType === 'inventory') {
+      itemSelect.innerHTML = inventoryItems.map(i => 
+        `<option value="${i.id}">${escapeHtml(i.name)} (${escapeHtml(i.unit)})</option>`
+      ).join('');
+    } else {
+      itemSelect.innerHTML = menuItems.map(i => 
+        `<option value="${i.id}">${escapeHtml(i.name)}</option>`
+      ).join('');
+    }
+  }
+
+  function openModal() {
+    const itemTypeSelect = document.getElementById('pItemType');
+    
+    // Default to menu items (legacy mode) if migration not supported
+    if (!supportsMigration || inventoryItems.length === 0) {
+      itemTypeSelect.value = 'menu';
+      // Hide inventory option if not supported
+      itemTypeSelect.querySelector('option[value="inventory"]').style.display = 
+        (supportsMigration && inventoryItems.length > 0) ? '' : 'none';
+    } else {
+      itemTypeSelect.value = 'inventory';
+    }
+    
+    updateItemDropdown();
+    document.getElementById('pQty').value = '';
+    document.getElementById('pExpiry').value = '';
+    document.getElementById('pRemarks').value = '';
+    document.getElementById('pError').style.display = 'none';
+    toggleModal(true);
+  }
+
+  async function savePurchase() {
+    const itemType = document.getElementById('pItemType').value;
+    const itemId = document.getElementById('pItemId').value;
+    const quantity = Number(document.getElementById('pQty').value);
+    const expiration_date = document.getElementById('pExpiry').value || null;
+    const remarks = document.getElementById('pRemarks').value.trim() || null;
+    const errEl = document.getElementById('pError');
+
+    if (!itemId || !quantity || quantity <= 0) {
+      errEl.textContent = 'Select an item and enter a positive quantity.';
+      errEl.style.display = 'block';
+      return;
+    }
+
+    const payload = {
+      quantity,
+      expiration_date,
+      remarks
+    };
+
+    if (itemType === 'inventory') {
+      payload.inventory_id = Number(itemId);
+    } else {
+      payload.menu_id = Number(itemId);
+    }
+
+    try {
+      console.log('Sending purchase payload:', payload);
+      const res = await adminFetch('/api/admin/purchases/create', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      console.log('Backend response:', { status: res.status, data });
+      if (!res.ok) {
+        // Show the detailed error message from backend
+        throw new Error(data.message || data.error || 'Could not save purchase.');
+      }
+      toggleModal(false);
+      loadPurchases();
+    } catch (err) {
+      errEl.textContent = err.message;
+      errEl.style.display = 'block';
+      console.error('Purchase error:', err);
+    }
+  }
+</script>
+</body>
+</html>
