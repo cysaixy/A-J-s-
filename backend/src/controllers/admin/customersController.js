@@ -56,7 +56,7 @@ export async function createCustomer(req, res, next) {
     }
 
     // Generate non-null fallback email if none provided (since customers.email column is NOT NULL)
-    const safeEmail = cleanEmail || `walkin-${cleanPhone.replace(/\D/g, '') || Date.now()}@theyos.local`;
+    const safeEmail = cleanEmail || `walkin-${cleanPhone.replace(/\D/g, '') || Date.now()}@ajsfoodflix.local`;
 
     const { rows } = await pool.query(
       `INSERT INTO customers (name, phone, email)

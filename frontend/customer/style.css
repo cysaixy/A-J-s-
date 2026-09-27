@@ -1,32 +1,33 @@
 :root {
-  --bone: #121315;
-  --ink: #FAF8F4;
-  --brass: #A3844A;
-  --stone: #1C1E22;
-  --dark: #121315;
-  --line: rgba(250,248,244,0.12);
-  --header-bg: rgba(12, 13, 15, 0.95);
-  --component-bg: #1C1E22;
+  --bone: #09090b;
+  --ink: #ffffff;
+  --brass: #ffffff;
+  --brass-dark: #e4e4e7;
+  --stone: #18181b;
+  --dark: #000000;
+  --line: rgba(255, 255, 255, 0.14);
+  --header-bg: rgba(9, 9, 11, 0.96);
+  --component-bg: #121214;
 }
 body, body.light-theme {
-  --bone: #FAF8F4; --ink: #15171A; --brass: #A3844A; --stone: #EBE6DD;
-  --dark: #121315; --line: rgba(21,23,26,0.12);
-  --header-bg: rgba(250, 248, 244, 0.95); --component-bg: #ffffff;
+  --bone: #ffffff; --ink: #09090b; --brass: #09090b; --brass-dark: #27272a; --stone: #f4f4f5;
+  --dark: #000000; --line: rgba(0, 0, 0, 0.12);
+  --header-bg: rgba(255, 255, 255, 0.96); --component-bg: #ffffff;
 }
 body.menu-page-theme, body.dark-theme {
-  --bone: #121315; --ink: #FAF8F4; --brass: #A3844A; --stone: #1C1E22;
-  --dark: #121315; --line: rgba(250,248,244,0.12);
-  --header-bg: rgba(12, 13, 15, 0.98); --component-bg: #1C1E22;
+  --bone: #09090b; --ink: #ffffff; --brass: #ffffff; --brass-dark: #e4e4e7; --stone: #18181b;
+  --dark: #000000; --line: rgba(255, 255, 255, 0.14);
+  --header-bg: rgba(9, 9, 11, 0.98); --component-bg: #121214;
 }
 body.menu-page-theme.light-theme {
-  --bone: #FAF8F4; --ink: #15171A; --brass: #A3844A; --stone: #EBE6DD;
-  --dark: #121315; --line: rgba(21,23,26,0.12);
-  --header-bg: rgba(250, 248, 244, 0.95); --component-bg: #ffffff;
+  --bone: #ffffff; --ink: #09090b; --brass: #09090b; --brass-dark: #27272a; --stone: #f4f4f5;
+  --dark: #000000; --line: rgba(0, 0, 0, 0.12);
+  --header-bg: rgba(255, 255, 255, 0.96); --component-bg: #ffffff;
 }
 body:not(.menu-page-theme).dark-theme {
-  --bone: #121315; --ink: #FAF8F4; --brass: #A3844A; --stone: #1C1E22;
-  --dark: #121315; --line: rgba(250,248,244,0.12);
-  --header-bg: rgba(12, 13, 15, 0.98); --component-bg: #1C1E22;
+  --bone: #09090b; --ink: #ffffff; --brass: #ffffff; --brass-dark: #e4e4e7; --stone: #18181b;
+  --dark: #000000; --line: rgba(255, 255, 255, 0.14);
+  --header-bg: rgba(9, 9, 11, 0.98); --component-bg: #121214;
 }
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html { scroll-behavior: smooth; }
@@ -133,7 +134,7 @@ body:not(.menu-page-theme) .hero-video-bg, body.menu-page-theme.light-theme .her
 .btn:hover { background: transparent; color: var(--brass); }
 .btn-outline { background: transparent; color: var(--ink); border: 1px solid var(--line); }
 .btn-outline:hover { background: var(--ink); color: var(--bone); }
-.marquee { background: var(--brass); color: var(--dark); overflow: hidden; white-space: nowrap; padding: 14px 0; position: relative; z-index: 2; }
+.marquee { background: #000000; color: #ffffff; border-top: 1px solid rgba(255,255,255,0.15); border-bottom: 1px solid rgba(255,255,255,0.15); overflow: hidden; white-space: nowrap; padding: 14px 0; position: relative; z-index: 2; }
 .marquee-track { display: inline-block; animation: scroll 30s linear infinite; }
 .marquee span { font-family: 'Archivo', sans-serif; font-weight: 900; text-transform: uppercase; font-size: 1.05rem; letter-spacing: 0.02em; padding: 0 26px; }
 @keyframes scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }

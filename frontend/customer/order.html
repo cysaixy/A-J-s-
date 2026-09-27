@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Order Terminal — The~Yo's</title>
+<title>Order Terminal — A&J's Foodflix</title>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;900&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css?v=5">
 <style>
@@ -341,7 +341,7 @@
 <header>
   <a href="index.html" class="logo-link">
     <img src="../pics&vids/the-yo's_logo.jpg" alt="Logo" class="logo-img">
-    <span class="logo-text">The~Yo's</span>
+    <span class="logo-text">A&J's Foodflix</span>
   </a>
  <nav id="siteNav">
     <ul>
@@ -1359,7 +1359,7 @@
       <div class="confirmation-card">
         <div class="confirmation-check"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
         <h3>Order Confirmed!</h3>
-        <p>Your order has been sent to The~Yo's. We'll prepare it as soon as it is confirmed.</p>
+        <p>Your order has been sent to A&J's Foodflix. We'll prepare it as soon as it is confirmed.</p>
         <div class="confirmation-details">
           <div><span>Order number</span><strong>#${escapeReceiptHtml(orderId)}</strong></div>
           <div><span>Payment method</span><strong>${escapeReceiptHtml(paymentChoice)}</strong></div>
@@ -1561,7 +1561,7 @@
   }
 
   // Feedback Section Handlers & Persistence
-  const REVIEWS_STORAGE_KEY = 'theyos_guest_reviews';
+  const REVIEWS_STORAGE_KEY = 'ajs_guest_reviews';
   const DEFAULT_REVIEWS = [
     {
       name: 'Aaron Lavado',
@@ -1623,9 +1623,9 @@
 
     if (isPrivate) {
       try {
-        const privateNotes = JSON.parse(localStorage.getItem('theyos_private_notes') || '[]');
+        const privateNotes = JSON.parse(localStorage.getItem('ajs_private_notes') || '[]');
         privateNotes.unshift({ name, stars: chosenRating, text: txt, date: new Date().toLocaleDateString('en-PH', { dateStyle: 'medium' }) });
-        localStorage.setItem('theyos_private_notes', JSON.stringify(privateNotes));
+        localStorage.setItem('ajs_private_notes', JSON.stringify(privateNotes));
       } catch (err) {}
       alert(`✓ Thank you, ${name}. Your message was sent privately to management.`);
     } else {
@@ -1669,7 +1669,7 @@
 <footer>
   <div class="wrap">
     <div class="footer-grid">
-        <div class="footer-logo">The~Yo's</div>
+        <div class="footer-logo">A&J's Foodflix</div>
         <p>A comforting community Resto Bar offering delicious meals to Baggao.</p>
       </div>
       <div>
@@ -1683,11 +1683,11 @@
         <a href="reservations.html">Reserve a Table</a>
         <a href="my-orders.html">Track My Order</a>
         <a href="https://www.facebook.com/profile.php?id=61555628762441" target="_blank">Facebook Page</a>
-        <a href="https://www.tiktok.com/@theyos.restaurant" target="_blank">TikTok</a>
+        <a href="https://www.tiktok.com/@ajsfoodflix" target="_blank">TikTok</a>
       </div>
     </div>
     <div class="foot-bottom">
-      <span>&copy; <span id="year"></span> The~Yo's Resto Bar.</span>
+      <span>&copy; <span id="year"></span> A&J's Foodflix.</span>
       <span>Baggao, Cagayan &middot; Made with care.</span>
     </div>
   </div>

@@ -1,5 +1,5 @@
 /* ==========================================================================
-   The~Yo's — Shared "Quick Cart" engine
+   A&J's Foodflix — Shared "Quick Cart" engine
    --------------------------------------------------------------------------
    Lightweight, page-agnostic cart used on the public-facing pages (Home,
    Menu) so guests can browse and tap "Add" before they've committed to the

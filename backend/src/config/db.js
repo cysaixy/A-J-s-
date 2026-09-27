@@ -5,39 +5,33 @@ import dotenv from 'dotenv';
 dotenv.config({ quiet: true });
 
 let connectionString =
+  process.env.DIRECT_URL ||
   process.env.POSTGRES_URL_DATABASE_URL ||
   process.env.DATABASE_URL ||
   process.env.POSTGRES_URL;
 
 const isLocal =
-  connectionString &&
-  (connectionString.includes('localhost') || connectionString.includes('127.0.0.1'));
-
-// If hosted Postgres connection string uses legacy sslmode aliases (e.g. sslmode=require),
-// upgrade to sslmode=verify-full to satisfy pg-connection-string and eliminate stderr security warnings in Vercel logs.
-if (connectionString && !isLocal) {
-  connectionString = connectionString.replace(/([?&]sslmode=)(?:require|prefer|verify-ca)(?=&|$)/, '$1verify-full');
-}
+  !connectionString ||
+  connectionString.includes('localhost') ||
+  connectionString.includes('127.0.0.1');
 
 const pool = connectionString
   ? new Pool({
     connectionString:
-      isLocal
-        ? connectionString
-        : !connectionString.includes('-pooler')
-          ? (() => {
-              const hostMatch = connectionString.match(/@([^\/]+)/);
-              if (hostMatch) {
-                const host = hostMatch[1];
-                const newHost = host.replace(/\.c-/, '-pooler.c-');
-                return connectionString.replace(host, newHost);
-              }
-              return connectionString;
-            })()
-          : connectionString,
-    ssl: isLocal ? false : { rejectUnauthorized: true },
+      !isLocal && connectionString.includes('.c-') && !connectionString.includes('-pooler')
+        ? (() => {
+            const hostMatch = connectionString.match(/@([^\/]+)/);
+            if (hostMatch) {
+              const host = hostMatch[1];
+              const newHost = host.replace(/\.c-/, '-pooler.c-');
+              return connectionString.replace(host, newHost);
+            }
+            return connectionString;
+          })()
+        : connectionString,
+    ssl: isLocal ? false : { rejectUnauthorized: false },
     options: '-c timezone=Asia/Manila',
-    max: 2,
+    max: 10,
     idleTimeoutMillis: 30_000,
     connectionTimeoutMillis: 15_000,
   })
@@ -48,7 +42,7 @@ const pool = connectionString
     port: process.env.DB_PORT,
     database: process.env.DB_NAME,
     options: '-c timezone=Asia/Manila',
-    max: 2,
+    max: 10,
     idleTimeoutMillis: 30_000,
     connectionTimeoutMillis: 15_000,
   });

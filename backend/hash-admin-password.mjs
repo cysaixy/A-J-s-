@@ -1,10 +1,10 @@
 // hash-admin-password.mjs
 // Run locally with:
-//   node hash-admin-password.mjs "YourChosenPassword" "admin@theyos.com" "Admin Name"
+//   node hash-admin-password.mjs "YourChosenPassword" "admin@ajsfoodflix.com" "A&J's Admin"
 //
 // Then copy and run the printed SQL in your hosted PostgreSQL database (Neon / Supabase SQL Editor).
 // Or pass --apply to run it directly against the database configured in your environment:
-//   node hash-admin-password.mjs "YourChosenPassword" "admin@theyos.com" "Admin Name" --apply
+//   node hash-admin-password.mjs "YourChosenPassword" "admin@ajsfoodflix.com" "A&J's Admin" --apply
 
 import bcrypt from "bcrypt";
 import dotenv from "dotenv";
@@ -14,11 +14,11 @@ const args = process.argv.slice(2);
 const shouldApply = args.includes('--apply');
 const filteredArgs = args.filter(a => a !== '--apply');
 
-const [password, email = 'admin@theyos.com', name = 'Admin'] = filteredArgs;
+const [password, email = 'admin@ajsfoodflix.com', name = "A&J's Admin"] = filteredArgs;
 
 if (!password) {
   console.error('Usage: node hash-admin-password.mjs "YourPassword" [email] [name] [--apply]');
-  console.error('Example: node hash-admin-password.mjs "admin123" "admin@theyos.com" "The Yos Admin"');
+  console.error('Example: node hash-admin-password.mjs "admin123" "admin@ajsfoodflix.com" "A&J\'s Admin"');
   process.exit(1);
 }
 

@@ -20,7 +20,7 @@ const ALLOWED_PREVIOUS_STATUSES = {
 // on every subsequent order that doesn't have a real customer attached.
 // Staff can still search and attach a real customer when it's useful
 // (repeat customers, loyalty tracking), but it's optional, not required.
-const WALK_IN_EMAIL = 'walkin@theyos.pos';
+const WALK_IN_EMAIL = 'walkin@ajsfoodflix.pos';
 
 async function getOrCreateWalkInCustomerId(client) {
   const existing = await client.query(
@@ -268,7 +268,7 @@ export async function createPosOrder(req, res, next) {
       if (!resolvedCustomerId && resolvedCustomerName) {
         // Customer email is optional in the POS. The database still needs a
         // unique value, so use an internal address only when one was not given.
-        const fallbackEmail = `pos-${(resolvedCustomerPhone || Date.now()).replace(/\D/g, '') || Date.now()}-${Date.now()}@theyos.local`;
+        const fallbackEmail = `pos-${(resolvedCustomerPhone || Date.now()).replace(/\D/g, '') || Date.now()}-${Date.now()}@ajsfoodflix.local`;
         resolvedCustomerEmail = resolvedCustomerEmail || fallbackEmail;
         const { rows: newCust } = await client.query(
           `INSERT INTO customers (name, phone, address, email)

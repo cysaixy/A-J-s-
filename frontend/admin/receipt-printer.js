@@ -1,14 +1,14 @@
-// receipt-printer.js — Dual Bluetooth & 58mm Thermal Receipt Printer Manager for The Yo's POS
+// receipt-printer.js — Dual Bluetooth & 58mm Thermal Receipt Printer Manager for A&J's Foodflix POS
 // Supports 2 separate printers (Counter Printer + Kitchen Printer) or 2 copies on a single printer.
 // Specially tailored for Xprinter XP-58IIH and ESC/POS compatible thermal printers.
 
-const STORAGE_KEY_SETTINGS = 'theyos_receipt_settings';
+const STORAGE_KEY_SETTINGS = 'ajs_receipt_settings';
 const DEFAULT_SETTINGS = {
-  storeName: "THE YO'S",
-  tagline: 'Restaurant & Coffee Bar',
-  address: 'General Santos City',
-  phone: '0912 345 6789',
-  footerNote: 'Thank you for your visit!\nPlease come again.',
+  storeName: "A&J'S FOODFLIX",
+  tagline: "Foodflix & Refreshments",
+  address: "General Santos City",
+  phone: "0912 345 6789",
+  footerNote: "Thank you for your visit!\nPlease come again.",
   autoPrintPos: false,
   autoPrintTarget: 'both', // 'both', 'counter', 'kitchen'
   printDoubleIfSingle: true, // If only 1 printer is connected, print 2 copies (Customer + Kitchen)
@@ -358,7 +358,7 @@ class ReceiptPrinterManager {
     pushBytes(0x1b, 0x61, 0x01); // Center
     pushBytes(0x1d, 0x21, 0x11); // Double width & height
     pushBytes(0x1b, 0x45, 0x01); // Bold ON
-    pushLine(s.storeName || "THE YO'S");
+    pushLine(s.storeName || "A&J'S FOODFLIX");
     pushBytes(0x1d, 0x21, 0x00); // Normal size
     pushBytes(0x1b, 0x45, 0x00); // Bold OFF
 
@@ -478,7 +478,7 @@ class ReceiptPrinterManager {
       const footerLines = s.footerNote.split('\n');
       footerLines.forEach((l) => pushLine(l.trim()));
     }
-    pushLine(`*** THE YO'S POS · ${copyType} ***`);
+    pushLine(`*** A&J'S FOODFLIX POS · ${copyType} ***`);
 
     // Feed lines & cut
     pushLine('\n\n\n\n');
@@ -1120,7 +1120,7 @@ function renderThermalReceiptHtml(data, settings, copyType = 'CUSTOMER RECEIPT')
   return `
     <div class="thermal-receipt">
       <div class="tr-header">
-        <div class="tr-store-name">${escapeHtml(s.storeName || "THE YO'S")}</div>
+        <div class="tr-store-name">${escapeHtml(s.storeName || "A&J'S FOODFLIX")}</div>
         ${s.tagline ? `<div class="tr-tagline">${escapeHtml(s.tagline)}</div>` : ''}
         ${s.address ? `<div class="tr-address">${escapeHtml(s.address)}</div>` : ''}
         ${s.phone ? `<div class="tr-phone">Tel: ${escapeHtml(s.phone)}</div>` : ''}
@@ -1218,7 +1218,7 @@ function renderThermalReceiptHtml(data, settings, copyType = 'CUSTOMER RECEIPT')
 
       <div class="tr-footer">
         ${s.footerNote ? s.footerNote.split('\n').map((l) => `<div>${escapeHtml(l)}</div>`).join('') : ''}
-        <div class="tr-power">*** THE YO'S POS · ${escapeHtml(copyType)} ***</div>
+        <div class="tr-power">*** A&J'S FOODFLIX POS · ${escapeHtml(copyType)} ***</div>
       </div>
 
       <div class="tr-cut-guide">

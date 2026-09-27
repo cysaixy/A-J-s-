@@ -56,8 +56,8 @@ export function renderCustomerNav({ active = '' } = {}) {
 
   header.innerHTML = `
     <a href="index.html" class="logo-link">
-      <img src="../pics&vids/the-yo's_logo.jpg" alt="The~Yo's Logo" class="logo-img">
-      <span class="logo-text">The~Yo's</span>
+      <img src="../pics&vids/the-yo's_logo.jpg" alt="A&J's Foodflix Logo" class="logo-img">
+      <span class="logo-text">A&J's Foodflix</span>
     </a>
     <nav id="siteNav">
       <ul>

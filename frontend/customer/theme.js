@@ -1,8 +1,8 @@
 /* Shared Hot Coffee ↔ Iced Coffee theme controller for every customer page. */
 (() => {
-  if (window.__theYosCoffeeTheme) return;
-  window.__theYosCoffeeTheme = true;
-  const key = 'theYosTheme';
+  if (window.__ajsFoodflixTheme) return;
+  window.__ajsFoodflixTheme = true;
+  const key = 'ajsFoodflixTheme';
   const init = () => {
     const body = document.body, list = document.querySelector('#siteNav ul');
     if (!body || !list) return;

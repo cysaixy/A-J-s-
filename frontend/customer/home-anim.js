@@ -1,4 +1,4 @@
-/* The~Yo's GSAP-style homepage motion.
+/* A&J's Foodflix GSAP-style homepage motion.
    Uses GSAP + ScrollTrigger (CDN). Every animated state is gated behind
    body.js-anim so the page stays fully readable without JS or with
    prefers-reduced-motion enabled. */
@@ -80,10 +80,10 @@
       // Same four steps used by the no-GSAP fallback (scroll-effects.js),
       // kept here so the copy updates even when GSAP is driving the show.
       const steps = [
-        ["01 / 04 \u00b7 You're on the road", "Follow the way to The~Yo's Resto Bar in the heart of Baggao.", "Walk to<br>The~Yo's."],
-        ["02 / 04 \u00b7 Approaching Baggao", "The road gets closer to the heart of Baggao.", "Walk to<br>The~Yo's."],
-        ["03 / 04 \u00b7 There you are", "The~Yo's Resto Bar is just ahead.", "Walk to<br>The~Yo's."],
-        ["04 / 04 \u00b7 You've arrived", "Welcome to The~Yo's Resto Bar.", "You've<br>arrived."]
+        ["01 / 04 \u00b7 You're on the road", "Follow the way to A&J's Foodflix in the heart of Baggao.", "Walk to<br>A&J's Foodflix."],
+        ["02 / 04 \u00b7 Approaching Baggao", "The road gets closer to the heart of Baggao.", "Walk to<br>A&J's Foodflix."],
+        ["03 / 04 \u00b7 There you are", "A&J's Foodflix is just ahead.", "Walk to<br>A&J's Foodflix."],
+        ["04 / 04 \u00b7 You've arrived", "Welcome to A&J's Foodflix.", "You've<br>arrived."]
       ];
       let activeStep = -1;
       const setStep = i => {
