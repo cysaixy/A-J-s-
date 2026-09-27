@@ -1,8 +1,12 @@
 {
-  "name": "the-yos-system",
+  "name": "ajs-foodflix-system",
   "version": "1.0.0",
   "private": true,
   "type": "module",
+  "scripts": {
+    "dev": "npm --prefix backend run dev",
+    "start": "npm --prefix backend start"
+  },
   "dependencies": {
     "@prisma/client": "6.19.3",
     "@upstash/ratelimit": "2.0.8",
