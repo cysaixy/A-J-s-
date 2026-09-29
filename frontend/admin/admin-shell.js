@@ -460,8 +460,8 @@ export function renderAdminShell({ active, title }) {
       <div class="admin-sidebar-backdrop" id="adminSidebarBackdrop"></div>
       <aside class="admin-sidebar">
         <div class="admin-logo">
-          <span class="mark">AJ</span>
-          <span class="brand-label">A&J'S FOODFLIX</span>
+          <span class="mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2.5 13 6.5"/><path d="M5 8c0-1.7 3.1-3 7-3s7 1.3 7 3"/><path d="M4.5 8h15"/><path d="M6 8l1.3 11.6A1.6 1.6 0 0 0 8.9 21h6.2a1.6 1.6 0 0 0 1.6-1.4L18 8"/><circle cx="10" cy="17" r=".9" fill="currentColor" stroke="none"/><circle cx="13.5" cy="17.4" r=".9" fill="currentColor" stroke="none"/><circle cx="12" cy="14.3" r=".9" fill="currentColor" stroke="none"/></svg></span>
+          <span class="brand-label"><b>A&amp;J's</b><small>Foodflix</small></span>
           <button class="sidebar-toggle" id="adminSidebarToggle" type="button" aria-label="Minimize sidebar" title="Minimize sidebar">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
               <path d="M4 6h16M4 12h16M4 18h16"/>
