@@ -3,492 +3,846 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>A&J's Foodflix — Baggao, Cagayan</title>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;900&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=5">
+<title>A&J's Foodflix — Milktea, Snacks & Wings | Baggao, Cagayan</title>
+<meta name="description" content="A&J's Foodflix serves premium milktea, crispy wings, snacks & espresso in Baggao, Cagayan. Order online for dine-in, pickup or delivery.">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=6">
 <link rel="stylesheet" href="animations.css">
 <style>
-  /* ============ GSAP-STYLE HOMEPAGE ============ */
+  /* ============ A&J'S FOODFLIX HOMEPAGE ============ */
   html { scroll-behavior: auto; }
-  body.home-gsap {
-    --bone: #FAF8F4; --ink: #15171A; --brass: #A3844A;
-    --stone: #EBE6DD; --dark: #121315;
-    --line: rgba(21,23,26,.12); --header-bg: rgba(250,248,244,.95);
-    --component-bg: #ffffff;
-    --hp-bg: #FAF8F4; --hp-panel: #ffffff; --hp-card: #ffffff;
-    --hp-ink: #15171A; --hp-ink-soft: rgba(21,23,26,.62); --hp-ink-faint: rgba(21,23,26,.45);
-    --hp-line: rgba(21,23,26,.12); --hp-line-strong: rgba(21,23,26,.16);
-    --hp-grid: rgba(21,23,26,.035); --hp-word-stroke: rgba(21,23,26,.06);
-    --hp-glow-a: rgba(163,132,74,.13); --hp-glow-b: rgba(163,132,74,.05);
-    --hp-photo-a: #f0e9dc; --hp-photo-b: #e5dac7;
-    --hp-plate-a: #cba86a; --hp-plate-b: #8a6d3a;
-    --hp-spec-a: #d9bd84; --hp-spec-b: #a3844a;
-    --hp-gt-a: #e0cba0; --hp-gt-b: #b89a64;
-    --hp-sticky: #ffffff; --hp-marquee-text: #121315;
-    padding-top: 0; background: var(--hp-bg); color: var(--hp-ink);
+
+  body.home-page {
+    padding-top: 0;
+    background: var(--bg);
+    color: var(--ink);
   }
-  body.home-gsap.coffee-night {
-    --bone: #121315; --ink: #FAF8F4; --brass: #A3844A;
-    --stone: #1C1E22; --dark: #121315;
-    --line: rgba(250,248,244,.12); --header-bg: rgba(12,13,15,.98);
-    --component-bg: #1C1E22;
-    --hp-bg: #120d09; --hp-panel: #191310; --hp-card: #1b1410;
-    --hp-ink: #f5ead8; --hp-ink-soft: rgba(245,234,216,.66); --hp-ink-faint: rgba(245,234,216,.5);
-    --hp-line: rgba(245,234,216,.14); --hp-line-strong: rgba(245,234,216,.18);
-    --hp-grid: rgba(245,234,216,.04); --hp-word-stroke: rgba(245,234,216,.07);
-    --hp-glow-a: rgba(217,154,78,.17); --hp-glow-b: rgba(217,154,78,.07);
-    --hp-photo-a: #33291c; --hp-photo-b: #17120b;
-    --hp-plate-a: #462e18; --hp-plate-b: #1a120a;
-    --hp-spec-a: #463019; --hp-spec-b: #19110a;
-    --hp-gt-a: #382a16; --hp-gt-b: #1a1410;
-    --hp-sticky: #16100c; --hp-marquee-text: #140f08;
-  }
-  body.js-anim .location-layer { transition: none !important; }
 
   /* ---------- HERO ---------- */
-  .gs-hero {
-    position: relative; min-height: 100vh; min-height: 100svh; display: grid; align-items: center;
-    overflow-x: hidden; padding: 150px 0 90px;
-    background:
-      radial-gradient(980px 560px at 80% 8%, var(--hp-glow-a), transparent 60%),
-      radial-gradient(720px 460px at 4% 96%, var(--hp-glow-b), transparent 55%),
-      var(--hp-bg);
+  .fx-hero {
+    position: relative;
+    min-height: 100vh; min-height: 100svh;
+    display: flex; align-items: center;
+    overflow: hidden;
+    background: var(--ink);
+    color: var(--bg);
   }
-  /* Short desktop viewports (1366x768, 1280x720, 1280x600, etc.) must
-     never squeeze the title/copy to force everything into the window.
-     Only the fixed-height decorative plate graphic is scaled down here,
-     which frees up vertical room without shrinking or compressing any
-     of the actual text content or its spacing. */
-  @media (min-width: 981px) and (max-height: 800px) {
-    .gs-hero { padding: 130px 0 60px; }
-    .gs-hero-figure { height: 340px; }
-    .gs-hero-plate { width: min(250px, 54vw); height: min(250px, 54vw); }
+  .fx-hero::before {
+    content: "";
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 80% 60% at 70% 40%, rgba(255,255,255,.06), transparent 60%);
+    pointer-events: none;
   }
-  @media (min-width: 981px) and (max-height: 650px) {
-    .gs-hero { padding: 115px 0 46px; }
-    .gs-hero-figure { height: 260px; }
-    .gs-hero-plate { width: min(200px, 48vw); height: min(200px, 48vw); }
+  /* Decorative grid dots */
+  .fx-hero::after {
+    content: "";
+    position: absolute; inset: 0; pointer-events: none;
+    background-image: radial-gradient(circle, rgba(255,255,255,.07) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: radial-gradient(ellipse 70% 60% at 60% 30%, #000, transparent 70%);
+    -webkit-mask-image: radial-gradient(ellipse 70% 60% at 60% 30%, #000, transparent 70%);
   }
-  .gs-hero::before {
-    content: ""; position: absolute; inset: 0; pointer-events: none;
-    background-image: linear-gradient(var(--hp-grid) 1px, transparent 1px),
-                      linear-gradient(90deg, var(--hp-grid) 1px, transparent 1px);
-    background-size: 72px 72px;
-    -webkit-mask-image: radial-gradient(ellipse 80% 70% at 60% 30%, #000, transparent 75%);
-    mask-image: radial-gradient(ellipse 80% 70% at 60% 30%, #000, transparent 75%);
+
+  .fx-hero-inner {
+    position: relative; z-index: 2;
+    width: min(1200px, calc(100% - 72px));
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1.2fr .8fr;
+    gap: 48px;
+    align-items: center;
+    padding: 140px 0 100px;
   }
-  .gs-hero-word {
-    position: absolute; top: 2%; right: -4%; z-index: 0; pointer-events: none; user-select: none;
-    font: 900 clamp(5rem,17vw,16rem)/1 'Archivo', sans-serif; letter-spacing: -.06em;
-    text-transform: uppercase; color: transparent; white-space: nowrap;
-    -webkit-text-stroke: 1px var(--hp-word-stroke);
+
+  .fx-eyebrow {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,.5);
   }
-  .gs-hero-inner {
-    position: relative; z-index: 2; width: min(1200px, calc(100% - 80px)); margin: 0 auto;
-    display: grid; grid-template-columns: 1.2fr .8fr; gap: 40px; align-items: center;
+  .fx-eyebrow::before {
+    content: "";
+    width: 28px; height: 2px;
+    background: rgba(255,255,255,.3);
+    border-radius: 1px;
   }
-  .gs-eyebrow {
-    display: inline-flex; align-items: center; gap: 12px;
-    font: 700 .68rem 'Space Mono', monospace; letter-spacing: .22em;
-    text-transform: uppercase; color: var(--brass);
+
+  .fx-title {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 800;
+    font-size: clamp(3rem, 9vw, 7.5rem);
+    line-height: .9;
+    letter-spacing: -.05em;
+    color: #fff;
+    margin: 20px 0 12px;
   }
-  .gs-eyebrow::before { content: ""; width: 34px; height: 1px; background: var(--brass); }
-  .gs-title {
-    font: 900 clamp(3.1rem,10vw,9.5rem)/.84 'Archivo', sans-serif;
-    text-transform: uppercase; letter-spacing: -.045em; color: var(--ink); margin: 18px 0 8px;
-    /* Flex + align-items:flex-end replaces reliance on inline
-       vertical-align/line-height (which is sensitive to per-glyph metrics
-       and to the GSAP entrance transform still settling on the
-       last-staggered letter) so every letter, including the final S,
-       is guaranteed to rest on the exact same baseline at every screen
-       size. flex-wrap:nowrap + white-space:nowrap guarantee the title
-       can never break onto a second line. */
-    display: flex; flex-wrap: nowrap; align-items: flex-end; white-space: nowrap;
+  .fx-title .fx-title-accent {
+    display: block;
+    color: rgba(255,255,255,.3);
+    font-size: .55em;
+    letter-spacing: -.02em;
+    margin-top: 6px;
   }
-  .gs-title .l { display: inline-block; overflow: hidden; vertical-align: bottom; padding-bottom: .04em; margin-bottom: -.04em; }
-  .gs-sub {
-    font: 700 clamp(1.15rem,2.6vw,2rem)/.9 'Archivo', sans-serif; text-transform: uppercase;
-    letter-spacing: -.02em; color: var(--brass); margin: 0 0 22px;
+
+  .fx-subtitle {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1.05rem;
+    color: rgba(255,255,255,.55);
+    max-width: 440px;
+    margin: 0 0 32px;
+    line-height: 1.65;
   }
-  .gs-hero-desc { max-width: 460px; color: var(--hp-ink-soft); font-size: 1.02rem; margin: 0 0 32px; }
-  .gs-hero-cta { display: flex; gap: 14px; flex-wrap: wrap; }
-  .gs-hero-figure { position: relative; height: 430px; display: grid; place-items: center; }
-  .gs-hero-figure::before {
-    content: ""; position: absolute; inset: 12% 6%;
-    background: linear-gradient(140deg, var(--hp-photo-a), var(--hp-bg) 70%); border-radius: 50%;
-    box-shadow: 0 40px 80px -30px rgba(0,0,0,.7);
+
+  .fx-hero-cta { display: flex; gap: 12px; flex-wrap: wrap; }
+  .fx-hero-cta .btn {
+    background: #fff; color: #111; border-color: #fff;
   }
-  .gs-hero-plate {
-    position: relative; z-index: 2; width: min(300px, 64vw); height: min(300px, 64vw);
-    border-radius: 50%; background: linear-gradient(160deg, var(--hp-plate-a), var(--hp-plate-b));
-    border: 1px solid var(--hp-line); display: grid; place-items: center;
+  .fx-hero-cta .btn:hover {
+    background: transparent; color: #fff;
   }
-  .gs-hero-plate svg { width: 110px; height: 110px; stroke: rgba(248,241,228,.85); fill: none; stroke-width: 1.2; }
-  .gs-hero-plate .gs-steam {
-    position: absolute; inset: 0; border-radius: 50%; mix-blend-mode: screen;
-    background: radial-gradient(ellipse 60% 40% at 50% 12%, rgba(255,220,170,.22), transparent 70%);
-    animation: steam 6s ease-in-out infinite;
+  .fx-hero-cta .btn-outline {
+    background: transparent; color: #fff;
+    border-color: rgba(255,255,255,.25);
   }
-  @keyframes steam { 0%,100% { opacity:.4; transform: translateY(0) scale(1); } 50% { opacity:.75; transform: translateY(-8px) scale(1.05); } }
-  .gs-hero-plate .plate-label {
-    position: absolute; bottom: -34px; font: 400 .6rem 'Space Mono', monospace;
-    letter-spacing: .08em; text-transform: uppercase; color: var(--hp-ink-faint);
+  .fx-hero-cta .btn-outline:hover {
+    background: #fff; color: #111;
+    border-color: #fff;
   }
-  .gs-scroll-cue {
-    position: absolute; left: 40px; bottom: 28px; z-index: 3;
-    display: flex; flex-direction: column; gap: 12px; align-items: center;
-    font: 700 .62rem 'Space Mono', monospace; letter-spacing: .24em;
-    text-transform: uppercase; color: var(--hp-ink-faint);
+
+  /* Hero visual — boba cup illustration */
+  .fx-hero-visual {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 420px;
   }
-  .gs-scroll-cue::after {
-    content: ""; width: 1px; height: 58px;
-    background: linear-gradient(var(--brass), transparent);
-    animation: cue 1.8s ease-in-out infinite;
+  .fx-boba-cup {
+    position: relative; z-index: 2;
+    width: 220px; height: 280px;
+    background: linear-gradient(180deg, rgba(255,255,255,.12) 0%, rgba(255,255,255,.04) 100%);
+    border: 1.5px solid rgba(255,255,255,.15);
+    border-radius: 24px 24px 40px 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(10px);
+    overflow: hidden;
   }
-  @keyframes cue { 0%,100% { transform: scaleY(.4); transform-origin: top; } 50% { transform: scaleY(1); transform-origin: top; } }
+  .fx-boba-cup::before {
+    content: "";
+    position: absolute;
+    top: -30px; left: 50%; transform: translateX(-50%);
+    width: 100px; height: 30px;
+    background: rgba(255,255,255,.08);
+    border-radius: 100px 100px 0 0;
+    border: 1.5px solid rgba(255,255,255,.15);
+    border-bottom: none;
+  }
+  /* Straw */
+  .fx-boba-cup::after {
+    content: "";
+    position: absolute;
+    top: -50px; left: 45%;
+    width: 8px; height: 110px;
+    background: rgba(255,255,255,.2);
+    border-radius: 4px;
+    transform: rotate(-10deg);
+  }
+  /* Boba pearls */
+  .fx-pearls {
+    position: absolute;
+    bottom: 30px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    padding: 0 20px;
+  }
+  .fx-pearl {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.2);
+    border: 1px solid rgba(255,255,255,.1);
+    animation: float-pearl 3s ease-in-out infinite;
+  }
+  .fx-pearl:nth-child(2) { animation-delay: .4s; width: 14px; height: 14px; }
+  .fx-pearl:nth-child(3) { animation-delay: .8s; width: 16px; height: 16px; }
+  .fx-pearl:nth-child(4) { animation-delay: 1.2s; }
+  .fx-pearl:nth-child(5) { animation-delay: 1.6s; width: 15px; height: 15px; }
+  .fx-pearl:nth-child(6) { animation-delay: 2s; width: 13px; height: 13px; }
+  .fx-pearl:nth-child(7) { animation-delay: .2s; width: 17px; height: 17px; }
+
+  @keyframes float-pearl {
+    0%, 100% { transform: translateY(0); opacity: .6; }
+    50% { transform: translateY(-6px); opacity: 1; }
+  }
+
+  /* Floating accent circles */
+  .fx-float-circle {
+    position: absolute; border-radius: 50%;
+    border: 1.5px solid rgba(255,255,255,.08);
+    pointer-events: none;
+  }
+  .fx-float-circle:nth-child(1) {
+    width: 180px; height: 180px;
+    top: 5%; right: 10%;
+    animation: floatA 8s ease-in-out infinite;
+  }
+  .fx-float-circle:nth-child(2) {
+    width: 100px; height: 100px;
+    bottom: 15%; left: 5%;
+    animation: floatB 6s ease-in-out infinite;
+  }
+  @keyframes floatA {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(-12px, 18px); }
+  }
+  @keyframes floatB {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(10px, -14px); }
+  }
+
+  .fx-scroll-cue {
+    position: absolute; left: 36px; bottom: 28px; z-index: 3;
+    display: flex; flex-direction: column; gap: 10px; align-items: center;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .64rem;
+    font-weight: 700;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,.3);
+  }
+  .fx-scroll-cue::after {
+    content: "";
+    width: 1px; height: 50px;
+    background: linear-gradient(rgba(255,255,255,.4), transparent);
+    animation: cue 2s ease-in-out infinite;
+  }
+  @keyframes cue {
+    0%, 100% { transform: scaleY(.4); transform-origin: top; }
+    50% { transform: scaleY(1); transform-origin: top; }
+  }
+
   @media (max-width: 980px) {
-    .gs-hero { padding: 120px 0 70px; text-align: center; justify-items: center; }
-    .gs-hero-inner { grid-template-columns: 1fr; width: min(1200px, calc(100% - 44px)); }
-    .gs-title { justify-content: center; }
-    .gs-eyebrow { justify-content: center; } .gs-eyebrow::before { display: none; }
-    .gs-hero-figure { order: -1; height: 250px; }
-    .gs-hero-desc { margin: 0 auto 30px; }
-    .gs-hero-cta { justify-content: center; }
-    .gs-scroll-cue { display: none; }
+    .fx-hero-inner {
+      grid-template-columns: 1fr;
+      width: min(1200px, calc(100% - 44px));
+      text-align: center;
+      padding: 120px 0 80px;
+    }
+    .fx-eyebrow { justify-content: center; }
+    .fx-eyebrow::before { display: none; }
+    .fx-subtitle { margin: 0 auto 28px; }
+    .fx-hero-cta { justify-content: center; }
+    .fx-hero-visual { order: -1; height: 260px; }
+    .fx-boba-cup { width: 160px; height: 200px; }
+    .fx-scroll-cue { display: none; }
   }
 
   /* ---------- MARQUEE ---------- */
-  .gs-marquee {
-    position: relative; z-index: 3; background: var(--brass); color: var(--hp-marquee-text);
-    overflow: hidden; white-space: nowrap; padding: 18px 0;
-    border-block: 1px solid rgba(0,0,0,.28);
+  .fx-marquee {
+    position: relative; z-index: 3;
+    background: var(--bg);
+    color: var(--ink);
+    overflow: hidden; white-space: nowrap;
+    padding: 18px 0;
+    border-bottom: 1px solid var(--line);
   }
-  .gs-marquee-track { display: inline-block; animation: gsScroll 28s linear infinite; }
-  .gs-marquee span { font: 900 clamp(1.25rem,2.6vw,2.1rem)/1 'Archivo', sans-serif; text-transform: uppercase; letter-spacing: .015em; padding: 0 20px; }
-  @keyframes gsScroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-
-  /* ---------- PINNED HORIZONTAL SECTIONS ---------- */
-  .gs-horz { position: relative; background: var(--hp-bg); }
-  .gs-horz-stage { position: relative; }
-  body.js-anim .gs-horz-stage { height: 100vh; overflow: hidden; }
-  .gs-horz-track { display: flex; flex-direction: column; }
-  body.js-anim .gs-horz-track { flex-direction: row; width: max-content; height: 100vh; }
-  .gs-panel { flex: 0 0 100%; display: flex; align-items: center; justify-content: center; padding: 90px 40px; }
-  body.js-anim .gs-panel { flex: 0 0 auto; width: 100vw; height: 100vh; padding: 0 40px; }
-  .gs-panel-inner { width: min(1120px, 100%); margin: 0 auto; }
-  .gs-horz-progress { display: none; }
-  body.js-anim .gs-horz-progress {
-    display: block; position: absolute; left: 0; right: 0; bottom: 0; z-index: 6;
-    height: 2px; background: var(--hp-line);
+  .fx-marquee-track {
+    display: inline-block;
+    animation: fxScroll 32s linear infinite;
   }
-  .gs-horz-progress i { display: block; height: 100%; width: 0; background: var(--brass); }
-
-  .gs-intro .gs-panel-inner { width: min(960px, 100%); }
-  .gs-intro h2 {
-    font: 900 clamp(2.8rem,7.5vw,7.5rem)/.85 'Archivo', sans-serif; text-transform: uppercase;
-    letter-spacing: -.06em; color: var(--ink); margin: 18px 0 22px;
+  .fx-marquee span {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 800;
+    font-size: clamp(1rem, 2vw, 1.5rem);
+    letter-spacing: .01em;
+    padding: 0 16px;
+    text-transform: uppercase;
   }
-  .gs-intro p { color: var(--hp-ink-soft); max-width: 520px; }
-
-  .gs-step { display: grid; grid-template-columns: 1fr .9fr; gap: 60px; align-items: center; }
-  .gs-step-art { display: grid; place-items: center; }
-  .gs-step-art svg { width: min(420px, 100%); height: auto; }
-  .gs-step-index { font: 700 .68rem 'Space Mono', monospace; letter-spacing: .2em; text-transform: uppercase; color: var(--brass); }
-  .gs-step h3 {
-    font: 900 clamp(2rem,4.6vw,4.2rem)/.88 'Archivo', sans-serif; text-transform: uppercase;
-    letter-spacing: -.03em; margin: 16px 0 20px; color: var(--ink);
+  .fx-marquee span::before {
+    content: '◆';
+    margin-right: 16px;
+    font-size: .45em;
+    vertical-align: middle;
+    opacity: .2;
   }
-  .gs-step p { color: var(--hp-ink-soft); max-width: 430px; }
-
-  .gs-cat { display: flex; flex-direction: column; align-items: flex-start; gap: 20px; }
-  .gs-cat-icon {
-    width: 96px; height: 96px; border-radius: 50%; border: 1px solid rgba(201,164,95,.35);
-    background: rgba(201,164,95,.07); display: grid; place-items: center;
-  }
-  .gs-cat-icon svg { width: 44px; height: 44px; stroke: var(--brass); fill: none; stroke-width: 1.3; }
-  .gs-cat h3 {
-    font: 900 clamp(2.4rem,5.4vw,5rem)/.86 'Archivo', sans-serif; text-transform: uppercase;
-    letter-spacing: -.04em; color: var(--ink);
-  }
-  .gs-cat-meta { font: 700 .68rem 'Space Mono', monospace; letter-spacing: .16em; text-transform: uppercase; color: var(--hp-ink-soft); }
-  .gs-cat-link {
-    display: inline-flex; align-items: center; gap: 10px; margin-top: 8px;
-    font: 700 .72rem 'Space Mono', monospace; letter-spacing: .18em; text-transform: uppercase; color: var(--brass);
-  }
-  .gs-cat-link:hover { color: var(--ink); }
-  @media (max-width: 900px) {
-    body.js-anim .gs-panel { width: 88vw; padding: 0 12vw 0 6vw; }
-    .gs-panel { padding: 70px 22px; }
-    .gs-step { grid-template-columns: 1fr; gap: 28px; text-align: center; justify-items: center; }
-    .gs-step p { margin: 0 auto; }
-    .gs-cat { align-items: center; text-align: center; }
-  }
-
-  /* ---------- LOCATION JOURNEY ---------- */
-  /* One continuous pinned scene: the section stays anchored on every
-     breakpoint and scroll only drives the SVG layers + copy below.
-     100dvh (with 100vh fallback for older browsers) is used everywhere,
-     not just desktop, so the pin has a stable box to pin on mobile too. */
-  .find-us { background: var(--hp-bg); position: relative; }
-  #locationJourney { position: relative; }
-  #mapFrame {
-    position: relative; overflow: hidden; display: grid; place-items: center;
-    padding: 0 22px; width: 100%;
-  }
-  body.js-anim #mapFrame { height: 100vh; height: 100dvh; }
-  /* Safety valve: on very short viewports (small phones, landscape),
-     allow the pinned frame to scroll internally rather than clip content -
-     this never fights the page-level pin/scrub since it's a separate,
-     inner scroll container. */
-  @media (max-height: 700px) {
-    body.js-anim #mapFrame { overflow-y: auto; padding: 18px 22px; }
-  }
-  .journey-copy {
-    width: min(1120px, 100%); display: grid; grid-template-columns: 1fr 1fr;
-    gap: 60px; align-items: center; margin: 0 auto;
-  }
-  .journey-copy h2 {
-    font: 900 clamp(2.6rem,6.4vw,6.2rem)/.85 'Archivo', sans-serif; text-transform: uppercase;
-    letter-spacing: -.05em; margin: 16px 0 20px; color: var(--ink);
-  }
-  .journey-copy p { color: var(--hp-ink-soft); max-width: 430px; }
-  .journey-label { font: 700 .68rem 'Space Mono', monospace; letter-spacing: .2em; text-transform: uppercase; color: var(--brass); margin-top: 22px; }
-  .journey-art { position: relative; width: 100%; max-width: 100%; height: min(56vh, 460px); }
-  .journey-art img {
-    position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain;
-    will-change: transform, opacity, filter; max-width: 100%;
-  }
-  .arrival { padding: 26px; border: 1px solid var(--hp-line-strong); background: var(--hp-panel); }
-  body.js-anim .arrival { opacity: 0; transform: translateY(22px); }
-  .arrival h3 { font: 900 clamp(1.7rem,3vw,2.6rem)/.9 'Archivo', sans-serif; text-transform: uppercase; margin-bottom: 14px; color: var(--ink); }
-  .arrival address { font-style: normal; color: var(--hp-ink-soft); line-height: 1.6; }
-  .arrival .hours { display: block; margin: 14px 0; color: var(--brass); font: 700 .66rem 'Space Mono', monospace; text-transform: uppercase; letter-spacing: .08em; }
-  .arrival-actions { display: flex; gap: 10px; flex-wrap: wrap; }
-
-  /* Tablet + mobile: same single scene, same pin - just a stacked,
-     compacted layout so it all still fits inside one screen height. */
-  @media (max-width: 900px) {
-    #mapFrame { padding: 70px 20px; }
-    .journey-copy {
-      grid-template-columns: 1fr; gap: 18px; text-align: center; justify-items: center;
-    }
-    .journey-copy h2 { font-size: clamp(1.9rem, 7.5vw, 3.2rem); margin: 10px 0 12px; }
-    .journey-copy p { margin: 0 auto; font-size: .92rem; }
-    .journey-label { margin-top: 12px; }
-    .journey-art { height: min(30vh, 260px); margin-top: 4px; }
-    .arrival { padding: 18px; }
-    .arrival h3 { font-size: clamp(1.3rem, 5vw, 1.8rem); margin-bottom: 8px; }
-    .arrival address { font-size: .88rem; }
-    .arrival-actions { justify-content: center; }
-    .arrival-actions .btn { flex: 1 1 auto; text-align: center; }
-  }
-  @media (max-width: 520px) {
-    #mapFrame { padding: 60px 16px; }
-    .journey-copy { gap: 12px; }
-    .journey-art { height: min(26vh, 210px); }
-    .arrival { padding: 14px; }
-    .arrival .hours { margin: 10px 0; }
-  }
-
-  /* ---------- SPECIALTY ---------- */
-  .specialty { background: var(--hp-bg); padding: 110px 0; border: none; }
-  .specialty-grid {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center;
-  }
-  .specialty h2 {
-    font: 900 clamp(2rem,4.4vw,3.6rem)/.92 'Archivo', sans-serif; text-transform: uppercase;
-    letter-spacing: -.03em; margin: 16px 0; color: var(--ink);
-  }
-  .specialty p { color: var(--hp-ink-soft); max-width: 440px; }
-  .specialty-price { display: flex; gap: 26px; margin-top: 28px; flex-wrap: wrap; }
-  .specialty-price div { border-left: 2px solid var(--brass); padding-left: 14px; }
-  .specialty-price strong { display: block; font: 700 1.3rem 'Space Mono', monospace; color: var(--brass); }
-  .specialty-price span { font: 600 .66rem 'Space Mono', monospace; text-transform: uppercase; letter-spacing: .06em; color: var(--hp-ink-faint); }
-  .specialty-photo-wrap {
-    display: flex; justify-content: center; align-items: center;
-  }
-  .specialty-photo {
-    width: 380px; height: 380px;
-    border-radius: 50%; overflow: hidden; position: relative;
-    background: #efe9dc;
-    border: 2px solid rgba(201,164,95,.45);
-    box-shadow: 0 20px 45px rgba(0,0,0,.12), 0 0 0 10px rgba(201,164,95,.07);
-    flex-shrink: 0;
-  }
-  .specialty-photo video,
-  .specialty-photo img {
-    width: 100%; height: 100%;
-    object-fit: cover;
-    object-position: center center;
-    display: block;
-  }
-  @media (max-width: 1000px) {
-    .specialty-photo { width: 300px; height: 300px; }
-  }
-  @media (max-width: 900px) {
-    .specialty { padding: 70px 0 40px; }
-    .specialty-grid { grid-template-columns: 1fr; gap: 40px; }
-    .specialty-photo-wrap { order: -1; }
-    .specialty-photo { width: 260px; height: 260px; }
-  }
-
-  /* ---------- SECTION HEADS ---------- */
-  .section-head {
-    display: flex; justify-content: space-between; align-items: flex-end; gap: 30px;
-    margin-bottom: 54px; flex-wrap: wrap; border-bottom: 1px solid var(--hp-line); padding-bottom: 26px;
-  }
-  .section-head h2 {
-    font: 900 clamp(1.9rem,4vw,3.2rem)/.9 'Archivo', sans-serif; text-transform: uppercase;
-    letter-spacing: -.03em; color: var(--ink);
-  }
-  .section-head p { max-width: 340px; color: var(--hp-ink-soft); font-size: .95rem; }
+  @keyframes fxScroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 
   /* ---------- BESTSELLERS ---------- */
-  .best { background: var(--hp-bg); padding: 110px 0; }
-  .ticket-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 18px; }
-  @media (max-width: 900px) { .ticket-grid { grid-template-columns: repeat(2,1fr); } }
-  .ticket {
-    background: var(--hp-card); border: 1px solid var(--hp-line); border-radius: 14px;
-    overflow: hidden; position: relative; transition: transform .2s ease, border-color .2s ease;
-  }
-  .ticket:hover { transform: translateY(-6px); border-color: rgba(201,164,95,.5); }
-  .ticket-photo {
-    aspect-ratio: 1/.82; position: relative; display: grid; place-items: center; color: var(--brass);
-    background: radial-gradient(120% 90% at 30% 20%, #f3ede1, #e6dccb 70%);
-  }
-  .ticket-photo svg { width: 46px; height: 46px; stroke: currentColor; fill: none; stroke-width: 1.3; opacity: .75; }
-  .ticket-badge {
-    position: absolute; top: 12px; left: 12px; background: var(--brass); color: #0b0c0d;
-    font: 700 .58rem 'Space Mono', monospace; letter-spacing: .05em; text-transform: uppercase;
-    padding: 5px 9px; border-radius: 20px;
-  }
-  .ticket-body { padding: 15px 16px 17px; border-top: 1px dashed var(--hp-line); }
-  .ticket-body .name { font: 800 .86rem 'Archivo', sans-serif; text-transform: uppercase; letter-spacing: .01em; display: block; margin-bottom: 8px; color: var(--ink); }
-  .ticket-body .row { display: flex; justify-content: space-between; align-items: center; }
-  .ticket-body .price { font: 700 .95rem 'Space Mono', monospace; color: var(--brass); }
-  .ticket-body .add {
-    width: 30px; height: 30px; border-radius: 9px; background: rgba(201,164,95,.12);
-    border: 1px solid rgba(201,164,95,.35); display: grid; place-items: center;
-    font-size: 1.05rem; cursor: pointer; color: var(--ink);
-  }
-  .ticket-body .add:hover { background: var(--brass); color: #0b0c0d; border-color: var(--brass); }
-  .ticket-body .add.just-added { background: var(--brass) !important; color: #0b0c0d !important; border-color: var(--brass) !important; transform: scale(1.15); transition: all .15s ease; }
+  .fx-bestsellers { background: var(--bg); padding: 100px 0; }
 
-  /* ---------- STATIC MENU CATEGORIES ---------- */
-  .hp-menu-cats { background: var(--hp-bg); padding: 110px 0; border-top: 1px solid var(--hp-line); }
-  .hp-cat-grid {
+  .fx-product-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
+  @media (max-width: 900px) { .fx-product-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 500px) { .fx-product-grid { grid-template-columns: 1fr; } }
+
+  .fx-product-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    overflow: hidden;
+    position: relative;
+    transition: all .28s cubic-bezier(.4,0,.2,1);
+  }
+  .fx-product-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 40px rgba(0,0,0,.06);
+    border-color: var(--ink);
+  }
+  .fx-product-thumb {
+    aspect-ratio: 1 / .85;
+    position: relative;
+    display: grid; place-items: center;
+    background: var(--bg-alt);
+    overflow: hidden;
+  }
+  .fx-product-thumb svg {
+    width: 42px; height: 42px;
+    stroke: var(--ink-faint);
+    fill: none;
+    stroke-width: 1.2;
+    opacity: .4;
+  }
+  .fx-product-badge {
+    position: absolute;
+    top: 12px; left: 12px;
+    background: var(--ink);
+    color: var(--bg);
+    font-family: 'DM Sans', sans-serif;
+    font-size: .62rem;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    padding: 5px 12px;
+    border-radius: 100px;
+  }
+  .fx-product-body {
+    padding: 16px 18px 18px;
+  }
+  .fx-product-body .name {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    font-size: .88rem;
+    letter-spacing: -.01em;
+    display: block;
+    margin-bottom: 10px;
+    color: var(--ink);
+  }
+  .fx-product-body .row {
+    display: flex; justify-content: space-between;
+    align-items: center;
+  }
+  .fx-product-body .price {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: .92rem;
+    color: var(--ink);
+  }
+  .fx-product-body .add {
+    width: 34px; height: 34px;
+    border-radius: 12px;
+    background: var(--accent-soft);
+    border: 1.5px solid var(--line);
+    display: grid; place-items: center;
+    font-size: 1.1rem;
+    cursor: pointer;
+    color: var(--ink);
+    transition: all .2s ease;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 700;
+  }
+  .fx-product-body .add:hover {
+    background: var(--ink);
+    color: var(--bg);
+    border-color: var(--ink);
+    transform: scale(1.1);
+  }
+  .fx-product-body .add.just-added {
+    background: var(--ink) !important;
+    color: var(--bg) !important;
+    border-color: var(--ink) !important;
+    transform: scale(1.15);
+    transition: all .15s ease;
+  }
+
+  /* ---------- HOW IT WORKS ---------- */
+  .fx-how {
+    background: var(--bg-alt);
+    padding: 100px 0;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+  .fx-how-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 20px;
   }
-  @media (max-width: 990px) { .hp-cat-grid { grid-template-columns: repeat(2, 1fr); } }
-  @media (max-width: 540px) { .hp-cat-grid { grid-template-columns: 1fr; } }
+  @media (max-width: 900px) { .fx-how-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 540px) { .fx-how-grid { grid-template-columns: 1fr; } }
+  .fx-how-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 32px 24px;
+    text-align: center;
+    transition: all .28s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .fx-how-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--ink);
+  }
+  .fx-how-number {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 800;
+    font-size: 3.5rem;
+    line-height: 1;
+    color: var(--accent-soft);
+    letter-spacing: -.04em;
+    margin-bottom: 14px;
+    display: block;
+    /* Using ink color with low opacity for B&W style */
+    color: var(--line);
+  }
+  .fx-how-card:hover .fx-how-number { color: var(--ink); }
+  .fx-how-icon {
+    width: 52px; height: 52px;
+    border-radius: 16px;
+    background: var(--accent-soft);
+    display: grid; place-items: center;
+    margin: 0 auto 16px;
+  }
+  .fx-how-icon svg {
+    width: 24px; height: 24px;
+    stroke: var(--ink);
+    fill: none;
+    stroke-width: 1.6;
+  }
+  .fx-how-card h3 {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    font-size: 1.05rem;
+    margin-bottom: 8px;
+    letter-spacing: -.01em;
+  }
+  .fx-how-card p {
+    font-size: .85rem;
+    color: var(--ink-soft);
+    line-height: 1.55;
+  }
 
-  .hp-cat-card {
-    display: flex; flex-direction: column; justify-content: space-between;
-    padding: 30px 24px; border: 1px solid var(--hp-line);
-    background: var(--hp-card); border-radius: 14px;
-    text-decoration: none; color: var(--hp-ink);
-    transition: border-color .22s ease, transform .22s ease, background .22s ease, box-shadow .22s ease;
-    position: relative; overflow: hidden; min-height: 240px;
+  /* ---------- MENU CATEGORIES ---------- */
+  .fx-categories {
+    background: var(--bg);
+    padding: 100px 0;
   }
-  .hp-cat-card:hover {
-    border-color: rgba(201,164,95,.6);
-    background: rgba(201,164,95,.06);
-    transform: translateY(-5px);
-    box-shadow: 0 16px 36px -12px rgba(0,0,0,.5);
+  .fx-cat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
   }
-  .hp-cat-card:focus-visible {
-    outline: 2px solid var(--brass); outline-offset: 3px;
-  }
-  .hp-cat-card:active { transform: translateY(-2px); }
+  @media (max-width: 990px) { .fx-cat-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 540px) { .fx-cat-grid { grid-template-columns: 1fr; } }
 
-  .hp-cat-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 22px; }
-  .hp-cat-icon {
-    width: 52px; height: 52px; border-radius: 50%;
-    border: 1px solid rgba(201,164,95,.35);
-    background: rgba(201,164,95,.1);
-    display: grid; place-items: center; flex-shrink: 0;
+  .fx-cat-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 28px 22px;
+    border: 1.5px solid var(--line);
+    background: var(--surface);
+    border-radius: 20px;
+    text-decoration: none;
+    color: var(--ink);
+    transition: all .28s ease;
+    position: relative;
+    overflow: hidden;
+    min-height: 220px;
   }
-  .hp-cat-icon svg { width: 24px; height: 24px; stroke: var(--brass); fill: none; stroke-width: 1.4; }
-  .hp-cat-badge {
-    font: 700 .66rem 'Space Mono', monospace;
+  .fx-cat-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, var(--accent-soft) 0%, transparent 50%);
+    opacity: 0;
+    transition: opacity .28s ease;
+  }
+  .fx-cat-card:hover::before { opacity: 1; }
+  .fx-cat-card:hover {
+    border-color: var(--ink);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+  }
+  .fx-cat-card:active { transform: translateY(-2px); }
+
+  .fx-cat-top {
+    position: relative; z-index: 1;
+    display: flex; justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 18px;
+  }
+  .fx-cat-icon {
+    width: 48px; height: 48px;
+    border-radius: 14px;
+    background: var(--accent-soft);
+    border: 1.5px solid var(--line);
+    display: grid; place-items: center;
+    flex-shrink: 0;
+    transition: all .28s ease;
+  }
+  .fx-cat-card:hover .fx-cat-icon {
+    background: var(--ink);
+    border-color: var(--ink);
+  }
+  .fx-cat-card:hover .fx-cat-icon svg { stroke: var(--bg); }
+  .fx-cat-icon svg {
+    width: 22px; height: 22px;
+    stroke: var(--ink);
+    fill: none;
+    stroke-width: 1.4;
+    transition: stroke .28s ease;
+  }
+  .fx-cat-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .66rem; font-weight: 700;
+    letter-spacing: .04em; text-transform: uppercase;
+    color: var(--ink-faint);
+    background: var(--accent-soft);
+    padding: 4px 10px;
+    border-radius: 100px;
+  }
+
+  .fx-cat-name {
+    position: relative; z-index: 1;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    font-size: 1.12rem;
+    letter-spacing: -.01em;
+    color: var(--ink);
+    margin-bottom: 8px;
+  }
+  .fx-cat-desc {
+    position: relative; z-index: 1;
+    font-size: .84rem;
+    color: var(--ink-soft);
+    margin-bottom: 18px;
+    line-height: 1.5;
+  }
+  .fx-cat-action {
+    position: relative; z-index: 1;
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .75rem; font-weight: 700;
     letter-spacing: .06em; text-transform: uppercase;
-    color: var(--brass); background: rgba(201,164,95,.12);
-    padding: 4px 10px; border-radius: 20px;
-  }
-
-  .hp-cat-name {
-    font: 900 1.22rem/1.15 'Archivo', sans-serif;
-    text-transform: uppercase; letter-spacing: -.01em;
-    color: var(--hp-ink); margin-bottom: 10px;
-  }
-  .hp-cat-desc {
-    font: 400 .86rem/1.55 'Inter', sans-serif;
-    color: var(--hp-ink-soft); margin-bottom: 20px;
-  }
-  .hp-cat-action {
-    display: inline-flex; align-items: center; gap: 8px;
-    font: 700 .72rem 'Space Mono', monospace; letter-spacing: .08em;
-    text-transform: uppercase; color: var(--brass);
+    color: var(--ink);
     transition: transform .2s ease;
   }
-  .hp-cat-card:hover .hp-cat-action { transform: translateX(4px); }
+  .fx-cat-card:hover .fx-cat-action { transform: translateX(4px); }
+
+  /* ---------- SPECIALTY ---------- */
+  .fx-specialty {
+    background: var(--bg-alt);
+    padding: 100px 0;
+    border-top: 1px solid var(--line);
+  }
+  .fx-specialty-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 56px;
+    align-items: center;
+  }
+  .fx-specialty h2 {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 800;
+    font-size: clamp(1.8rem, 4vw, 3.2rem);
+    letter-spacing: -.03em;
+    line-height: .98;
+    margin: 14px 0;
+    color: var(--ink);
+  }
+  .fx-specialty p {
+    color: var(--ink-soft);
+    max-width: 440px;
+    line-height: 1.6;
+  }
+  .fx-specialty-prices {
+    display: flex; gap: 22px;
+    margin-top: 28px; flex-wrap: wrap;
+  }
+  .fx-specialty-prices div {
+    border-left: 3px solid var(--ink);
+    padding-left: 14px;
+  }
+  .fx-specialty-prices strong {
+    display: block;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: var(--ink);
+  }
+  .fx-specialty-prices span {
+    font-family: 'DM Sans', sans-serif;
+    font-size: .68rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--ink-faint);
+  }
+  .fx-specialty-photo-wrap {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .fx-specialty-photo {
+    width: 340px; height: 340px;
+    border-radius: 40px;
+    overflow: hidden;
+    position: relative;
+    border: 2px solid var(--line);
+    box-shadow: var(--shadow-lg);
+    flex-shrink: 0;
+  }
+  .fx-specialty-photo video,
+  .fx-specialty-photo img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  @media (max-width: 1000px) {
+    .fx-specialty-photo { width: 280px; height: 280px; border-radius: 32px; }
+  }
+  @media (max-width: 900px) {
+    .fx-specialty { padding: 70px 0 50px; }
+    .fx-specialty-grid { grid-template-columns: 1fr; gap: 36px; }
+    .fx-specialty-photo-wrap { order: -1; }
+    .fx-specialty-photo { width: 240px; height: 240px; border-radius: 28px; }
+  }
 
   /* ---------- GALLERY TEASER ---------- */
-  .gallery-teaser { background: var(--hp-bg); padding: 0 0 110px; }
-  .gt-grid { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 14px; height: 300px; }
+  .fx-gallery-teaser {
+    background: var(--bg);
+    padding: 0 0 100px;
+  }
+  .fx-gt-grid {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr 1fr;
+    gap: 12px;
+    height: 300px;
+  }
   @media (max-width: 800px) {
-    .gt-grid { grid-template-columns: 1fr 1fr; height: auto; }
-    .gt-grid .gt-item { aspect-ratio: 1/1; }
-    .gt-grid .gt-item:first-child { grid-column: 1/-1; aspect-ratio: 2/1; }
+    .fx-gt-grid { grid-template-columns: 1fr 1fr; height: auto; }
+    .fx-gt-grid .fx-gt-item { aspect-ratio: 1/1; }
+    .fx-gt-grid .fx-gt-item:first-child { grid-column: 1/-1; aspect-ratio: 2/1; }
   }
-  .gt-item {
-    border-radius: 14px; position: relative; overflow: hidden; display: flex; align-items: flex-end;
-    padding: 22px; color: #f2ecdf; font: 700 .82rem 'Archivo', sans-serif; letter-spacing: .02em; text-transform: uppercase; text-decoration: none;
+  .fx-gt-item {
+    border-radius: 20px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: flex-end;
+    padding: 22px;
+    color: #fff;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    font-size: .82rem;
+    letter-spacing: .01em;
+    text-decoration: none;
   }
-  .gt-item img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform .5s ease; z-index: 0; }
-  .gt-item::before { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(18,19,21,0.15) 0%, rgba(18,19,21,0.85) 100%); z-index: 1; transition: background .3s ease; }
-  .gt-item::after { content: ""; position: absolute; inset: 0; border: 1px solid rgba(201,164,95,.3); border-radius: inherit; opacity: 0; transition: opacity .25s; z-index: 2; }
-  .gt-item:hover img { transform: scale(1.06); }
-  .gt-item:hover::before { background: linear-gradient(180deg, rgba(18,19,21,0.05) 0%, rgba(18,19,21,0.7) 100%); }
-  .gt-item:hover::after { opacity: 1; }
-  .gt-item span { position: relative; z-index: 3; display: inline-flex; align-items: center; gap: 8px; text-shadow: 0 2px 8px rgba(0,0,0,0.8); }
+  .fx-gt-item img {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    transition: transform .5s ease;
+    z-index: 0;
+  }
+  .fx-gt-item::before {
+    content: "";
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg, transparent 30%, rgba(0,0,0,.75) 100%);
+    z-index: 1;
+    transition: background .3s ease;
+  }
+  .fx-gt-item::after {
+    content: "";
+    position: absolute; inset: 0;
+    border: 2px solid rgba(255,255,255,.15);
+    border-radius: inherit;
+    opacity: 0;
+    transition: opacity .25s;
+    z-index: 2;
+  }
+  .fx-gt-item:hover img { transform: scale(1.05); }
+  .fx-gt-item:hover::after { opacity: 1; }
+  .fx-gt-item span {
+    position: relative; z-index: 3;
+    display: inline-flex; align-items: center; gap: 6px;
+    text-shadow: 0 2px 8px rgba(0,0,0,.6);
+  }
+
+  /* ---------- LOCATION ---------- */
+  .fx-location {
+    background: var(--bg);
+    padding: 100px 0;
+    border-top: 1px solid var(--line);
+  }
+  .fx-location-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 52px;
+    align-items: center;
+  }
+  .fx-location h2 {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 800;
+    font-size: clamp(2.2rem, 5.5vw, 4.5rem);
+    line-height: .92;
+    letter-spacing: -.04em;
+    margin: 14px 0 18px;
+    color: var(--ink);
+  }
+  .fx-location p {
+    color: var(--ink-soft);
+    max-width: 400px;
+    margin-bottom: 8px;
+  }
+  .fx-arrival-card {
+    padding: 28px;
+    border: 1.5px solid var(--line);
+    border-radius: 20px;
+    background: var(--surface);
+    box-shadow: var(--shadow-sm);
+  }
+  .fx-arrival-card h3 {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 800;
+    font-size: clamp(1.5rem, 3vw, 2.2rem);
+    letter-spacing: -.02em;
+    margin-bottom: 14px;
+    color: var(--ink);
+  }
+  .fx-arrival-card address {
+    font-style: normal;
+    color: var(--ink-soft);
+    line-height: 1.65;
+    margin-bottom: 4px;
+  }
+  .fx-arrival-card .hours {
+    display: block;
+    margin: 12px 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--ink);
+  }
+  .fx-arrival-actions {
+    display: flex; gap: 10px; flex-wrap: wrap;
+    margin-top: 8px;
+  }
+  @media (max-width: 900px) {
+    .fx-location-grid {
+      grid-template-columns: 1fr; gap: 32px; text-align: center;
+    }
+    .fx-location p { margin: 0 auto 8px; }
+    .fx-arrival-actions { justify-content: center; }
+  }
 
   /* ---------- CTA BAND ---------- */
-  .cta-band { background: var(--hp-panel); border-block: 1px solid var(--hp-line); padding: 80px 0; }
-  .cta-inner { display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
-  .cta-inner h3 { font: 900 1.6rem 'Archivo', sans-serif; text-transform: uppercase; margin-bottom: 6px; color: var(--ink); }
-  .cta-inner p { margin: 0; color: var(--hp-ink-soft); }
-  @media (max-width: 700px) { .cta-inner { flex-direction: column; align-items: flex-start; } }
-
-  footer { border-top: 1px solid var(--hp-line); }
-
-  /* ---------- MOBILE STICKY ORDER BAR ---------- */
-  .sticky-order { display: none; }
-  @media (max-width: 900px) {
-    body.home-gsap { padding-bottom: 78px; }
-    .sticky-order {
-      display: flex; position: fixed; bottom: 0; left: 0; right: 0; z-index: 90;
-      background: var(--hp-panel); padding: 12px 18px; align-items: center; justify-content: space-between;
-      border-top: 1px solid var(--hp-line); box-shadow: 0 -8px 24px rgba(0,0,0,.12);
-    }
-    .sticky-order .txt { color: var(--hp-ink); }
-    .sticky-order .txt strong { display: block; font: 800 .86rem 'Archivo', sans-serif; }
-    .sticky-order .txt span { font: 600 .64rem 'Space Mono', monospace; opacity: .6; }
+  .fx-cta-band {
+    background: var(--ink);
+    color: var(--bg);
+    padding: 72px 0;
   }
+  .fx-cta-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .fx-cta-inner h3 {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 800;
+    font-size: 1.5rem;
+    letter-spacing: -.02em;
+    margin-bottom: 4px;
+  }
+  .fx-cta-inner p {
+    margin: 0;
+    color: rgba(255,255,255,.55);
+    font-size: .92rem;
+  }
+  .fx-cta-inner .btn {
+    background: #fff; color: #111; border-color: #fff;
+  }
+  .fx-cta-inner .btn:hover {
+    background: transparent; color: #fff;
+  }
+  .fx-cta-inner .btn-outline {
+    background: transparent; color: #fff;
+    border-color: rgba(255,255,255,.2);
+  }
+  .fx-cta-inner .btn-outline:hover {
+    background: #fff; color: #111; border-color: #fff;
+  }
+  @media (max-width: 700px) {
+    .fx-cta-inner { flex-direction: column; align-items: flex-start; text-align: left; }
+  }
+
+  /* ---------- MOBILE STICKY BAR ---------- */
+  .fx-sticky-bar { display: none; }
+  @media (max-width: 900px) {
+    body.home-page { padding-bottom: 72px; }
+    .fx-sticky-bar {
+      display: flex;
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 90;
+      background: var(--surface);
+      padding: 12px 18px;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid var(--line);
+      box-shadow: 0 -8px 24px rgba(0,0,0,.06);
+      backdrop-filter: blur(16px);
+    }
+    .fx-sticky-bar .txt { color: var(--ink); }
+    .fx-sticky-bar .txt strong {
+      display: block;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      font-size: .85rem;
+    }
+    .fx-sticky-bar .txt span {
+      font-family: 'DM Sans', sans-serif;
+      font-size: .68rem;
+      font-weight: 500;
+      opacity: .5;
+    }
+  }
+
+  footer { border-top: none; }
 </style>
 </head>
-<body class="home-gsap">
+<body class="home-page">
 
 <header>
   <a href="index.html" class="logo-link">
-    <img src="../pics&vids/the-yo's_logo.jpg" alt="Logo" class="logo-img">
+    <img src="../pics&vids/the-yo's_logo.jpg" alt="A&J's Foodflix Logo" class="logo-img">
     <span class="logo-text">A&J's Foodflix</span>
   </a>
   <nav id="siteNav">
     <ul>
-      
       <li><a href="about.html">About</a></li>
       <li><a href="menu.html">Menu</a></li>
       <li><a href="gallery.html">Gallery</a></li>
@@ -518,74 +872,84 @@
 </header>
 
 <!-- ============ HERO ============ -->
-<section class="gs-hero">
-  <div class="gs-hero-word" aria-hidden="true">A&J'S FOODFLIX</div>
-  <div class="gs-hero-inner">
-    <div class="gs-hero-copy">
-      <p class="gs-eyebrow fade-in">Resto Bar &middot; Baggao, Cagayan</p>
-      <h1 class="gs-title" aria-label="A&J'S FOODFLIX">
-        <span class="l"><span>T</span></span><span class="l"><span>H</span></span><span class="l"><span>E</span></span><span class="l"><span>~</span></span><span class="l"><span>Y</span></span><span class="l"><span>O</span></span><span class="l"><span>'</span></span><span class="l"><span>S</span></span>
+<section class="fx-hero">
+  <div class="fx-float-circle"></div>
+  <div class="fx-float-circle"></div>
+
+  <div class="fx-hero-inner">
+    <div class="fx-hero-copy">
+      <p class="fx-eyebrow fade-in">Milktea · Snacks · Wings · Baggao</p>
+      <h1 class="fx-title" aria-label="A&J's Foodflix">
+        A&J's<br>Foodflix
+        <span class="fx-title-accent">Sip. Crunch. Repeat.</span>
       </h1>
-      <p class="gs-sub fade-in">Sizzling rice meals &middot; Handcrafted espresso</p>
-      <p class="gs-hero-desc fade-in">Sizzling rice meals, signature chicken flavors, local noodle masterpieces, and premium hot &amp; iced espresso lines — 2nd Floor, DKB Building, Poblacion.</p>
-      <div class="gs-hero-cta fade-in">
+      <p class="fx-subtitle fade-in">Creamy milktea, crispy wings, savory snacks, and handcrafted espresso — all under one roof. 2nd Floor, DKB Building, Poblacion, Baggao.</p>
+      <div class="fx-hero-cta fade-in">
         <a href="order.html" class="btn">Order Now</a>
-        <a href="menu.html" class="btn btn-outline">View Full Menu</a>
+        <a href="menu.html" class="btn btn-outline">View Menu</a>
       </div>
     </div>
-    <div class="gs-hero-figure fade-in">
-      <div class="gs-hero-plate">
-        <div class="gs-steam"></div>
-        <svg viewBox="0 0 24 24"><ellipse cx="12" cy="15" rx="9" ry="3.2"/><path d="M3 15V9a9 3.2 0 0 1 18 0v6"/><path d="M8 6c0-1.4.6-2.2.6-3.4M12 6c0-1.6.6-2.4.6-3.6M16 6c0-1.4.6-2.2.6-3.4" stroke-linecap="round"/></svg>
-        <span class="plate-label">A&J's Foodflix signature</span>
+    <div class="fx-hero-visual fade-in">
+      <div class="fx-boba-cup">
+        <div class="fx-pearls">
+          <div class="fx-pearl"></div>
+          <div class="fx-pearl"></div>
+          <div class="fx-pearl"></div>
+          <div class="fx-pearl"></div>
+          <div class="fx-pearl"></div>
+          <div class="fx-pearl"></div>
+          <div class="fx-pearl"></div>
+        </div>
       </div>
     </div>
   </div>
-  <div class="gs-scroll-cue">Scroll</div>
+  <div class="fx-scroll-cue">Scroll</div>
 </section>
 
-<div class="gs-marquee">
-  <div class="gs-marquee-track">
-    <span>Rice Meals &amp; Bowls </span><span>Crispy Chicken </span><span>Pansit Batil Patung </span><span>Handcrafted Espresso </span><span>Matcha &amp; Non-Coffee </span><span>Full Catering Operations </span>
-    <span>Rice Meals &amp; Bowls </span><span>Crispy Chicken </span><span>Pansit Batil Patung </span><span>Handcrafted Espresso </span><span>Matcha &amp; Non-Coffee </span><span>Full Catering Operations </span>
+<!-- ============ MARQUEE ============ -->
+<div class="fx-marquee">
+  <div class="fx-marquee-track">
+    <span>Classic Milktea</span><span>Crispy Wings</span><span>Matcha Series</span><span>Pansit Batil Patung</span><span>Spanish Latte</span><span>Loaded Fries</span><span>Rice Meals</span><span>Biscoff Specials</span>
+    <span>Classic Milktea</span><span>Crispy Wings</span><span>Matcha Series</span><span>Pansit Batil Patung</span><span>Spanish Latte</span><span>Loaded Fries</span><span>Rice Meals</span><span>Biscoff Specials</span>
   </div>
 </div>
 
-<section class="best">
+<!-- ============ BESTSELLERS ============ -->
+<section class="fx-bestsellers">
   <div class="wrap">
     <div class="section-head">
       <div>
-        <p class="gs-eyebrow" style="display:block; margin-bottom:8px;">Popular Menu</p>
-        <h2>What people actually order</h2>
+        <p class="eyebrow" style="display:block; margin-bottom:8px;">Popular Right Now</p>
+        <h2>What everyone's ordering</h2>
       </div>
-      <p>Reordered favorites — tap "+" to drop one straight into your cart, no need to leave the page.</p>
+      <p>Fan favorites — tap "+" to add straight to your cart without leaving the page.</p>
     </div>
 
-    <div class="ticket-grid" id="bestsellerGrid">
-      <div class="ticket">
-        <div class="ticket-photo"><span class="ticket-badge">Bestseller</span><svg viewBox="0 0 24 24"><path d="M4 12h16M4 12a8 4 0 0 0 16 0M4 12a8 4 0 0 1 16 0"/></svg></div>
-        <div class="ticket-body">
+    <div class="fx-product-grid" id="bestsellerGrid">
+      <div class="fx-product-card">
+        <div class="fx-product-thumb"><span class="fx-product-badge">Bestseller</span><svg viewBox="0 0 24 24"><ellipse cx="12" cy="15" rx="9" ry="3.2"/><path d="M3 15V9a9 3.2 0 0 1 18 0v6"/></svg></div>
+        <div class="fx-product-body">
           <span class="name">Chicken Katsu Rice Meal</span>
           <div class="row"><span class="price">₱120</span><button type="button" class="add" data-id="chicken-katsu-rice-meal" data-name="Chicken Katsu Rice Meal" data-price="120" onclick="Cart.add(this)">+</button></div>
         </div>
       </div>
-      <div class="ticket">
-        <div class="ticket-photo"><svg viewBox="0 0 24 24"><path d="M8 4c-2 0-3.5 1.6-3.5 3.6 0 2.6 2.2 4.9 5 6.8l2.5 1.7 2.5-1.7c2.8-1.9 5-4.2 5-6.8C19.5 5.6 18 4 16 4c-1.5 0-2.8.9-3.5 2.2C11.8 4.9 10.5 4 9 4Z"/></svg></div>
-        <div class="ticket-body">
+      <div class="fx-product-card">
+        <div class="fx-product-thumb"><svg viewBox="0 0 24 24"><path d="M8 4c-2 0-3.5 1.6-3.5 3.6 0 2.6 2.2 4.9 5 6.8l2.5 1.7 2.5-1.7c2.8-1.9 5-4.2 5-6.8C19.5 5.6 18 4 16 4c-1.5 0-2.8.9-3.5 2.2C11.8 4.9 10.5 4 9 4Z"/></svg></div>
+        <div class="fx-product-body">
           <span class="name">Chicken Wings (6 Pcs)</span>
           <div class="row"><span class="price">₱180</span><button type="button" class="add" data-id="chicken-wings-6-pcs" data-name="Chicken Wings (6 Pcs)" data-price="180" onclick="Cart.add(this)">+</button></div>
         </div>
       </div>
-      <div class="ticket">
-        <div class="ticket-photo"><span class="ticket-badge">Bestseller</span><svg viewBox="0 0 24 24"><path d="M6 8h11v6a5.5 5.5 0 0 1-5.5 5.5h0A5.5 5.5 0 0 1 6 14V8Z"/><path d="M17 9.5h1.5a2 2 0 0 1 0 4H17"/></svg></div>
-        <div class="ticket-body">
+      <div class="fx-product-card">
+        <div class="fx-product-thumb"><span class="fx-product-badge">Bestseller</span><svg viewBox="0 0 24 24"><path d="M6 8h11v6a5.5 5.5 0 0 1-5.5 5.5h0A5.5 5.5 0 0 1 6 14V8Z"/><path d="M17 9.5h1.5a2 2 0 0 1 0 4H17"/></svg></div>
+        <div class="fx-product-body">
           <span class="name">Spanish Latte</span>
           <div class="row"><span class="price">₱110</span><button type="button" class="add" data-id="spanish-latte" data-name="Spanish Latte" data-price="110" onclick="Cart.add(this)">+</button></div>
         </div>
       </div>
-      <div class="ticket">
-        <div class="ticket-photo"><svg viewBox="0 0 24 24"><path d="M6 8h11v6a5.5 5.5 0 0 1-5.5 5.5h0A5.5 5.5 0 0 1 6 14V8Z"/><path d="M17 9.5h1.5a2 2 0 0 1 0 4H17"/><path d="M8.5 4.5c1.5 1 1.8 2.2.9 3.4M12 4.5c1.5 1 1.8 2.2.9 3.4" stroke-linecap="round"/></svg></div>
-        <div class="ticket-body">
+      <div class="fx-product-card">
+        <div class="fx-product-thumb"><svg viewBox="0 0 24 24"><path d="M6 8h11v6a5.5 5.5 0 0 1-5.5 5.5h0A5.5 5.5 0 0 1 6 14V8Z"/><path d="M17 9.5h1.5a2 2 0 0 1 0 4H17"/><path d="M8.5 4.5c1.5 1 1.8 2.2.9 3.4M12 4.5c1.5 1 1.8 2.2.9 3.4" stroke-linecap="round"/></svg></div>
+        <div class="fx-product-body">
           <span class="name">Biscoff Matcha Delight</span>
           <div class="row"><span class="price">₱130</span><button type="button" class="add" data-id="biscoff-matcha-delight" data-name="Biscoff Matcha Delight" data-price="130" onclick="Cart.add(this)">+</button></div>
         </div>
@@ -594,189 +958,146 @@
   </div>
 </section>
 
-<!-- ============ HORIZONTAL: ORDER STORY ============ -->
-<section class="gs-horz order-horz" id="orderStory">
-  <div class="gs-horz-stage">
-    <div class="gs-horz-track">
-      <div class="gs-panel gs-intro">
-        <div class="gs-panel-inner">
-          <p class="gs-eyebrow">From craving to confirmed</p>
-          <h2 id="storyTitle">Good food.<br>Your way.</h2>
-          <p id="storyText">Browse drinks, choose dine-in, pickup, delivery, or an advance order, then check everything before you confirm.</p>
-        </div>
-      </div>
-      <div class="gs-panel">
-        <div class="gs-panel-inner gs-step">
-          <div>
-            <p class="gs-step-index">01 / 04 &middot; Choose your drink</p>
-            <h3>Pick your favorite</h3>
-            <p>Browse our drinks and choose something you&rsquo;ll enjoy — from handcrafted espresso to icy matcha.</p>
-          </div>
-          <div class="gs-step-art"><img src="./assets/svg/how-drink.svg" alt="Choosing your drink illustration"></div>
-        </div>
-      </div>
-      <div class="gs-panel">
-        <div class="gs-panel-inner gs-step">
-          <div>
-            <p class="gs-step-index">02 / 04 &middot; Choose your way</p>
-            <h3>Your way, your call</h3>
-            <p>Choose dine-in, pickup, delivery, or plan your order ahead for a set time.</p>
-          </div>
-          <div class="gs-step-art"><img src="./assets/svg/how-way.svg" alt="Choosing your way illustration"></div>
-        </div>
-      </div>
-      <div class="gs-panel">
-        <div class="gs-panel-inner gs-step">
-          <div>
-            <p class="gs-step-index">03 / 04 &middot; Review your order</p>
-            <h3>Check it twice</h3>
-            <p>Check your drinks, quantities, order details, and total before you send it.</p>
-          </div>
-          <div class="gs-step-art"><img src="./assets/svg/how-cart.svg" alt="Reviewing your order illustration"></div>
-        </div>
-      </div>
-      <div class="gs-panel">
-        <div class="gs-panel-inner gs-step">
-          <div>
-            <p class="gs-step-index">04 / 04 &middot; Confirm and track</p>
-            <h3>Done. Tracked.</h3>
-            <p>Send your order, receive confirmation, and check its status from My Orders.</p>
-          </div>
-          <div class="gs-step-art"><img src="./assets/svg/how-track.svg" alt="Tracking your order illustration"></div>
-        </div>
-      </div>
-    </div>
-    <div class="gs-horz-progress"><i></i></div>
-  </div>
-</section>
-
-<!-- ============ STATIC MENU CATEGORIES ============ -->
-<section class="hp-menu-cats" id="menuShowcase">
+<!-- ============ HOW IT WORKS ============ -->
+<section class="fx-how">
   <div class="wrap">
     <div class="section-head">
       <div>
-        <p class="gs-eyebrow">The Menu</p>
-        <h2 style="font-size:clamp(2rem,4vw,3.2rem);">What people actually order</h2>
+        <p class="eyebrow" style="display:block; margin-bottom:8px;">How It Works</p>
+        <h2>From craving to confirmed</h2>
       </div>
-      <p>Every favorite in one place — from hearty rice meals to the espresso bar. Select any category to jump straight to that part of the menu.</p>
+      <p>Four simple steps to get your milktea fix, wings, or a full meal delivered or ready for pickup.</p>
     </div>
 
-    <div class="hp-cat-grid">
-      <!-- 1. Rice Meals & Bowls -->
-      <a class="hp-cat-card" href="menu.html#rice-meals-bowls">
-        <div>
-          <div class="hp-cat-top">
-            <div class="hp-cat-icon">
-              <svg viewBox="0 0 24 24"><ellipse cx="12" cy="15" rx="9" ry="3.2"/><path d="M3 15V9a9 3.2 0 0 1 18 0v6"/></svg>
-            </div>
-            <span class="hp-cat-badge">From ₱100</span>
-          </div>
-          <h3 class="hp-cat-name">Rice Meals &amp; Bowls</h3>
-          <p class="hp-cat-desc">Comforting Filipino favorites — pork sisig, chicken katsu, tapsi, poppers, and savory rice bowls.</p>
+    <div class="fx-how-grid">
+      <div class="fx-how-card">
+        <span class="fx-how-number">01</span>
+        <div class="fx-how-icon">
+          <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></svg>
         </div>
-        <div class="hp-cat-action">View Rice Meals &amp; Bowls &rarr;</div>
-      </a>
-
-      <!-- 2. Wings, Noodles & Snacks -->
-      <a class="hp-cat-card" href="menu.html#wings-noodles-snacks">
-        <div>
-          <div class="hp-cat-top">
-            <div class="hp-cat-icon">
-              <svg viewBox="0 0 24 24"><path d="M8 4c-2 0-3.5 1.6-3.5 3.6 0 2.6 2.2 4.9 5 6.8l2.5 1.7 2.5-1.7c2.8-1.9 5-4.2 5-6.8C19.5 5.6 18 4 16 4c-1.5 0-2.8.9-3.5 2.2C11.8 4.9 10.5 4 9 4Z"/></svg>
-            </div>
-            <span class="hp-cat-badge">From ₱55</span>
-          </div>
-          <h3 class="hp-cat-name">Wings, Noodles &amp; Snacks</h3>
-          <p class="hp-cat-desc">Crispy flavored wings, regional Pansit Batil Patung, rich Lomi, burger sets, pasta, and loaded fries.</p>
+        <h3>Browse & Pick</h3>
+        <p>Explore our milktea, wings, snacks, and espresso bar. Something for every mood.</p>
+      </div>
+      <div class="fx-how-card">
+        <span class="fx-how-number">02</span>
+        <div class="fx-how-icon">
+          <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9h18M3 15h18M12 3v18"/></svg>
         </div>
-        <div class="hp-cat-action">View Wings &amp; Snacks &rarr;</div>
-      </a>
-
-      <!-- 3. Espresso & Coffee -->
-      <a class="hp-cat-card" href="menu.html#espresso-coffee">
-        <div>
-          <div class="hp-cat-top">
-            <div class="hp-cat-icon">
-              <svg viewBox="0 0 24 24"><path d="M6 8h11v6a5.5 5.5 0 0 1-5.5 5.5h0A5.5 5.5 0 0 1 6 14V8Z"/><path d="M17 9.5h1.5a2 2 0 0 1 0 4H17"/><path d="M8.5 4.5c1.5 1 1.8 2.2.9 3.4M12 4.5c1.5 1 1.8 2.2.9 3.4" stroke-linecap="round"/></svg>
-            </div>
-            <span class="hp-cat-badge">From ₱90</span>
-          </div>
-          <h3 class="hp-cat-name">Espresso &amp; Coffee</h3>
-          <p class="hp-cat-desc">Freshly pulled espresso handcrafted hot or iced — Americano, Spanish Latte, Caramel Macchiato &amp; Mocha.</p>
+        <h3>Choose Your Way</h3>
+        <p>Dine-in, pickup, delivery, or schedule an advance order — totally your call.</p>
+      </div>
+      <div class="fx-how-card">
+        <span class="fx-how-number">03</span>
+        <div class="fx-how-icon">
+          <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
         </div>
-        <div class="hp-cat-action">View Coffee Menu &rarr;</div>
-      </a>
-
-      <!-- 4. Specialty Beverages -->
-      <a class="hp-cat-card" href="menu.html#specialty-beverages">
-        <div>
-          <div class="hp-cat-top">
-            <div class="hp-cat-icon">
-              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M7 10c1.5 1 3 1.4 5 1.4s3.5-.4 5-1.4M6 14c2 1.2 4 1.7 6 1.7s4-.5 6-1.7" stroke-linecap="round"/></svg>
-            </div>
-            <span class="hp-cat-badge">From ₱80</span>
-          </div>
-          <h3 class="hp-cat-name">Specialty Beverages</h3>
-          <p class="hp-cat-desc">Artisan ceremonial matcha, blended frappes, refreshing fruit teas, and non-coffee favorites.</p>
+        <h3>Review & Confirm</h3>
+        <p>Double-check your order, quantities, and total before sending it our way.</p>
+      </div>
+      <div class="fx-how-card">
+        <span class="fx-how-number">04</span>
+        <div class="fx-how-icon">
+          <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m9 12 2 2 4-4"/></svg>
         </div>
-        <div class="hp-cat-action">View Beverages &rarr;</div>
-      </a>
+        <h3>Done. Tracked.</h3>
+        <p>Get confirmation and track your order status right from your account.</p>
+      </div>
     </div>
   </div>
 </section>
 
-<!-- ============ LOCATION JOURNEY ============ -->
-<section class="find-us" id="find-us">
-  <div class="journey" id="locationJourney">
-    <div class="journey-stage" id="mapFrame">
-      <div class="journey-copy">
-        <div>
-          <p class="gs-eyebrow">Where to find us</p>
-          <h2 class="display" id="findUsTitle">Walk to<br>A&J's Foodflix.</h2>
-          <p id="locationText">Follow the way to A&J's Foodflix in the heart of Baggao.</p>
-          <p class="journey-label" id="journeyLabel">01 / 04 &middot; You're on the road</p>
-        </div>
-        <div>
-          <div class="journey-art">
-            <img class="location-layer background" src="./assets/location/location-background.svg" alt="">
-            <img class="location-layer midground" src="./assets/location/location-midground.svg" alt="">
-            <img class="location-layer road" src="./assets/location/location-road.svg" alt="">
-            <img class="location-layer foreground" src="./assets/location/location-foreground.svg" alt="">
-            <img class="location-layer store" src="./assets/location/location-store.svg" alt="A&J's Foodflix storefront">
-            <img class="location-layer marker" src="./assets/location/location-marker.svg" alt="">
-          </div>
-          <div class="arrival" id="arrivalCard">
-            <h3>You've arrived.</h3>
-            <address><strong>A&J's Foodflix</strong><br>2nd Floor, DKB Building<br>Poblacion, Baggao, Cagayan</address>
-            <span class="hours">Open daily &middot; 8:00 AM &ndash; 8:00 PM</span>
-            <div class="arrival-actions">
-              <a class="btn" href="https://www.google.com/maps/dir/?api=1&amp;destination=2nd+Floor+DKB+Building,+Poblacion,+Baggao,+Cagayan" target="_blank" rel="noopener">Get Directions</a>
-              <a class="btn btn-outline" href="order.html">Order Now</a>
-            </div>
-          </div>
-        </div>
+<!-- ============ MENU CATEGORIES ============ -->
+<section class="fx-categories" id="menuShowcase">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <p class="eyebrow" style="display:block; margin-bottom:8px;">The Menu</p>
+        <h2>Everything in one place</h2>
       </div>
+      <p>From hearty rice meals to the espresso bar — pick a category and jump right in.</p>
+    </div>
+
+    <div class="fx-cat-grid">
+      <!-- 1. Rice Meals & Bowls -->
+      <a class="fx-cat-card" href="menu.html#rice-meals-bowls">
+        <div>
+          <div class="fx-cat-top">
+            <div class="fx-cat-icon">
+              <svg viewBox="0 0 24 24"><ellipse cx="12" cy="15" rx="9" ry="3.2"/><path d="M3 15V9a9 3.2 0 0 1 18 0v6"/></svg>
+            </div>
+            <span class="fx-cat-badge">From ₱100</span>
+          </div>
+          <h3 class="fx-cat-name">Rice Meals &amp; Bowls</h3>
+          <p class="fx-cat-desc">Pork sisig, chicken katsu, tapsi, poppers, and comforting savory rice bowls.</p>
+        </div>
+        <div class="fx-cat-action">View Rice Meals →</div>
+      </a>
+
+      <!-- 2. Wings, Noodles & Snacks -->
+      <a class="fx-cat-card" href="menu.html#wings-noodles-snacks">
+        <div>
+          <div class="fx-cat-top">
+            <div class="fx-cat-icon">
+              <svg viewBox="0 0 24 24"><path d="M8 4c-2 0-3.5 1.6-3.5 3.6 0 2.6 2.2 4.9 5 6.8l2.5 1.7 2.5-1.7c2.8-1.9 5-4.2 5-6.8C19.5 5.6 18 4 16 4c-1.5 0-2.8.9-3.5 2.2C11.8 4.9 10.5 4 9 4Z"/></svg>
+            </div>
+            <span class="fx-cat-badge">From ₱55</span>
+          </div>
+          <h3 class="fx-cat-name">Wings, Noodles &amp; Snacks</h3>
+          <p class="fx-cat-desc">Crispy flavored wings, Pansit Batil Patung, Lomi, burgers, pasta &amp; loaded fries.</p>
+        </div>
+        <div class="fx-cat-action">View Wings & Snacks →</div>
+      </a>
+
+      <!-- 3. Espresso & Coffee -->
+      <a class="fx-cat-card" href="menu.html#espresso-coffee">
+        <div>
+          <div class="fx-cat-top">
+            <div class="fx-cat-icon">
+              <svg viewBox="0 0 24 24"><path d="M6 8h11v6a5.5 5.5 0 0 1-5.5 5.5h0A5.5 5.5 0 0 1 6 14V8Z"/><path d="M17 9.5h1.5a2 2 0 0 1 0 4H17"/><path d="M8.5 4.5c1.5 1 1.8 2.2.9 3.4M12 4.5c1.5 1 1.8 2.2.9 3.4" stroke-linecap="round"/></svg>
+            </div>
+            <span class="fx-cat-badge">From ₱90</span>
+          </div>
+          <h3 class="fx-cat-name">Espresso &amp; Coffee</h3>
+          <p class="fx-cat-desc">Freshly pulled espresso hot or iced — Americano, Spanish Latte, Caramel Macchiato.</p>
+        </div>
+        <div class="fx-cat-action">View Coffee Menu →</div>
+      </a>
+
+      <!-- 4. Specialty Beverages -->
+      <a class="fx-cat-card" href="menu.html#specialty-beverages">
+        <div>
+          <div class="fx-cat-top">
+            <div class="fx-cat-icon">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M7 10c1.5 1 3 1.4 5 1.4s3.5-.4 5-1.4M6 14c2 1.2 4 1.7 6 1.7s4-.5 6-1.7" stroke-linecap="round"/></svg>
+            </div>
+            <span class="fx-cat-badge">From ₱80</span>
+          </div>
+          <h3 class="fx-cat-name">Milktea &amp; Beverages</h3>
+          <p class="fx-cat-desc">Classic milktea, matcha lattes, blended frappes, fruit teas &amp; non-coffee favorites.</p>
+        </div>
+        <div class="fx-cat-action">View Beverages →</div>
+      </a>
     </div>
   </div>
 </section>
 
 <!-- ============ HOUSE SPECIALTY ============ -->
-<section class="specialty">
-  <div class="wrap specialty-grid">
+<section class="fx-specialty">
+  <div class="wrap fx-specialty-grid">
     <div>
-      <p class="gs-eyebrow">House Specialty</p>
+      <p class="eyebrow">House Specialty</p>
       <h2>Pansit Batil Patung, made the Cagayan way.</h2>
       <p>Our take on the regional classic — thick miki noodles, a raw egg hand-mixed tableside the traditional batil way, and your choice of balor. It's the dish people from out of town ask for by name.</p>
-      <div class="specialty-price">
+      <div class="fx-specialty-prices">
         <div><strong>₱100</strong><span>Balor 100</span></div>
         <div><strong>₱120</strong><span>Balor 120</span></div>
         <div><strong>₱150</strong><span>Balor 150</span></div>
         <div><strong>₱300+</strong><span>Bilao (Sharing)</span></div>
       </div>
-      <div style="margin-top:28px;"><a href="menu.html#wings-noodles-snacks" class="btn btn-outline" style="border-color:var(--hp-line); color:var(--hp-ink);">See Noodle Menu</a></div>
+      <div style="margin-top:28px;"><a href="menu.html#wings-noodles-snacks" class="btn btn-outline">See Noodle Menu</a></div>
     </div>
-    <div class="specialty-photo-wrap">
-      <div class="specialty-photo">
+    <div class="fx-specialty-photo-wrap">
+      <div class="fx-specialty-photo">
         <video autoplay loop muted playsinline>
           <source src="../pics&vids/pancit.mp4" type="video/mp4">
           <img src="../pics&vids/the-yo's_sample-pic-3.jpg" alt="Pansit Batil Patung">
@@ -787,31 +1108,53 @@
 </section>
 
 <!-- ============ GALLERY TEASER ============ -->
-<section class="gallery-teaser">
+<section class="fx-gallery-teaser">
   <div class="wrap">
     <div class="section-head" style="margin-bottom:20px; border-bottom:none; padding-bottom:0;">
-      <div><p class="gs-eyebrow" style="display:block; margin-bottom:8px;">Life at A&J's Foodflix</p><h2 style="font-size:clamp(1.6rem,3vw,2.1rem);">See it before you order</h2></div>
+      <div><p class="eyebrow" style="display:block; margin-bottom:8px;">Life at A&J's Foodflix</p><h2 style="font-size:clamp(1.5rem,3vw,2rem);">See it before you order</h2></div>
     </div>
-    <div class="gt-grid">
-      <a class="gt-item" href="gallery.html">
+    <div class="fx-gt-grid">
+      <a class="fx-gt-item" href="gallery.html">
         <img src="../pics&vids/the-yo's_sample-pic-cateting.jpg" alt="Full Catering Setups">
-        <span>Full Catering Setups &rarr;</span>
+        <span>Full Catering Setups →</span>
       </a>
-      <a class="gt-item" href="gallery.html">
+      <a class="fx-gt-item" href="gallery.html">
         <img src="../pics&vids/the-yo's_sample-pic-4.jpg" alt="Espresso Bar">
-        <span>Espresso Bar &rarr;</span>
+        <span>Espresso Bar →</span>
       </a>
-      <a class="gt-item" href="gallery.html">
+      <a class="fx-gt-item" href="gallery.html">
         <img src="../pics&vids/the-yo's_customer-1.jpg" alt="Family Gatherings">
-        <span>Family Gatherings &rarr;</span>
+        <span>Family Gatherings →</span>
       </a>
     </div>
   </div>
 </section>
 
+<!-- ============ LOCATION ============ -->
+<section class="fx-location" id="find-us">
+  <div class="wrap">
+    <div class="fx-location-grid">
+      <div>
+        <p class="eyebrow">Where To Find Us</p>
+        <h2>Visit<br>A&J's Foodflix.</h2>
+        <p>Located in the heart of Baggao — your go-to spot for milktea, wings, and good vibes.</p>
+      </div>
+      <div class="fx-arrival-card">
+        <h3>We're here for you.</h3>
+        <address><strong>A&J's Foodflix</strong><br>2nd Floor, DKB Building<br>Poblacion, Baggao, Cagayan</address>
+        <span class="hours">Open daily · 8:00 AM – 8:00 PM</span>
+        <div class="fx-arrival-actions">
+          <a class="btn" href="https://www.google.com/maps/dir/?api=1&amp;destination=2nd+Floor+DKB+Building,+Poblacion,+Baggao,+Cagayan" target="_blank" rel="noopener">Get Directions</a>
+          <a class="btn btn-outline" href="order.html">Order Now</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ============ CTA BAND ============ -->
-<section class="cta-band">
-  <div class="wrap cta-inner">
+<section class="fx-cta-band">
+  <div class="wrap fx-cta-inner">
     <div>
       <h3>Reserve Your Table</h3>
       <p>Planning a celebration or a catering order? Let us set it up for you.</p>
@@ -823,17 +1166,18 @@
   </div>
 </section>
 
+<!-- ============ FOOTER ============ -->
 <footer>
   <div class="wrap">
     <div class="footer-grid">
       <div>
         <div class="footer-logo">A&J's Foodflix</div>
-        <p>A comforting community Resto Bar offering delicious meals to Baggao.</p>
+        <p>Your favorite milktea shop, snack bar & wings spot in Baggao, Cagayan.</p>
       </div>
       <div>
         <h4>Location & Hours</h4>
         <p>2nd Floor DKB Building, Poblacion, Baggao, Cagayan</p>
-        <p style="color: var(--brass); font-weight:700;">Open Daily: 8:00 AM – 8:00 PM</p>
+        <p style="color: #fff; font-weight:700;">Open Daily: 8:00 AM – 8:00 PM</p>
       </div>
       <div>
         <h4>Quick Links</h4>
@@ -851,15 +1195,12 @@
   </div>
 </footer>
 
-<div class="sticky-order">
+<div class="fx-sticky-bar">
   <div class="txt"><strong>Order for delivery</strong><span>Baggao only · ₱20–₱150 fee</span></div>
-  <a class="btn" href="order.html" style="padding:9px 16px;">Order</a>
+  <a class="btn" href="order.html" style="padding:9px 18px; font-size:.75rem;">Order</a>
 </div>
 
 <script src="global.js"></script>
 <script src="cart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
-<script src="home-anim.js"></script>
 </body>
 </html>

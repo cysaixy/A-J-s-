@@ -4,8 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Order Terminal — A&J's Foodflix</title>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;900&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=5">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=6">
 <style>
   .kiosk-grid {
     display: grid;
@@ -26,13 +28,13 @@
   }
   .kiosk-browse-head { display:flex; align-items:center; justify-content:space-between; gap:14px; margin-bottom:18px; }
   .kiosk-search { width:min(270px,100%); padding:11px 13px; border:1px solid var(--line); border-radius:8px; background:var(--component-bg); color:var(--ink); font-family:'Inter',sans-serif; font-size:.86rem; }
-  .kiosk-search:focus { outline:none; border-color:var(--brass); box-shadow:0 0 0 3px rgba(163,132,74,.12); }
+  .kiosk-search:focus { outline:none; border-color:var(--ink); box-shadow:0 0 0 3px rgba(0,0,0,.08); }
   .kiosk-tab-btn {
     background: var(--component-bg, #1e1e1e);
     border: 1px solid var(--line, #333);
     color: var(--ink, #fff);
     padding: 12px 18px;
-    font-family: 'Space Mono', monospace;
+    font-family: var(--font-mono), monospace;
     font-size: 0.8rem;
     font-weight: 700;
     text-transform: uppercase;
@@ -41,9 +43,9 @@
     transition: all 0.2s ease;
   }
   .kiosk-tab-btn.active, .kiosk-tab-btn:hover {
-    background: var(--brass, #d4af37);
+    background: var(--ink);
     color: #fff;
-    border-color: var(--brass, #d4af37);
+    border-color: var(--ink);
   }
 
   .order-catalog {
@@ -55,7 +57,7 @@
     padding-right: 8px;
   }
   .order-catalog::-webkit-scrollbar { width: 6px; }
-  .order-catalog::-webkit-scrollbar-thumb { background: var(--brass, #d4af37); border-radius: 3px; }
+  .order-catalog::-webkit-scrollbar-thumb { background: var(--line); border-radius: 3px; }
   
   .catalog-item {
     background: var(--component-bg, #1e1e1e) !important;
@@ -77,7 +79,7 @@
     aspect-ratio: 4 / 3;
     overflow: hidden;
     border-radius: 0;
-    background: linear-gradient(135deg, rgba(163,132,74,.22), rgba(0,0,0,.08));
+    background: linear-gradient(135deg, rgba(128,128,128,.15), rgba(0,0,0,.08));
   }
   .catalog-item-media img,
   .cart-item-thumb img {
@@ -85,30 +87,30 @@
   }
   .product-image-placeholder {
     position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
-    color: var(--brass, #d4af37); opacity: .85;
+    color: var(--ink); opacity: .85;
   }
   .product-image-placeholder svg { width: 34px; height: 34px; fill: none; stroke: currentColor; stroke-width: 1.5; }
   .catalog-item-media.has-image .product-image-placeholder,
   .cart-item-thumb.has-image .product-image-placeholder { display: none; }
   .catalog-item:hover {
     transform: translateY(-4px);
-    border-color: var(--brass, #d4af37);
+    border-color: var(--ink);
   }
   .catalog-info h4 {
-    font-family: 'Archivo', sans-serif;
+    font-family: var(--font-display), sans-serif;
     font-size: 0.95rem;
     text-transform: uppercase;
     margin: 0 0 5px;
     color: var(--ink, #fff);
   }
   .catalog-info span {
-    font-family: 'Space Mono', monospace;
+    font-family: var(--font-mono), monospace;
     font-size: 0.95rem;
-    color: var(--brass, #d4af37);
+    color: var(--ink);
     font-weight: 700;
   }
   .catalog-copy { padding:14px 15px 15px; display:flex; align-items:flex-end; justify-content:space-between; gap:12px; }
-  .catalog-add { flex:0 0 32px; width:32px; height:32px; border:0; border-radius:9px; background:var(--brass); color:#fff; font-size:1.2rem; font-weight:700; pointer-events:none; }
+  .catalog-add { flex:0 0 32px; width:32px; height:32px; border:0; border-radius: 9999px; background: var(--ink); color:#fff; font-size:1.2rem; font-weight:700; pointer-events:none; }
 
   .kiosk-cart-panel {
     background: var(--component-bg, #1e1e1e);
@@ -119,11 +121,11 @@
     top: 115px;
   }
   .cart-title {
-    font-family: 'Space Mono', monospace;
+    font-family: var(--font-mono), monospace;
     font-size: 0.8rem;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--brass, #d4af37);
+    color: var(--ink);
     margin-bottom: 4px;
     display: block;
     font-weight: 700;
@@ -153,13 +155,13 @@
   .cart-row-main { display: flex; align-items: flex-start; gap: 10px; min-width: 0; }
   .cart-item-thumb {
     position: relative; width: 52px; aspect-ratio: 1; flex: 0 0 52px; overflow: hidden;
-    border-radius: 5px; background: linear-gradient(135deg, rgba(163,132,74,.22), rgba(0,0,0,.08));
+    border-radius: 5px; background: linear-gradient(135deg, rgba(128,128,128,.15), rgba(0,0,0,.08));
   }
   .cart-item-thumb .product-image-placeholder svg { width: 22px; height: 22px; }
   .cart-item-mods {
     display: block;
     font-size: 0.75rem;
-    color: var(--brass, #d4af37);
+    color: var(--ink);
     font-style: italic;
     margin-top: 2px;
     line-height: 1.2;
@@ -170,7 +172,7 @@
     color: #ff4d4d;
     font-size: 0.8rem;
     cursor: pointer;
-    font-family: 'Space Mono', monospace;
+    font-family: var(--font-mono), monospace;
     margin-left: 10px;
     padding: 0;
   }
@@ -206,7 +208,7 @@
     color: var(--ink, #fff);
   }
   .modal-card h3 {
-    font-family: 'Archivo', sans-serif;
+    font-family: var(--font-display), sans-serif;
     text-transform: uppercase;
     font-size: 1.1rem;
     margin-bottom: 6px;
@@ -216,10 +218,10 @@
   .signed-in-banner {
     display: flex; align-items: center; justify-content: space-between; gap: 10px;
     border: 1px solid var(--line, #333); border-radius: 6px; padding: 12px 14px;
-    margin-bottom: 16px; font-size: 0.82rem; background: rgba(163,132,74,0.08);
+    margin-bottom: 16px; font-size: 0.82rem; background: var(--surface-alt);
   }
   .signed-in-banner button {
-    background: none; border: none; color: var(--brass, #d4af37); font-family: 'Space Mono', monospace;
+    background: none; border: none; color: var(--ink); font-family: var(--font-mono), monospace;
     font-size: 0.72rem; text-transform: uppercase; cursor: pointer; text-decoration: underline;
   }
 
@@ -233,23 +235,23 @@
   }
   .stepper button {
     width: 34px; height: 34px; background: none; border: none; cursor: pointer;
-    color: var(--ink, #fff); font-family: 'Space Mono', monospace; font-size: 1.05rem; line-height: 1;
+    color: var(--ink, #fff); font-family: var(--font-mono), monospace; font-size: 1.05rem; line-height: 1;
   }
-  .stepper button:hover:not(:disabled) { background: rgba(163,132,74,0.15); color: var(--brass, #d4af37); }
+  .stepper button:hover:not(:disabled) { background: var(--surface-alt); color: var(--ink); }
   .stepper button:disabled { opacity: 0.3; cursor: not-allowed; }
   .stepper span {
-    min-width: 38px; text-align: center; font-family: 'Space Mono', monospace;
+    min-width: 38px; text-align: center; font-family: var(--font-mono), monospace;
     font-size: 0.95rem; font-weight: 700;
   }
   .modal-price-row {
     display: flex; justify-content: space-between; align-items: center;
-    margin-bottom: 14px; font-family: 'Space Mono', monospace; font-size: 1.05rem; font-weight: 700;
-    color: var(--brass, #d4af37);
+    margin-bottom: 14px; font-family: var(--font-mono), monospace; font-size: 1.05rem; font-weight: 700;
+    color: var(--ink);
   }
   .addon-section { margin: 4px 0; }
   .addon-section-label {
-    font-family: 'Space Mono', monospace; font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
-    color: var(--brass, #d4af37); display: block; margin-bottom: 4px;
+    font-family: var(--font-mono), monospace; font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+    color: var(--ink); display: block; margin-bottom: 4px;
   }
   .addon-row {
     display: flex; align-items: center; justify-content: space-between; gap: 10px;
@@ -259,7 +261,7 @@
   .addon-name { font-size: 0.85rem; }
   .addon-name small { display: block; opacity: 0.5; font-size: 0.72rem; line-height: 1.35; }
   .addon-right { display: flex; align-items: center; gap: 12px; }
-  .addon-price { font-family: 'Space Mono', monospace; font-size: 0.78rem; color: var(--brass, #d4af37); font-weight: 700; white-space: nowrap; }
+  .addon-price { font-family: var(--font-mono), monospace; font-size: 0.78rem; color: var(--ink); font-weight: 700; white-space: nowrap; }
   .addon-empty { font-size: 0.78rem; opacity: 0.45; font-style: italic; }
   .addon-row .stepper button { width: 28px; height: 28px; }
   .addon-row .stepper span { min-width: 30px; font-size: 0.85rem; }
@@ -282,7 +284,7 @@
   }
   .checkout-close:hover { opacity: 1; }
   .checkout-step-count {
-    display: block; text-align: center; font-family: 'Space Mono', monospace; font-size: 0.7rem;
+    display: block; text-align: center; font-family: var(--font-mono), monospace; font-size: 0.7rem;
     text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.5; margin-top: 16px;
   }
 
@@ -290,26 +292,26 @@
   .progress-step { display: flex; flex-direction: column; align-items: center; gap: 7px; flex-shrink: 0; }
   .progress-dot {
     width: 30px; height: 30px; border-radius: 50%; background: var(--component-bg); border: 2px solid var(--line);
-    display: flex; align-items: center; justify-content: center; font-family: 'Space Mono', monospace; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; font-family: var(--font-mono), monospace; font-weight: 700;
     font-size: 0.8rem; color: var(--ink); opacity: 0.5; transition: all .25s ease;
   }
-  .progress-label { font-family: 'Space Mono', monospace; font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.5; white-space: nowrap; }
+  .progress-label { font-family: var(--font-mono), monospace; font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.5; white-space: nowrap; }
   .progress-line { flex: 1; max-width: 70px; height: 2px; background: var(--line); margin: 14px 4px 0; transition: background .25s ease; }
-  .progress-step.active .progress-dot, .progress-step.done .progress-dot { background: var(--brass); border-color: var(--brass); color: #fff; opacity: 1; }
-  .progress-step.active .progress-label, .progress-step.done .progress-label { opacity: 1; color: var(--brass); font-weight: 700; }
-  .progress-line.done { background: var(--brass); }
+  .progress-step.active .progress-dot, .progress-step.done .progress-dot { background: var(--ink); border-color: var(--ink); color: #fff; opacity: 1; }
+  .progress-step.active .progress-label, .progress-step.done .progress-label { opacity: 1; color: var(--ink); font-weight: 700; }
+  .progress-line.done { background: var(--ink); }
 
   .checkout-body { flex: 1; }
   .checkout-step-panel { display: none; flex-direction: column; gap: 18px; }
   .checkout-step-panel.active { display: flex; }
-  .checkout-step-title { font-family: 'Archivo', sans-serif; text-transform: uppercase; font-size: 1.35rem; margin-bottom: 2px; }
+  .checkout-step-title { font-family: var(--font-display), sans-serif; text-transform: uppercase; font-size: 1.35rem; margin-bottom: 2px; }
   .checkout-confirmation { display:none; min-height:420px; align-items:center; justify-content:center; }
   .checkout-confirmation.active { display:flex; }
   .confirmation-card { width:100%; max-width:460px; text-align:center; border:1px solid var(--line); border-radius:10px; background:var(--component-bg); padding:30px 24px; box-shadow:0 12px 36px rgba(0,0,0,.08); }
   .confirmation-check { width:48px; height:48px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 14px; background:rgba(46,125,79,.13); color:var(--success); font-size:1.55rem; font-weight:700; }
-  .confirmation-card h3 { font-family:'Archivo', sans-serif; text-transform:uppercase; font-size:1.5rem; margin:0 0 8px; }
+  .confirmation-card h3 { font-family:var(--font-display), sans-serif; text-transform:uppercase; font-size:1.5rem; margin:0 0 8px; }
   .confirmation-card > p { margin:0 auto 20px; max-width:330px; font-size:.88rem; opacity:.72; line-height:1.55; }
-  .confirmation-details { text-align:left; background:rgba(163,132,74,.08); border-radius:6px; padding:14px 16px; margin-bottom:20px; font-size:.84rem; }
+  .confirmation-details { text-align:left; background:var(--surface-alt); border-radius:6px; padding:14px 16px; margin-bottom:20px; font-size:.84rem; }
   .confirmation-details div { display:flex; justify-content:space-between; gap:14px; padding:6px 0; }
   .confirmation-details span { opacity:.65; }
   .confirmation-actions { display:flex; gap:10px; }
@@ -318,21 +320,21 @@
 
   .payment-receipt { border: 1px solid var(--line); border-radius: 8px; padding: 18px; background: var(--component-bg); }
   .payment-receipt-head { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; padding-bottom:12px; border-bottom:1px dashed var(--line); }
-  .payment-receipt-title { font-family:'Space Mono', monospace; text-transform:uppercase; letter-spacing:.08em; font-size:.72rem; font-weight:700; }
+  .payment-receipt-title { font-family:var(--font-mono), monospace; text-transform:uppercase; letter-spacing:.08em; font-size:.72rem; font-weight:700; }
   .payment-receipt-service { font-size:.76rem; opacity:.65; text-align:right; }
   .receipt-line { display:flex; justify-content:space-between; gap:14px; padding:12px 0; border-bottom:1px dashed var(--line); font-size:.88rem; }
   .receipt-line-name { min-width:0; }
   .receipt-line-name small { display:block; font-size:.74rem; opacity:.62; margin-top:3px; line-height:1.35; }
-  .receipt-line-price { white-space:nowrap; font-family:'Space Mono', monospace; font-size:.8rem; }
-  .receipt-total { display:flex; justify-content:space-between; gap:12px; padding-top:14px; font-family:'Space Mono', monospace; font-weight:700; }
-  .receipt-total strong { color:var(--brass); font-size:1.2rem; }
-  .receipt-payment-note { margin:12px 0 0; padding:10px 12px; border-radius:5px; background:rgba(163,132,74,.1); font-size:.78rem; line-height:1.45; }
+  .receipt-line-price { white-space:nowrap; font-family:var(--font-mono), monospace; font-size:.8rem; }
+  .receipt-total { display:flex; justify-content:space-between; gap:12px; padding-top:14px; font-family:var(--font-mono), monospace; font-weight:700; }
+  .receipt-total strong { color:var(--ink); font-size:1.2rem; }
+  .receipt-payment-note { margin:12px 0 0; padding:10px 12px; border-radius:5px; background:var(--surface-alt); font-size:.78rem; line-height:1.45; }
 
   .checkout-footer { display: flex; justify-content: space-between; gap: 14px; margin-top: 34px; padding-top: 22px; border-top: 1px solid var(--line); }
   .checkout-footer .btn { flex: 1; justify-content: center; padding: 15px; border-radius: 6px; margin-bottom: 0; }
   .checkout-footer #btnCancelOrder { color: #c0392b; border-color: var(--line); }
   .checkout-footer #btnCancelOrder:hover { background: #c0392b; color: #fff; border-color: #c0392b; }
-  .field-error { font-family: 'Space Mono', monospace; font-size: 0.72rem; color: #c0392b; margin: -6px 0 0; }
+  .field-error { font-family: var(--font-mono), monospace; font-size: 0.72rem; color: #c0392b; margin: -6px 0 0; }
   @media(max-width:480px) { .progress-label { font-size: 0.55rem; } .progress-line { max-width: 36px; } }
 </style>
 </head>
@@ -396,7 +398,7 @@
         </div>
 
         <div class="order-catalog" id="menuCatalog">
-          <div style="opacity:0.6; font-family:'Space Mono', monospace; padding:20px; grid-column:1/-1;">Loading menu…</div>
+          <div style="opacity:0.6; font-family:var(--font-mono), monospace; padding:20px; grid-column:1/-1;">Loading menu…</div>
         </div>
       </div>
 
@@ -411,7 +413,7 @@
 
         <div class="order-summary-box" style="margin: 0 0 20px 0; padding: 10px 0; border-bottom: 1px solid var(--line);">
           <div>
-            <span style="font-family:'Space Mono', monospace; font-size:0.75rem; font-weight:700; display:block; text-transform:uppercase;">Grand Total</span>
+            <span style="font-family:var(--font-mono), monospace; font-size:0.75rem; font-weight:700; display:block; text-transform:uppercase;">Grand Total</span>
             <span class="total-counter" id="runningTotalDisplay" style="font-size:1.6rem;">₱0</span>
           </div>
         </div>
@@ -447,7 +449,7 @@
         <div class="cart-list" id="checkoutCartList" style="max-height:none;"></div>
         <div class="order-summary-box" style="border-top:1px dashed var(--line); margin-top:6px; padding-top:16px;">
           <div>
-            <span style="font-family:'Space Mono', monospace; font-size:0.75rem; font-weight:700; display:block; text-transform:uppercase;">Grand Total</span>
+            <span style="font-family:var(--font-mono), monospace; font-size:0.75rem; font-weight:700; display:block; text-transform:uppercase;">Grand Total</span>
             <span class="total-counter" id="checkoutTotalDisplay" style="font-size:1.6rem;">₱0</span>
           </div>
         </div>
@@ -483,7 +485,7 @@
           <div class="order-type-dynamic">
             <div id="deliveryField" style="display:none;">
               <label for="deliveryAddress" style="display:inline-flex; align-items:center; gap:6px;">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:var(--brass, #d4af37); flex-shrink:0;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:var(--ink); flex-shrink:0;">
                   <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
                   <circle cx="12" cy="10" r="3"></circle>
                 </svg>
@@ -516,7 +518,7 @@
 
         <div class="order-summary-box" style="border-top:1px dashed var(--line); margin-top:22px; padding-top:16px;">
           <div>
-            <span style="font-family:'Space Mono', monospace; font-size:0.75rem; font-weight:700; display:block; text-transform:uppercase;">Total Due</span>
+            <span style="font-family:var(--font-mono), monospace; font-size:0.75rem; font-weight:700; display:block; text-transform:uppercase;">Total Due</span>
             <span class="total-counter" id="paymentTotalDisplay" style="font-size:1.6rem;">₱0</span>
           </div>
         </div>
@@ -569,7 +571,7 @@
     </div>
 
     <div style="margin-top:6px;">
-      <label for="modalItemComments" style="font-family:'Space Mono'; font-size:0.7rem; font-weight:700;">Ingredient Adjustments:</label>
+      <label for="modalItemComments" style="font-family:var(--font-mono); font-size:0.7rem; font-weight:700;">Ingredient Adjustments:</label>
       <input type="text" id="modalItemComments" placeholder="Add or remove ingredients..." style="font-size:0.9rem; margin-bottom:16px;">
     </div>
     <div style="display:flex; gap:10px; justify-content:flex-end;">
@@ -597,8 +599,8 @@
           <div><label for="reviewerName">Your Name</label><input id="reviewerName" type="text" required placeholder="Maria"></div>
           <div><label for="feedbackText">Comments / Messages</label><textarea id="feedbackText" required placeholder="Write review or message..."></textarea></div>
           
-          <div style="margin: 16px 0; background: rgba(21,23,26,0.04); padding: 12px; border-radius: 4px; border-left: 3px solid var(--brass);">
-            <label style="display: flex; align-items: center; gap: 8px; font-family: 'Space Mono', monospace; font-size: 0.8rem; font-weight: 700; cursor: pointer; color: var(--dark);">
+          <div style="margin: 16px 0; background: rgba(21,23,26,0.04); padding: 12px; border-radius: 4px; border-left: 3px solid var(--ink);">
+            <label style="display: flex; align-items: center; gap: 8px; font-family: var(--font-mono), monospace; font-size: 0.8rem; font-weight: 700; cursor: pointer; color: var(--dark);">
               <input type="checkbox" id="privateToggle" style="width:16px; height:16px; cursor:pointer;">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
               <span>SEND PRIVATELY TO MANAGEMENT</span>
@@ -826,7 +828,7 @@
     if (!notice) {
       notice = document.createElement('div');
       notice.id = 'sharedCartNotice';
-      notice.style.cssText = 'font-size:0.75rem; font-family:"Space Mono",monospace; background:var(--stone); border:1px dashed var(--brass); border-radius:4px; padding:10px 12px; margin-bottom:12px; color:var(--ink); line-height:1.4;';
+      notice.style.cssText = 'font-size:0.75rem; font-family:"Space Mono",monospace; background:var(--stone); border:1px dashed var(--ink); border-radius:4px; padding:10px 12px; margin-bottom:12px; color:var(--ink); line-height:1.4;';
       panel.insertBefore(notice, panel.firstChild.nextSibling);
     }
     notice.textContent = message;
@@ -1077,14 +1079,14 @@
           ${productImageTemplate(entry.image_url, entry.name, 'cart-item-thumb')}
           <div style="min-width:0;">
             <strong>${entry.name}</strong>
-            <span style="color:var(--brass); margin-left:6px; font-family:'Space Mono'; font-weight:700;">x${entry.quantity}</span>
+            <span style="color:var(--ink); margin-left:6px; font-family:var(--font-mono); font-weight:700;">x${entry.quantity}</span>
             ${modsHTML}
             ${addonsHTML}
             <span style="display:inline-flex; align-items:center; gap:4px; font-size:0.7rem; color:var(--ink); opacity:0.4; margin-top:2px;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>Tap to edit details</span>
           </div>
         </div>
         <div style="display:flex; align-items:center; gap:12px;">
-          <span style="font-family:'Space Mono';">₱${lineSubtotal(entry)}</span>
+          <span style="font-family:var(--font-mono);">₱${lineSubtotal(entry)}</span>
           <button type="button" class="remove-item" onclick="removeCartRow(${entry.uniqueCartId})" title="Remove item"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
         </div>
       </div>
@@ -1209,14 +1211,14 @@
         balanceNote = `<p class="receipt-payment-note">Order total: ₱${currentCartTotal}. Pay 50% downpayment (₱${amountDue}) now via GCash. Remaining balance of ₱${remainingBalance} will be paid in cash upon pickup at the counter.</p>`;
       } else if (isDeliveryType) {
         balanceNote = `<p class="receipt-payment-note">Order total: ₱${currentCartTotal}. Pay 50% downpayment (₱${amountDue}) now via GCash. Remaining food balance of ₱${remainingBalance} will be paid in cash to your rider upon delivery.</p>
-        <p class="receipt-payment-note" style="color:var(--brass); margin-top:8px;"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0; vertical-align:-0.18em; margin-right:6px;"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg><strong>Delivery Fee Note:</strong> Staff will assign the delivery fee based on your address. Delivery fee will also be paid in cash directly to your rider upon arrival.</p>`;
+        <p class="receipt-payment-note" style="color:var(--ink); margin-top:8px;"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0; vertical-align:-0.18em; margin-right:6px;"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg><strong>Delivery Fee Note:</strong> Staff will assign the delivery fee based on your address. Delivery fee will also be paid in cash directly to your rider upon arrival.</p>`;
       } else {
         balanceNote = `<p class="receipt-payment-note">Order total: ₱${currentCartTotal}. Pay 50% downpayment (₱${amountDue}) now. Remaining balance is ₱${remainingBalance}.</p>`;
       }
     } else {
       if (isDeliveryType) {
         balanceNote = `<p class="receipt-payment-note">Food total: ₱${currentCartTotal}. Pay via ${escapeReceiptHtml(payment || 'Cash')}.</p>
-        <p class="receipt-payment-note" style="color:var(--brass); margin-top:8px;"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0; vertical-align:-0.18em; margin-right:6px;"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg><strong>Delivery Fee Note:</strong> Delivery fee will be assigned by staff and paid in cash directly to your rider upon arrival.</p>`;
+        <p class="receipt-payment-note" style="color:var(--ink); margin-top:8px;"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0; vertical-align:-0.18em; margin-right:6px;"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg><strong>Delivery Fee Note:</strong> Delivery fee will be assigned by staff and paid in cash directly to your rider upon arrival.</p>`;
       } else {
         balanceNote = `<p class="receipt-payment-note">Total amount: ₱${currentCartTotal} to be paid via ${escapeReceiptHtml(payment || 'Cash')}.</p>`;
       }
@@ -1373,8 +1375,8 @@
             <p style="font-size:0.8rem; opacity:0.7; margin-top:6px; text-align:center;">Redirecting you to secure PayMongo checkout in a moment...</p>
           </div>` : ''}
         ${isDelivery ? `
-          <p class="delivery-fee-note" style="margin-top:14px; padding:12px 14px; border-radius:6px; background:rgba(163,132,74,0.1); border:1px solid rgba(163,132,74,0.3); font-size:0.85rem; text-align:left;">
-            <span style="display:inline-flex; align-items:center; gap:6px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0; vertical-align:-2px;"><rect x="1" y="3" width="15" height="13" rx="2"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg><strong>About your delivery fee:</strong></span> Our staff will confirm the delivery fee for your address shortly. The delivery fee will be paid in cash directly to your rider upon delivery. You can check the assigned fee anytime on your <a href="my-orders.html" style="color:var(--brass); font-weight:700;">My Orders</a> page.
+          <p class="delivery-fee-note" style="margin-top:14px; padding:12px 14px; border-radius:6px; background:var(--surface-alt); border:1px solid var(--line); font-size:0.85rem; text-align:left;">
+            <span style="display:inline-flex; align-items:center; gap:6px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0; vertical-align:-2px;"><rect x="1" y="3" width="15" height="13" rx="2"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg><strong>About your delivery fee:</strong></span> Our staff will confirm the delivery fee for your address shortly. The delivery fee will be paid in cash directly to your rider upon delivery. You can check the assigned fee anytime on your <a href="my-orders.html" style="color:var(--ink); font-weight:700;">My Orders</a> page.
           </p>` : ''}
         <div class="confirmation-actions">
           <button type="button" class="btn btn-outline" onclick="continueShopping()">Continue Shopping</button>
@@ -1670,12 +1672,12 @@
   <div class="wrap">
     <div class="footer-grid">
         <div class="footer-logo">A&J's Foodflix</div>
-        <p>A comforting community Resto Bar offering delicious meals to Baggao.</p>
+        <p>Your favorite milktea shop, snack bar & wings spot in Baggao, Cagayan.</p>
       </div>
       <div>
         <h4>Location & Hours</h4>
         <p>2nd Floor DKB Building, Poblacion, Baggao, Cagayan</p>
-        <p style="color: var(--brass); font-weight:700;">Open Daily: 8:00 AM &ndash; 8:00 PM</p>
+        <p style="color: var(--ink); font-weight:700;">Open Daily: 8:00 AM &ndash; 8:00 PM</p>
       </div>
       <div>
         <h4>Quick Links</h4>

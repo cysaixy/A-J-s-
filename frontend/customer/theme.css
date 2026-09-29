@@ -1,18 +1,28 @@
-/* A&J's Foodflix — Sleek Black & White Monochrome Theme */
+/* A&J's Foodflix — Clean B&W Theme Toggle */
 body.sunset-mode {
   transition: background-color .5s ease, color .5s ease;
 }
 body.sunset-mode.coffee-night {
-  --bone: #09090b;
-  --stone: #18181b;
-  --ink: #ffffff;
-  --component-bg: #121214;
-  --line: rgba(255,255,255,0.14);
-  --header-bg: rgba(9,9,11,0.96);
+  --bg: #0a0a0a;
+  --bg-alt: #141414;
+  --surface: #1a1a1a;
+  --surface-raised: #1e1e1e;
+  --ink: #f0f0f0;
+  --ink-soft: rgba(240,240,240,.62);
+  --ink-faint: rgba(240,240,240,.4);
+  --accent: #ffffff;
+  --accent-soft: rgba(255,255,255,.08);
+  --accent-hover: #cccccc;
+  --line: rgba(255,255,255,.1);
+  --line-strong: rgba(255,255,255,.18);
+  --header-bg: rgba(10,10,10,.94);
+  --bone: #0a0a0a;
+  --stone: #141414;
+  --component-bg: #1a1a1a;
   --brass: #ffffff;
-  --brass-dark: #e4e4e7;
-  background: #09090b;
-  color: #ffffff;
+  --brass-dark: #cccccc;
+  background: #0a0a0a;
+  color: #f0f0f0;
 }
 .sunset-mode header,
 .sunset-mode .card,
@@ -32,11 +42,11 @@ body.sunset-mode.coffee-night {
   align-items: center;
   gap: 7px;
   padding: 6px 10px;
-  border: 1px solid var(--line);
-  border-radius: 18px;
-  background: var(--component-bg);
+  border: 1.5px solid var(--line);
+  border-radius: 100px;
+  background: var(--surface);
   color: var(--ink);
-  font: 600 11px/1 'Space Mono', monospace;
+  font: 600 11px/1 'DM Sans', sans-serif;
   letter-spacing: .04em;
   cursor: pointer;
   white-space: nowrap;
@@ -45,8 +55,8 @@ body.sunset-mode.coffee-night {
 .sunset-mode-toggle:hover,
 .sunset-mode-toggle.is-sunset {
   border-color: var(--ink);
-  background: var(--stone);
-  box-shadow: 0 0 14px rgba(0,0,0,0.18);
+  background: var(--bg-alt);
+  box-shadow: 0 0 14px rgba(0,0,0,.12);
 }
 .coffee-toggle-art {
   width: 52px;
@@ -83,7 +93,7 @@ body.sunset-mode.coffee-night {
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background: #09090b;
+  background: #0a0a0a;
   box-shadow: 0 1px 5px rgba(0,0,0,0.3);
   transition: transform .5s cubic-bezier(.2,.8,.2,1), background .4s ease;
 }

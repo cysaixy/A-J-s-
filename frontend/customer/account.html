@@ -4,8 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>My Account — A&J's Foodflix</title>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;900&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=5">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=6">
 <style>
   .account-section { background: var(--stone); min-height: calc(100vh - 95px); display: flex; align-items: center; }
   .account-wrap { max-width: 980px; margin: 0 auto; width: 100%; padding: 60px 22px; }
@@ -23,7 +25,7 @@
   @media(max-width:520px) { .login-form-col { padding: 34px 24px; } }
 
   .login-heading { margin-bottom: 26px; }
-  .login-heading h1 { font-family: 'Archivo', sans-serif; font-weight: 900; text-transform: uppercase; font-size: 1.6rem; letter-spacing: -0.01em; color: var(--ink); margin-bottom: 8px; }
+  .login-heading h1 { font-family: var(--font-display), sans-serif; font-weight: 900; text-transform: uppercase; font-size: 1.6rem; letter-spacing: -0.01em; color: var(--ink); margin-bottom: 8px; }
   .login-heading p { font-size: 0.9rem; color: var(--ink); opacity: 0.65; }
 
   .account-card { background: transparent; border: none; padding: 0; }
@@ -40,8 +42,8 @@
     content: ""; position: absolute; inset: 0;
     background: radial-gradient(120% 70% at 85% -10%, rgba(255,255,255,.22), transparent 60%);
   }
-  .login-art-eyebrow { position: relative; z-index: 1; font-family: 'Space Mono', monospace; font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase; opacity: 0.75; }
-  .login-art-title { position: relative; z-index: 1; font-family: 'Archivo', sans-serif; font-weight: 900; text-transform: uppercase; font-size: 1.7rem; line-height: 1.05; margin: 10px 0 14px; }
+  .login-art-eyebrow { position: relative; z-index: 1; font-family: var(--font-mono), monospace; font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase; opacity: 0.75; }
+  .login-art-title { position: relative; z-index: 1; font-family: var(--font-display), sans-serif; font-weight: 900; text-transform: uppercase; font-size: 1.7rem; line-height: 1.05; margin: 10px 0 14px; }
   .login-art-sub { position: relative; z-index: 1; font-size: 0.9rem; opacity: 0.82; max-width: 300px; line-height: 1.5; }
 
   .login-art-graphic { position: relative; z-index: 1; display: flex; justify-content: center; align-items: center; margin: 18px 0; }
@@ -49,18 +51,18 @@
   .login-art-plate svg { width: 74px; height: 74px; stroke: #f4efe6; fill: none; stroke-width: 1.1; opacity: 0.9; }
   @media(max-width:840px) { .login-art-plate { width: 108px; height: 108px; } .login-art-plate svg { width: 48px; height: 48px; } }
 
-  .login-art-stats { position: relative; z-index: 1; display: flex; gap: 22px; font-family: 'Space Mono', monospace; }
+  .login-art-stats { position: relative; z-index: 1; display: flex; gap: 22px; font-family: var(--font-mono), monospace; }
   .login-art-stats div strong { display: block; font-size: 1.15rem; color: #fff; }
   .login-art-stats div span { display: block; font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.06em; opacity: 0.65; margin-top: 2px; }
 
   .account-tabs { display: flex; border: 1px solid var(--line); border-radius: 4px; overflow: hidden; margin-bottom: 28px; }
-  .account-tab-btn {
+  .account-tab-btn { border-radius: 9999px;
     flex: 1; background: transparent; border: none; padding: 13px 10px;
-    font-family: 'Space Mono', monospace; font-size: 0.72rem; font-weight: 700;
+    font-family: var(--font-mono), monospace; font-size: 0.72rem; font-weight: 700;
     letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink); opacity: 0.55;
     cursor: pointer; transition: all 0.2s ease;
   }
-  .account-tab-btn.active { background: var(--brass); color: #fff; opacity: 1; }
+  .account-tab-btn.active { background: var(--ink); color: var(--bg); opacity: 1; border-radius: 9999px; }
   .account-tab-btn:not(.active):hover { opacity: 0.85; }
 
   .account-panel { display: none; flex-direction: column; gap: 16px; }
@@ -70,7 +72,7 @@
 
   .divider-row { display: flex; align-items: center; gap: 12px; margin: 4px 0; }
   .divider-row .line { flex: 1; height: 1px; background: var(--line); }
-  .divider-row span { font-family: 'Space Mono', monospace; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink); opacity: 0.5; }
+  .divider-row span { font-family: var(--font-mono), monospace; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink); opacity: 0.5; }
 
   .btn-google {
     display: flex; align-items: center; justify-content: center; gap: 10px;
@@ -79,7 +81,7 @@
     font-family: 'Inter', sans-serif; font-size: 0.85rem; font-weight: 600;
     cursor: pointer; transition: all 0.2s ease;
   }
-  .btn-google:hover { border-color: var(--brass); color: var(--brass); }
+  .btn-google:hover { border-color: var(--ink); color: var(--ink); }
 
   .account-submit {
     width: 100%; justify-content: center; padding: 14px; border-radius: 4px;
@@ -88,11 +90,11 @@
 
   .account-status {
     font-size: 0.8rem; margin-top: 4px; min-height: 18px;
-    font-family: 'Space Mono', monospace;
+    font-family: var(--font-mono), monospace;
   }
   .account-status.err { color: #e05252; }
   .account-status.ok { color: #4caf7d; }
-  .account-status.info { color: var(--brass); }
+  .account-status.info { color: var(--ink); }
 
   .password-wrap { position: relative; }
   .password-wrap input { padding-right: 42px; }
@@ -108,7 +110,7 @@
   .password-toggle.shown .eye-closed { display: block; }
 
   .switch-hint { text-align: center; font-size: 0.82rem; color: var(--ink); opacity: 0.7; margin-top: 4px; }
-  .switch-hint a { color: var(--brass); font-weight: 600; cursor: pointer; }
+  .switch-hint a { color: var(--ink); font-weight: 600; cursor: pointer; }
 
   /* Logged-in state */
   .logged-in-card { display: none; }
@@ -116,10 +118,10 @@
   .profile-header { text-align: center; margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px dashed var(--line); }
   .profile-header .avatar-ring {
     width: 64px; height: 64px; border-radius: 50%; margin: 0 auto 14px;
-    background: var(--brass); color: #fff; display: flex; align-items: center; justify-content: center;
-    font-family: 'Archivo', sans-serif; font-weight: 900; font-size: 1.6rem;
+    background: var(--ink); color: #fff; display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-display), sans-serif; font-weight: 900; font-size: 1.6rem;
   }
-  .profile-header h3 { font-family: 'Archivo', sans-serif; text-transform: uppercase; font-size: 1.2rem; margin-bottom: 4px; }
+  .profile-header h3 { font-family: var(--font-display), sans-serif; text-transform: uppercase; font-size: 1.2rem; margin-bottom: 4px; }
   .profile-header p { font-size: 0.85rem; opacity: 0.65; }
 
   .logged-in-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 24px; padding-top: 20px; border-top: 1px dashed var(--line); }
@@ -140,7 +142,7 @@
       <li><a href="order.html#feedback">Reviews</a></li>
       <li><a href="reservations.html">Reserve</a></li>
       <li><a href="my-orders.html">My Orders</a></li>
-      <li><a href="account.html" class="nav-account-btn" id="navAccountLink" title="My Account">
+      <li><a href="account.html" class="nav-account-btn active" id="navAccountLink" title="My Account">
             <svg class="nav-account-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
               <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
               <circle cx="12" cy="7" r="4"/>
@@ -223,7 +225,7 @@
 
         <!-- Stage 2: Enter OTP Code -->
         <div id="createStageCode" style="display:none;">
-          <p class="field-hint" style="margin-bottom:4px;">Code sent to <strong id="codeSentToEmail"></strong>. <a onclick="resetToEmailStage()" style="color:var(--brass); cursor:pointer; font-weight:600;">Change email</a></p>
+          <p class="field-hint" style="margin-bottom:4px;">Code sent to <strong id="codeSentToEmail"></strong>. <a onclick="resetToEmailStage()" style="color:var(--ink); cursor:pointer; font-weight:600;">Change email</a></p>
           <div>
             <label for="caCode">Verification Code</label>
             <input id="caCode" type="text" inputmode="numeric" maxlength="6" placeholder="123456" autocomplete="one-time-code">
@@ -874,12 +876,12 @@
     <div class="footer-grid">
       <div>
         <div class="footer-logo">A&J's Foodflix</div>
-        <p>A comforting community Resto Bar offering delicious meals to Baggao.</p>
+        <p>Your favorite milktea shop, snack bar & wings spot in Baggao, Cagayan.</p>
       </div>
       <div>
         <h4>Location & Hours</h4>
         <p>2nd Floor DKB Building, Poblacion, Baggao, Cagayan</p>
-        <p style="color: var(--brass); font-weight:700;">Open Daily: 8:00 AM &ndash; 8:00 PM</p>
+        <p style="color: var(--ink); font-weight:700;">Open Daily: 8:00 AM &ndash; 8:00 PM</p>
       </div>
       <div>
         <h4>Quick Links</h4>
