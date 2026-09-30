@@ -1,173 +1,27 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>My Account — A&J's Foodflix</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=6">
-<style>
-  .account-section { background: var(--stone); min-height: calc(100vh - 95px); display: flex; align-items: center; }
-  .account-wrap { max-width: 980px; margin: 0 auto; width: 100%; padding: 60px 22px; }
-
-  /* ---------- Split login card (form left, illustration right) ---------- */
-  .login-split {
-    display: grid; grid-template-columns: 1.05fr 1fr;
-    background: var(--component-bg); border: 1px solid var(--line);
-    border-radius: 18px; overflow: hidden;
-    box-shadow: 0 40px 80px -36px rgba(15,12,8,.35);
-  }
-  @media(max-width:840px) { .login-split { grid-template-columns: 1fr; } }
-
-  .login-form-col { padding: 52px 48px; display: flex; flex-direction: column; justify-content: center; }
-  @media(max-width:520px) { .login-form-col { padding: 34px 24px; } }
-
-  .login-heading { margin-bottom: 26px; }
-  .login-heading h1 { font-family: var(--font-display), sans-serif; font-weight: 900; text-transform: uppercase; font-size: 1.6rem; letter-spacing: -0.01em; color: var(--ink); margin-bottom: 8px; }
-  .login-heading p { font-size: 0.9rem; color: var(--ink); opacity: 0.65; }
-
-  .account-card { background: transparent; border: none; padding: 0; }
-
-  /* Illustration side */
-  .login-art-col {
-    position: relative; color: #f4efe6; overflow: hidden;
-    background: radial-gradient(130% 100% at 75% 0%, #c79a55 0%, #8a6d3a 45%, #241a10 100%);
-    display: flex; flex-direction: column; justify-content: space-between;
-    padding: 46px 40px;
-  }
-  @media(max-width:840px) { .login-art-col { order: -1; min-height: 220px; padding: 36px 28px; } }
-  .login-art-col::before {
-    content: ""; position: absolute; inset: 0;
-    background: radial-gradient(120% 70% at 85% -10%, rgba(255,255,255,.22), transparent 60%);
-  }
-  .login-art-eyebrow { position: relative; z-index: 1; font-family: var(--font-mono), monospace; font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase; opacity: 0.75; }
-  .login-art-title { position: relative; z-index: 1; font-family: var(--font-display), sans-serif; font-weight: 900; text-transform: uppercase; font-size: 1.7rem; line-height: 1.05; margin: 10px 0 14px; }
-  .login-art-sub { position: relative; z-index: 1; font-size: 0.9rem; opacity: 0.82; max-width: 300px; line-height: 1.5; }
-
-  .login-art-graphic { position: relative; z-index: 1; display: flex; justify-content: center; align-items: center; margin: 18px 0; }
-  .login-art-plate { width: 168px; height: 168px; border-radius: 50%; background: rgba(255,255,255,.14); border: 1.5px solid rgba(255,255,255,.35); display: flex; align-items: center; justify-content: center; }
-  .login-art-plate svg { width: 74px; height: 74px; stroke: #f4efe6; fill: none; stroke-width: 1.1; opacity: 0.9; }
-  @media(max-width:840px) { .login-art-plate { width: 108px; height: 108px; } .login-art-plate svg { width: 48px; height: 48px; } }
-
-  .login-art-stats { position: relative; z-index: 1; display: flex; gap: 22px; font-family: var(--font-mono), monospace; }
-  .login-art-stats div strong { display: block; font-size: 1.15rem; color: #fff; }
-  .login-art-stats div span { display: block; font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.06em; opacity: 0.65; margin-top: 2px; }
-
-  .account-tabs { display: flex; border: 1px solid var(--line); border-radius: 4px; overflow: hidden; margin-bottom: 28px; }
-  .account-tab-btn { border-radius: 9999px;
-    flex: 1; background: transparent; border: none; padding: 13px 10px;
-    font-family: var(--font-mono), monospace; font-size: 0.72rem; font-weight: 700;
-    letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink); opacity: 0.55;
-    cursor: pointer; transition: all 0.2s ease;
-  }
-  .account-tab-btn.active { background: var(--ink); color: var(--bg); opacity: 1; border-radius: 9999px; }
-  .account-tab-btn:not(.active):hover { opacity: 0.85; }
-
-  .account-panel { display: none; flex-direction: column; gap: 16px; }
-  .account-panel.active { display: flex; }
-
-  .field-hint { font-size: 0.72rem; color: var(--ink); opacity: 0.5; margin-top: -8px; }
-
-  .divider-row { display: flex; align-items: center; gap: 12px; margin: 4px 0; }
-  .divider-row .line { flex: 1; height: 1px; background: var(--line); }
-  .divider-row span { font-family: var(--font-mono), monospace; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink); opacity: 0.5; }
-
-  .btn-google {
-    display: flex; align-items: center; justify-content: center; gap: 10px;
-    width: 100%; background: transparent; color: var(--ink);
-    border: 1px solid var(--line); padding: 13px 20px; border-radius: 4px;
-    font-family: 'Inter', sans-serif; font-size: 0.85rem; font-weight: 600;
-    cursor: pointer; transition: all 0.2s ease;
-  }
-  .btn-google:hover { border-color: var(--ink); color: var(--ink); }
-
-  .account-submit {
-    width: 100%; justify-content: center; padding: 14px; border-radius: 4px;
-    margin-top: 4px;
-  }
-
-  .account-status {
-    font-size: 0.8rem; margin-top: 4px; min-height: 18px;
-    font-family: var(--font-mono), monospace;
-  }
-  .account-status.err { color: #e05252; }
-  .account-status.ok { color: #4caf7d; }
-  .account-status.info { color: var(--ink); }
-
-  .password-wrap { position: relative; }
-  .password-wrap input { padding-right: 42px; }
-  .password-toggle {
-    position: absolute; right: 2px; bottom: 10px;
-    background: none; border: none; padding: 4px; cursor: pointer;
-    color: var(--ink); opacity: 0.5; display: flex; align-items: center; justify-content: center;
-    transition: opacity .2s ease;
-  }
-  .password-toggle:hover { opacity: 1; }
-  .password-toggle .eye-closed { display: none; }
-  .password-toggle.shown .eye-open { display: none; }
-  .password-toggle.shown .eye-closed { display: block; }
-
-  .switch-hint { text-align: center; font-size: 0.82rem; color: var(--ink); opacity: 0.7; margin-top: 4px; }
-  .switch-hint a { color: var(--ink); font-weight: 600; cursor: pointer; }
-
-  /* Logged-in state */
-  .logged-in-card { display: none; }
-  .logged-in-card.active { display: block; }
-  .profile-header { text-align: center; margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px dashed var(--line); }
-  .profile-header .avatar-ring {
-    width: 64px; height: 64px; border-radius: 50%; margin: 0 auto 14px;
-    background: var(--ink); color: #fff; display: flex; align-items: center; justify-content: center;
-    font-family: var(--font-display), sans-serif; font-weight: 900; font-size: 1.6rem;
-  }
-  .profile-header h3 { font-family: var(--font-display), sans-serif; text-transform: uppercase; font-size: 1.2rem; margin-bottom: 4px; }
-  .profile-header p { font-size: 0.85rem; opacity: 0.65; }
-
-  .logged-in-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 24px; padding-top: 20px; border-top: 1px dashed var(--line); }
-</style>
-</head>
-<body>
-
+<html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign in — A&J's Foodflix</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="foodflix.css">
+</head><body class="auth">
 <header>
-  <a href="index.html" class="logo-link">
-    <img src="../pics&vids/the-yo's_logo.jpg" alt="Logo" class="logo-img">
-    <span class="logo-text">A&J's Foodflix</span>
-  </a>
-  <nav id="siteNav">
-    <ul>
-      <li><a href="about.html">About</a></li>
-      <li><a href="menu.html">Menu</a></li>
-      <li><a href="gallery.html">Gallery</a></li>
-      <li><a href="order.html#feedback">Reviews</a></li>
-      <li><a href="reservations.html">Reserve</a></li>
-      <li><a href="my-orders.html">My Orders</a></li>
-      <li><a href="account.html" class="nav-account-btn active" id="navAccountLink" title="My Account">
-            <svg class="nav-account-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
-              <circle cx="12" cy="7" r="4"/>
-            </svg>
-          </a></li>
-      <li><a href="order.html" class="nav-btn">Order Now</a></li>
-    </ul>
-  </nav>
+  <a href="index.html" class="logo-link"><img src="../pics&vids/the-yo's_logo.jpg" alt="A&J's Foodflix logo" class="logo-img"><span>A&J's Foodflix</span></a>
+  <nav id="siteNav"><ul>
+    <li><a href="about.html">About</a></li><li><a href="menu.html">Menu</a></li><li><a href="gallery.html">Gallery</a></li>
+    <li><a href="order.html#feedback">Reviews</a></li><li><a href="reservations.html">Reserve</a></li><li><a href="my-orders.html">My Orders</a></li>
+    <li><a href="account.html" class="nav-account-btn active" id="navAccountLink" title="My Account"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></a></li>
+    <li id="navSignOutItem" style="display:none"><a href="#" id="navSignOutLink">Sign Out</a></li>
+    <li><a href="order.html" class="nav-btn">Order Now</a></li>
+  </ul></nav>
   <button class="nav-toggle" id="navToggle" type="button" aria-label="Toggle navigation menu" aria-expanded="false">
-    <svg class="nav-toggle-icon nav-icon-menu" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
-      <line x1="4" y1="6" x2="20" y2="6"></line>
-      <line x1="4" y1="12" x2="20" y2="12"></line>
-      <line x1="4" y1="18" x2="20" y2="18"></line>
-    </svg>
-    <svg class="nav-toggle-icon nav-icon-close" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
-      <line x1="18" y1="6" x2="6" y2="18"></line>
-      <line x1="6" y1="6" x2="18" y2="18"></line>
-    </svg>
+    <svg class="nav-icon-menu" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    <svg class="nav-icon-close" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
   </button>
 </header>
-
-<section class="account-section">
-  <div class="account-wrap">
-    <div class="login-split">
-    <div class="login-form-col">
+<section class="account-section"><div class="login-split">
+<div class="login-form-col">
 
     <!-- SIGNED-OUT CARD -->
     <div class="account-card" id="authCard">
@@ -391,27 +245,16 @@
     </div>
 
     <div class="login-art-col">
-      <div>
-        <p class="login-art-eyebrow">A&J's Foodflix</p>
-        <h2 class="login-art-title">Good Food,<br>Good Company.</h2>
-        <p class="login-art-sub">One account gets you faster checkout, live order tracking, and easy table reservations at our Baggao dining room.</p>
-      </div>
-      <div class="login-art-graphic">
-        <div class="login-art-plate">
-          <svg viewBox="0 0 24 24"><ellipse cx="12" cy="15" rx="9" ry="3.2"/><path d="M3 15V9a9 3.2 0 0 1 18 0v6"/><path d="M8 6c0-1.4.6-2.2.6-3.4M12 6c0-1.6.6-2.4.6-3.6M16 6c0-1.4.6-2.2.6-3.4" stroke-linecap="round"/></svg>
-        </div>
-      </div>
-      <div class="login-art-stats">
-        <div><strong>8AM&ndash;8PM</strong><span>Open Daily</span></div>
-        <div><strong>20+</strong><span>Beverages</span></div>
-        <div><strong>2nd Flr</strong><span>DKB Building</span></div>
-      </div>
-    </div>
-
-    </div>
+  <div class="blob b1" style="width:300px;height:300px;top:-80px;right:-80px"></div>
+  <div>
+    <p class="eyebrow" style="position:relative">Members only</p>
+    <h2 class="art-title">Your seat.<br><em>Your order.</em><br>Your tab.</h2>
+    <p class="art-sub">One account for faster checkout, live order tracking and table reservations at our Baggao dining room.</p>
   </div>
-</section>
-
+  <div class="ticket" id="ticket"><small>Admit one · A&J's Foodflix</small><strong>Skip the line,<br>save your details.</strong><div><span>Open 8AM–8PM</span><span>2nd Flr DKB</span></div></div>
+  <div class="perks"><span>Live tracking</span><span>Saved address</span><span>Fast reserve</span></div>
+</div>
+</div></section>
 <script type="module">
   import { 
     auth, 
@@ -870,36 +713,29 @@
     }
   });
 </script>
-
-<footer>
-  <div class="wrap">
-    <div class="footer-grid">
-      <div>
-        <div class="footer-logo">A&J's Foodflix</div>
-        <p>Your favorite milktea shop, snack bar & wings spot in Baggao, Cagayan.</p>
-      </div>
-      <div>
-        <h4>Location & Hours</h4>
-        <p>2nd Floor DKB Building, Poblacion, Baggao, Cagayan</p>
-        <p style="color: var(--ink); font-weight:700;">Open Daily: 8:00 AM &ndash; 8:00 PM</p>
-      </div>
-      <div>
-        <h4>Quick Links</h4>
-        <a href="menu.html">View Full Menu</a>
-        <a href="reservations.html">Reserve a Table</a>
-        <a href="my-orders.html">Track My Order</a>
-        <a href="https://www.facebook.com/profile.php?id=61555628762441" target="_blank">Facebook Page</a>
-        <a href="https://www.tiktok.com/@ajsfoodflix" target="_blank">TikTok</a>
-      </div>
-    </div>
-    <div class="foot-bottom">
-      <span>&copy; <span id="year"></span> A&J's Foodflix.</span>
-      <span>Baggao, Cagayan &middot; Made with care.</span>
-    </div>
+<footer><div class="wrap">
+  <div class="fgrid">
+    <div><div class="flogo">A&J's Foodflix</div><p>Milktea, snacks and wings in Baggao, Cagayan.</p></div>
+    <div><h4>Find us</h4><p>2nd Floor DKB Building, Poblacion, Baggao, Cagayan</p><p>Open daily 8:00 AM – 8:00 PM</p></div>
+    <div><h4>Quick links</h4><a href="menu.html">Full menu</a><a href="reservations.html">Reserve a table</a><a href="my-orders.html">Track my order</a><a href="https://www.facebook.com/profile.php?id=61555628762441" target="_blank" rel="noopener">Facebook</a><a href="https://www.tiktok.com/@ajsfoodflix" target="_blank" rel="noopener">TikTok</a></div>
   </div>
-</footer>
-
-<script src="global.js"></script>
+  <div class="fbot"><span>&copy; <span id="year"></span> A&J's Foodflix.</span><span>Baggao, Cagayan · Made with care.</span></div>
+</div></footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="fx.js"></script>
 <script src="cart.js"></script>
-</body>
-</html>
+<script>
+(()=>{if(matchMedia('(prefers-reduced-motion: reduce)').matches||!window.gsap)return;
+ gsap.from('.login-split',{y:50,opacity:0,duration:.9,ease:'power4.out'});
+ gsap.from('.art-title,.art-sub,.perks span',{y:30,opacity:0,duration:.8,stagger:.08,ease:'power3.out',delay:.25});
+ gsap.from('#ticket',{y:80,rotate:-14,opacity:0,duration:1.1,ease:'back.out(1.4)',delay:.5});
+ gsap.to('#ticket',{y:-8,duration:2.4,ease:'sine.inOut',yoyo:true,repeat:-1,delay:1.6});
+ gsap.to('.login-art-col .blob',{x:-40,y:40,duration:6,ease:'sine.inOut',yoyo:true,repeat:-1});
+ // animate whichever tab panel / card becomes visible, without touching the auth logic
+ const pop=el=>gsap.fromTo(el.children,{y:16,opacity:0},{y:0,opacity:1,duration:.45,stagger:.05,ease:'power2.out',clearProps:'transform,opacity'});
+ const mo=new MutationObserver(m=>m.forEach(r=>{const t=r.target;if((t.classList.contains('account-panel')||t.classList.contains('logged-in-card'))&&t.classList.contains('active'))pop(t)}));
+ document.querySelectorAll('.account-panel,.logged-in-card').forEach(e=>mo.observe(e,{attributes:true,attributeFilter:['class']}));
+})();
+</script>
+</body></html>

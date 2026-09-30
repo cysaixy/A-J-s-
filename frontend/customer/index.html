@@ -1,1206 +1,668 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>A&J's Foodflix — Milktea, Snacks & Wings | Baggao, Cagayan</title>
-<meta name="description" content="A&J's Foodflix serves premium milktea, crispy wings, snacks & espresso in Baggao, Cagayan. Order online for dine-in, pickup or delivery.">
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=6">
-<link rel="stylesheet" href="animations.css">
-<style>
-  /* ============ A&J'S FOODFLIX HOMEPAGE ============ */
-  html { scroll-behavior: auto; }
-
-  body.home-page {
-    padding-top: 0;
-    background: var(--bg);
-    color: var(--ink);
-  }
-
-  /* ---------- HERO ---------- */
-  .fx-hero {
-    position: relative;
-    min-height: 100vh; min-height: 100svh;
-    display: flex; align-items: center;
-    overflow: hidden;
-    background: var(--ink);
-    color: var(--bg);
-  }
-  .fx-hero::before {
-    content: "";
-    position: absolute; inset: 0;
-    background: radial-gradient(ellipse 80% 60% at 70% 40%, rgba(255,255,255,.06), transparent 60%);
-    pointer-events: none;
-  }
-  /* Decorative grid dots */
-  .fx-hero::after {
-    content: "";
-    position: absolute; inset: 0; pointer-events: none;
-    background-image: radial-gradient(circle, rgba(255,255,255,.07) 1px, transparent 1px);
-    background-size: 48px 48px;
-    mask-image: radial-gradient(ellipse 70% 60% at 60% 30%, #000, transparent 70%);
-    -webkit-mask-image: radial-gradient(ellipse 70% 60% at 60% 30%, #000, transparent 70%);
-  }
-
-  .fx-hero-inner {
-    position: relative; z-index: 2;
-    width: min(1200px, calc(100% - 72px));
-    margin: 0 auto;
-    display: grid;
-    grid-template-columns: 1.2fr .8fr;
-    gap: 48px;
-    align-items: center;
-    padding: 140px 0 100px;
-  }
-
-  .fx-eyebrow {
-    display: inline-flex; align-items: center; gap: 10px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: .72rem;
-    font-weight: 700;
-    letter-spacing: .16em;
-    text-transform: uppercase;
-    color: rgba(255,255,255,.5);
-  }
-  .fx-eyebrow::before {
-    content: "";
-    width: 28px; height: 2px;
-    background: rgba(255,255,255,.3);
-    border-radius: 1px;
-  }
-
-  .fx-title {
-    font-family: 'Outfit', sans-serif;
-    font-weight: 800;
-    font-size: clamp(3rem, 9vw, 7.5rem);
-    line-height: .9;
-    letter-spacing: -.05em;
-    color: #fff;
-    margin: 20px 0 12px;
-  }
-  .fx-title .fx-title-accent {
-    display: block;
-    color: rgba(255,255,255,.3);
-    font-size: .55em;
-    letter-spacing: -.02em;
-    margin-top: 6px;
-  }
-
-  .fx-subtitle {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 1.05rem;
-    color: rgba(255,255,255,.55);
-    max-width: 440px;
-    margin: 0 0 32px;
-    line-height: 1.65;
-  }
-
-  .fx-hero-cta { display: flex; gap: 12px; flex-wrap: wrap; }
-  .fx-hero-cta .btn {
-    background: #fff; color: #111; border-color: #fff;
-  }
-  .fx-hero-cta .btn:hover {
-    background: transparent; color: #fff;
-  }
-  .fx-hero-cta .btn-outline {
-    background: transparent; color: #fff;
-    border-color: rgba(255,255,255,.25);
-  }
-  .fx-hero-cta .btn-outline:hover {
-    background: #fff; color: #111;
-    border-color: #fff;
-  }
-
-  /* Hero visual — boba cup illustration */
-  .fx-hero-visual {
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 420px;
-  }
-  .fx-boba-cup {
-    position: relative; z-index: 2;
-    width: 220px; height: 280px;
-    background: linear-gradient(180deg, rgba(255,255,255,.12) 0%, rgba(255,255,255,.04) 100%);
-    border: 1.5px solid rgba(255,255,255,.15);
-    border-radius: 24px 24px 40px 40px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    backdrop-filter: blur(10px);
-    overflow: hidden;
-  }
-  .fx-boba-cup::before {
-    content: "";
-    position: absolute;
-    top: -30px; left: 50%; transform: translateX(-50%);
-    width: 100px; height: 30px;
-    background: rgba(255,255,255,.08);
-    border-radius: 100px 100px 0 0;
-    border: 1.5px solid rgba(255,255,255,.15);
-    border-bottom: none;
-  }
-  /* Straw */
-  .fx-boba-cup::after {
-    content: "";
-    position: absolute;
-    top: -50px; left: 45%;
-    width: 8px; height: 110px;
-    background: rgba(255,255,255,.2);
-    border-radius: 4px;
-    transform: rotate(-10deg);
-  }
-  /* Boba pearls */
-  .fx-pearls {
-    position: absolute;
-    bottom: 30px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    justify-content: center;
-    padding: 0 20px;
-  }
-  .fx-pearl {
-    width: 18px; height: 18px;
-    border-radius: 50%;
-    background: rgba(255,255,255,.2);
-    border: 1px solid rgba(255,255,255,.1);
-    animation: float-pearl 3s ease-in-out infinite;
-  }
-  .fx-pearl:nth-child(2) { animation-delay: .4s; width: 14px; height: 14px; }
-  .fx-pearl:nth-child(3) { animation-delay: .8s; width: 16px; height: 16px; }
-  .fx-pearl:nth-child(4) { animation-delay: 1.2s; }
-  .fx-pearl:nth-child(5) { animation-delay: 1.6s; width: 15px; height: 15px; }
-  .fx-pearl:nth-child(6) { animation-delay: 2s; width: 13px; height: 13px; }
-  .fx-pearl:nth-child(7) { animation-delay: .2s; width: 17px; height: 17px; }
-
-  @keyframes float-pearl {
-    0%, 100% { transform: translateY(0); opacity: .6; }
-    50% { transform: translateY(-6px); opacity: 1; }
-  }
-
-  /* Floating accent circles */
-  .fx-float-circle {
-    position: absolute; border-radius: 50%;
-    border: 1.5px solid rgba(255,255,255,.08);
-    pointer-events: none;
-  }
-  .fx-float-circle:nth-child(1) {
-    width: 180px; height: 180px;
-    top: 5%; right: 10%;
-    animation: floatA 8s ease-in-out infinite;
-  }
-  .fx-float-circle:nth-child(2) {
-    width: 100px; height: 100px;
-    bottom: 15%; left: 5%;
-    animation: floatB 6s ease-in-out infinite;
-  }
-  @keyframes floatA {
-    0%, 100% { transform: translate(0, 0); }
-    50% { transform: translate(-12px, 18px); }
-  }
-  @keyframes floatB {
-    0%, 100% { transform: translate(0, 0); }
-    50% { transform: translate(10px, -14px); }
-  }
-
-  .fx-scroll-cue {
-    position: absolute; left: 36px; bottom: 28px; z-index: 3;
-    display: flex; flex-direction: column; gap: 10px; align-items: center;
-    font-family: 'DM Sans', sans-serif;
-    font-size: .64rem;
-    font-weight: 700;
-    letter-spacing: .2em;
-    text-transform: uppercase;
-    color: rgba(255,255,255,.3);
-  }
-  .fx-scroll-cue::after {
-    content: "";
-    width: 1px; height: 50px;
-    background: linear-gradient(rgba(255,255,255,.4), transparent);
-    animation: cue 2s ease-in-out infinite;
-  }
-  @keyframes cue {
-    0%, 100% { transform: scaleY(.4); transform-origin: top; }
-    50% { transform: scaleY(1); transform-origin: top; }
-  }
-
-  @media (max-width: 980px) {
-    .fx-hero-inner {
-      grid-template-columns: 1fr;
-      width: min(1200px, calc(100% - 44px));
-      text-align: center;
-      padding: 120px 0 80px;
-    }
-    .fx-eyebrow { justify-content: center; }
-    .fx-eyebrow::before { display: none; }
-    .fx-subtitle { margin: 0 auto 28px; }
-    .fx-hero-cta { justify-content: center; }
-    .fx-hero-visual { order: -1; height: 260px; }
-    .fx-boba-cup { width: 160px; height: 200px; }
-    .fx-scroll-cue { display: none; }
-  }
-
-  /* ---------- MARQUEE ---------- */
-  .fx-marquee {
-    position: relative; z-index: 3;
-    background: var(--bg);
-    color: var(--ink);
-    overflow: hidden; white-space: nowrap;
-    padding: 18px 0;
-    border-bottom: 1px solid var(--line);
-  }
-  .fx-marquee-track {
-    display: inline-block;
-    animation: fxScroll 32s linear infinite;
-  }
-  .fx-marquee span {
-    font-family: 'Outfit', sans-serif;
-    font-weight: 800;
-    font-size: clamp(1rem, 2vw, 1.5rem);
-    letter-spacing: .01em;
-    padding: 0 16px;
-    text-transform: uppercase;
-  }
-  .fx-marquee span::before {
-    content: '◆';
-    margin-right: 16px;
-    font-size: .45em;
-    vertical-align: middle;
-    opacity: .2;
-  }
-  @keyframes fxScroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-
-  /* ---------- BESTSELLERS ---------- */
-  .fx-bestsellers { background: var(--bg); padding: 100px 0; }
-
-  .fx-product-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
-  }
-  @media (max-width: 900px) { .fx-product-grid { grid-template-columns: repeat(2, 1fr); } }
-  @media (max-width: 500px) { .fx-product-grid { grid-template-columns: 1fr; } }
-
-  .fx-product-card {
-    background: var(--surface);
-    border: 1px solid var(--line);
-    border-radius: 20px;
-    overflow: hidden;
-    position: relative;
-    transition: all .28s cubic-bezier(.4,0,.2,1);
-  }
-  .fx-product-card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 20px 40px rgba(0,0,0,.06);
-    border-color: var(--ink);
-  }
-  .fx-product-thumb {
-    aspect-ratio: 1 / .85;
-    position: relative;
-    display: grid; place-items: center;
-    background: var(--bg-alt);
-    overflow: hidden;
-  }
-  .fx-product-thumb svg {
-    width: 42px; height: 42px;
-    stroke: var(--ink-faint);
-    fill: none;
-    stroke-width: 1.2;
-    opacity: .4;
-  }
-  .fx-product-badge {
-    position: absolute;
-    top: 12px; left: 12px;
-    background: var(--ink);
-    color: var(--bg);
-    font-family: 'DM Sans', sans-serif;
-    font-size: .62rem;
-    font-weight: 700;
-    letter-spacing: .06em;
-    text-transform: uppercase;
-    padding: 5px 12px;
-    border-radius: 100px;
-  }
-  .fx-product-body {
-    padding: 16px 18px 18px;
-  }
-  .fx-product-body .name {
-    font-family: 'Outfit', sans-serif;
-    font-weight: 700;
-    font-size: .88rem;
-    letter-spacing: -.01em;
-    display: block;
-    margin-bottom: 10px;
-    color: var(--ink);
-  }
-  .fx-product-body .row {
-    display: flex; justify-content: space-between;
-    align-items: center;
-  }
-  .fx-product-body .price {
-    font-family: 'JetBrains Mono', monospace;
-    font-weight: 700;
-    font-size: .92rem;
-    color: var(--ink);
-  }
-  .fx-product-body .add {
-    width: 34px; height: 34px;
-    border-radius: 12px;
-    background: var(--accent-soft);
-    border: 1.5px solid var(--line);
-    display: grid; place-items: center;
-    font-size: 1.1rem;
-    cursor: pointer;
-    color: var(--ink);
-    transition: all .2s ease;
-    font-family: 'DM Sans', sans-serif;
-    font-weight: 700;
-  }
-  .fx-product-body .add:hover {
-    background: var(--ink);
-    color: var(--bg);
-    border-color: var(--ink);
-    transform: scale(1.1);
-  }
-  .fx-product-body .add.just-added {
-    background: var(--ink) !important;
-    color: var(--bg) !important;
-    border-color: var(--ink) !important;
-    transform: scale(1.15);
-    transition: all .15s ease;
-  }
-
-  /* ---------- HOW IT WORKS ---------- */
-  .fx-how {
-    background: var(--bg-alt);
-    padding: 100px 0;
-    border-top: 1px solid var(--line);
-    border-bottom: 1px solid var(--line);
-  }
-  .fx-how-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
-  }
-  @media (max-width: 900px) { .fx-how-grid { grid-template-columns: repeat(2, 1fr); } }
-  @media (max-width: 540px) { .fx-how-grid { grid-template-columns: 1fr; } }
-  .fx-how-card {
-    background: var(--surface);
-    border: 1px solid var(--line);
-    border-radius: 20px;
-    padding: 32px 24px;
-    text-align: center;
-    transition: all .28s ease;
-    position: relative;
-    overflow: hidden;
-  }
-  .fx-how-card:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-md);
-    border-color: var(--ink);
-  }
-  .fx-how-number {
-    font-family: 'Outfit', sans-serif;
-    font-weight: 800;
-    font-size: 3.5rem;
-    line-height: 1;
-    color: var(--accent-soft);
-    letter-spacing: -.04em;
-    margin-bottom: 14px;
-    display: block;
-    /* Using ink color with low opacity for B&W style */
-    color: var(--line);
-  }
-  .fx-how-card:hover .fx-how-number { color: var(--ink); }
-  .fx-how-icon {
-    width: 52px; height: 52px;
-    border-radius: 16px;
-    background: var(--accent-soft);
-    display: grid; place-items: center;
-    margin: 0 auto 16px;
-  }
-  .fx-how-icon svg {
-    width: 24px; height: 24px;
-    stroke: var(--ink);
-    fill: none;
-    stroke-width: 1.6;
-  }
-  .fx-how-card h3 {
-    font-family: 'Outfit', sans-serif;
-    font-weight: 700;
-    font-size: 1.05rem;
-    margin-bottom: 8px;
-    letter-spacing: -.01em;
-  }
-  .fx-how-card p {
-    font-size: .85rem;
-    color: var(--ink-soft);
-    line-height: 1.55;
-  }
-
-  /* ---------- MENU CATEGORIES ---------- */
-  .fx-categories {
-    background: var(--bg);
-    padding: 100px 0;
-  }
-  .fx-cat-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
-  }
-  @media (max-width: 990px) { .fx-cat-grid { grid-template-columns: repeat(2, 1fr); } }
-  @media (max-width: 540px) { .fx-cat-grid { grid-template-columns: 1fr; } }
-
-  .fx-cat-card {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    padding: 28px 22px;
-    border: 1.5px solid var(--line);
-    background: var(--surface);
-    border-radius: 20px;
-    text-decoration: none;
-    color: var(--ink);
-    transition: all .28s ease;
-    position: relative;
-    overflow: hidden;
-    min-height: 220px;
-  }
-  .fx-cat-card::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, var(--accent-soft) 0%, transparent 50%);
-    opacity: 0;
-    transition: opacity .28s ease;
-  }
-  .fx-cat-card:hover::before { opacity: 1; }
-  .fx-cat-card:hover {
-    border-color: var(--ink);
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-md);
-  }
-  .fx-cat-card:active { transform: translateY(-2px); }
-
-  .fx-cat-top {
-    position: relative; z-index: 1;
-    display: flex; justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 18px;
-  }
-  .fx-cat-icon {
-    width: 48px; height: 48px;
-    border-radius: 14px;
-    background: var(--accent-soft);
-    border: 1.5px solid var(--line);
-    display: grid; place-items: center;
-    flex-shrink: 0;
-    transition: all .28s ease;
-  }
-  .fx-cat-card:hover .fx-cat-icon {
-    background: var(--ink);
-    border-color: var(--ink);
-  }
-  .fx-cat-card:hover .fx-cat-icon svg { stroke: var(--bg); }
-  .fx-cat-icon svg {
-    width: 22px; height: 22px;
-    stroke: var(--ink);
-    fill: none;
-    stroke-width: 1.4;
-    transition: stroke .28s ease;
-  }
-  .fx-cat-badge {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: .66rem; font-weight: 700;
-    letter-spacing: .04em; text-transform: uppercase;
-    color: var(--ink-faint);
-    background: var(--accent-soft);
-    padding: 4px 10px;
-    border-radius: 100px;
-  }
-
-  .fx-cat-name {
-    position: relative; z-index: 1;
-    font-family: 'Outfit', sans-serif;
-    font-weight: 700;
-    font-size: 1.12rem;
-    letter-spacing: -.01em;
-    color: var(--ink);
-    margin-bottom: 8px;
-  }
-  .fx-cat-desc {
-    position: relative; z-index: 1;
-    font-size: .84rem;
-    color: var(--ink-soft);
-    margin-bottom: 18px;
-    line-height: 1.5;
-  }
-  .fx-cat-action {
-    position: relative; z-index: 1;
-    display: inline-flex; align-items: center; gap: 6px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: .75rem; font-weight: 700;
-    letter-spacing: .06em; text-transform: uppercase;
-    color: var(--ink);
-    transition: transform .2s ease;
-  }
-  .fx-cat-card:hover .fx-cat-action { transform: translateX(4px); }
-
-  /* ---------- SPECIALTY ---------- */
-  .fx-specialty {
-    background: var(--bg-alt);
-    padding: 100px 0;
-    border-top: 1px solid var(--line);
-  }
-  .fx-specialty-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 56px;
-    align-items: center;
-  }
-  .fx-specialty h2 {
-    font-family: 'Outfit', sans-serif;
-    font-weight: 800;
-    font-size: clamp(1.8rem, 4vw, 3.2rem);
-    letter-spacing: -.03em;
-    line-height: .98;
-    margin: 14px 0;
-    color: var(--ink);
-  }
-  .fx-specialty p {
-    color: var(--ink-soft);
-    max-width: 440px;
-    line-height: 1.6;
-  }
-  .fx-specialty-prices {
-    display: flex; gap: 22px;
-    margin-top: 28px; flex-wrap: wrap;
-  }
-  .fx-specialty-prices div {
-    border-left: 3px solid var(--ink);
-    padding-left: 14px;
-  }
-  .fx-specialty-prices strong {
-    display: block;
-    font-family: 'JetBrains Mono', monospace;
-    font-weight: 700;
-    font-size: 1.25rem;
-    color: var(--ink);
-  }
-  .fx-specialty-prices span {
-    font-family: 'DM Sans', sans-serif;
-    font-size: .68rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: .06em;
-    color: var(--ink-faint);
-  }
-  .fx-specialty-photo-wrap {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  .fx-specialty-photo {
-    width: 340px; height: 340px;
-    border-radius: 40px;
-    overflow: hidden;
-    position: relative;
-    border: 2px solid var(--line);
-    box-shadow: var(--shadow-lg);
-    flex-shrink: 0;
-  }
-  .fx-specialty-photo video,
-  .fx-specialty-photo img {
-    width: 100%; height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-  @media (max-width: 1000px) {
-    .fx-specialty-photo { width: 280px; height: 280px; border-radius: 32px; }
-  }
-  @media (max-width: 900px) {
-    .fx-specialty { padding: 70px 0 50px; }
-    .fx-specialty-grid { grid-template-columns: 1fr; gap: 36px; }
-    .fx-specialty-photo-wrap { order: -1; }
-    .fx-specialty-photo { width: 240px; height: 240px; border-radius: 28px; }
-  }
-
-  /* ---------- GALLERY TEASER ---------- */
-  .fx-gallery-teaser {
-    background: var(--bg);
-    padding: 0 0 100px;
-  }
-  .fx-gt-grid {
-    display: grid;
-    grid-template-columns: 1.3fr 1fr 1fr;
-    gap: 12px;
-    height: 300px;
-  }
-  @media (max-width: 800px) {
-    .fx-gt-grid { grid-template-columns: 1fr 1fr; height: auto; }
-    .fx-gt-grid .fx-gt-item { aspect-ratio: 1/1; }
-    .fx-gt-grid .fx-gt-item:first-child { grid-column: 1/-1; aspect-ratio: 2/1; }
-  }
-  .fx-gt-item {
-    border-radius: 20px;
-    position: relative;
-    overflow: hidden;
-    display: flex;
-    align-items: flex-end;
-    padding: 22px;
-    color: #fff;
-    font-family: 'Outfit', sans-serif;
-    font-weight: 700;
-    font-size: .82rem;
-    letter-spacing: .01em;
-    text-decoration: none;
-  }
-  .fx-gt-item img {
-    position: absolute; inset: 0;
-    width: 100%; height: 100%;
-    object-fit: cover;
-    transition: transform .5s ease;
-    z-index: 0;
-  }
-  .fx-gt-item::before {
-    content: "";
-    position: absolute; inset: 0;
-    background: linear-gradient(180deg, transparent 30%, rgba(0,0,0,.75) 100%);
-    z-index: 1;
-    transition: background .3s ease;
-  }
-  .fx-gt-item::after {
-    content: "";
-    position: absolute; inset: 0;
-    border: 2px solid rgba(255,255,255,.15);
-    border-radius: inherit;
-    opacity: 0;
-    transition: opacity .25s;
-    z-index: 2;
-  }
-  .fx-gt-item:hover img { transform: scale(1.05); }
-  .fx-gt-item:hover::after { opacity: 1; }
-  .fx-gt-item span {
-    position: relative; z-index: 3;
-    display: inline-flex; align-items: center; gap: 6px;
-    text-shadow: 0 2px 8px rgba(0,0,0,.6);
-  }
-
-  /* ---------- LOCATION ---------- */
-  .fx-location {
-    background: var(--bg);
-    padding: 100px 0;
-    border-top: 1px solid var(--line);
-  }
-  .fx-location-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 52px;
-    align-items: center;
-  }
-  .fx-location h2 {
-    font-family: 'Outfit', sans-serif;
-    font-weight: 800;
-    font-size: clamp(2.2rem, 5.5vw, 4.5rem);
-    line-height: .92;
-    letter-spacing: -.04em;
-    margin: 14px 0 18px;
-    color: var(--ink);
-  }
-  .fx-location p {
-    color: var(--ink-soft);
-    max-width: 400px;
-    margin-bottom: 8px;
-  }
-  .fx-arrival-card {
-    padding: 28px;
-    border: 1.5px solid var(--line);
-    border-radius: 20px;
-    background: var(--surface);
-    box-shadow: var(--shadow-sm);
-  }
-  .fx-arrival-card h3 {
-    font-family: 'Outfit', sans-serif;
-    font-weight: 800;
-    font-size: clamp(1.5rem, 3vw, 2.2rem);
-    letter-spacing: -.02em;
-    margin-bottom: 14px;
-    color: var(--ink);
-  }
-  .fx-arrival-card address {
-    font-style: normal;
-    color: var(--ink-soft);
-    line-height: 1.65;
-    margin-bottom: 4px;
-  }
-  .fx-arrival-card .hours {
-    display: block;
-    margin: 12px 0;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: .7rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: .06em;
-    color: var(--ink);
-  }
-  .fx-arrival-actions {
-    display: flex; gap: 10px; flex-wrap: wrap;
-    margin-top: 8px;
-  }
-  @media (max-width: 900px) {
-    .fx-location-grid {
-      grid-template-columns: 1fr; gap: 32px; text-align: center;
-    }
-    .fx-location p { margin: 0 auto 8px; }
-    .fx-arrival-actions { justify-content: center; }
-  }
-
-  /* ---------- CTA BAND ---------- */
-  .fx-cta-band {
-    background: var(--ink);
-    color: var(--bg);
-    padding: 72px 0;
-  }
-  .fx-cta-inner {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 24px;
-    flex-wrap: wrap;
-  }
-  .fx-cta-inner h3 {
-    font-family: 'Outfit', sans-serif;
-    font-weight: 800;
-    font-size: 1.5rem;
-    letter-spacing: -.02em;
-    margin-bottom: 4px;
-  }
-  .fx-cta-inner p {
-    margin: 0;
-    color: rgba(255,255,255,.55);
-    font-size: .92rem;
-  }
-  .fx-cta-inner .btn {
-    background: #fff; color: #111; border-color: #fff;
-  }
-  .fx-cta-inner .btn:hover {
-    background: transparent; color: #fff;
-  }
-  .fx-cta-inner .btn-outline {
-    background: transparent; color: #fff;
-    border-color: rgba(255,255,255,.2);
-  }
-  .fx-cta-inner .btn-outline:hover {
-    background: #fff; color: #111; border-color: #fff;
-  }
-  @media (max-width: 700px) {
-    .fx-cta-inner { flex-direction: column; align-items: flex-start; text-align: left; }
-  }
-
-  /* ---------- MOBILE STICKY BAR ---------- */
-  .fx-sticky-bar { display: none; }
-  @media (max-width: 900px) {
-    body.home-page { padding-bottom: 72px; }
-    .fx-sticky-bar {
-      display: flex;
-      position: fixed; bottom: 0; left: 0; right: 0; z-index: 90;
-      background: var(--surface);
-      padding: 12px 18px;
-      align-items: center;
-      justify-content: space-between;
-      border-top: 1px solid var(--line);
-      box-shadow: 0 -8px 24px rgba(0,0,0,.06);
-      backdrop-filter: blur(16px);
-    }
-    .fx-sticky-bar .txt { color: var(--ink); }
-    .fx-sticky-bar .txt strong {
-      display: block;
-      font-family: 'Outfit', sans-serif;
-      font-weight: 700;
-      font-size: .85rem;
-    }
-    .fx-sticky-bar .txt span {
-      font-family: 'DM Sans', sans-serif;
-      font-size: .68rem;
-      font-weight: 500;
-      opacity: .5;
-    }
-  }
-
-  footer { border-top: none; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A&J's Foodflix — Modern Milktea, Crispy Wings & Espresso</title>
+  <meta name="description" content="A&J's Foodflix Flagship in Baggao, Cagayan. Artisanal milktea, specialty espresso, handcrafted wings, and comfort dining in an ultra-modern space.">
+  
+  <!-- Preconnect to Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,500;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- Modern Black & White Design System -->
+  <link rel="stylesheet" href="index.css?v=2">
 </head>
-<body class="home-page">
+<body>
 
-<header>
-  <a href="index.html" class="logo-link">
-    <img src="../pics&vids/the-yo's_logo.jpg" alt="A&J's Foodflix Logo" class="logo-img">
-    <span class="logo-text">A&J's Foodflix</span>
-  </a>
-  <nav id="siteNav">
-    <ul>
-      <li><a href="about.html">About</a></li>
-      <li><a href="menu.html">Menu</a></li>
-      <li><a href="gallery.html">Gallery</a></li>
-      <li><a href="order.html#feedback">Reviews</a></li>
-      <li><a href="reservations.html">Reserve</a></li>
-      <li><a href="my-orders.html">My Orders</a></li>
-      <li><a href="account.html" class="nav-account-btn" id="navAccountLink" title="My Account">
-            <svg class="nav-account-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
-              <circle cx="12" cy="7" r="4"/>
-            </svg>
-          </a></li>
-      <li><a href="order.html" class="nav-btn">Order Now</a></li>
+  <!-- Ambient Dynamic Mouse Spotlight -->
+  <div class="mouse-spotlight" id="mouseSpotlight"></div>
+  
+  <!-- Subtle Monochromatic Background Grid -->
+  <div class="grid-bg-overlay"></div>
+
+  <!-- ==========================================================================
+       SITE HEADER
+       ========================================================================== -->
+  <header class="site-header" id="siteHeader">
+    <div class="container header-inner">
+      <a href="index.html" class="brand-emblem" aria-label="A&J's Foodflix Home">
+        <div class="brand-symbol">
+          <img src="../pics&vids/the-yo's_logo.jpg" alt="A&J's Emblem">
+        </div>
+        <div class="brand-meta">
+          <span class="brand-name">A&J'S FOODFLIX</span>
+          <span class="brand-sub">BAGGAO · EST. 2024</span>
+        </div>
+      </a>
+
+      <!-- Desktop Navigation -->
+      <nav class="desktop-nav" aria-label="Main Navigation">
+        <ul class="nav-links-list">
+          <li><a href="about.html">About</a></li>
+          <li><a href="menu.html">Menu</a></li>
+          <li><a href="gallery.html">Gallery</a></li>
+          <li><a href="order.html#feedback">Reviews</a></li>
+          <li><a href="reservations.html">Reservations</a></li>
+          <li><a href="my-orders.html">My Orders</a></li>
+        </ul>
+      </nav>
+
+      <!-- Action Cluster -->
+      <div class="nav-action-cluster">
+        <!-- Account Icon Button (Synced via authNav.js) -->
+        <a href="account.html" class="icon-btn" id="navAccountLink" title="Account / Sign In" aria-label="My Account">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+        </a>
+
+        <!-- Sign Out Link (revealed by authNav.js when signed in) -->
+        <div id="navSignOutItem" style="display: none;">
+          <a href="#" id="navSignOutLink" class="btn-secondary" style="padding: 8px 16px; font-size: 0.82rem;">Sign Out</a>
+        </div>
+
+        <!-- Primary Order CTA Button -->
+        <a href="order.html" class="btn-primary magnet-btn">
+          <span>Order Now</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        </a>
+
+        <!-- Mobile Menu Toggle Button -->
+        <button class="mobile-toggle" id="mobileNavToggle" type="button" aria-label="Toggle navigation menu" aria-expanded="false">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile Fullscreen Menu Overlay -->
+  <div class="mobile-menu-overlay" id="mobileMenuOverlay">
+    <div class="tag-label">
+      <span class="dot"></span> Navigation Hub
+    </div>
+    <ul class="mobile-nav-links">
+      <li><a href="about.html">About Us</a></li>
+      <li><a href="menu.html">Curated Menu</a></li>
+      <li><a href="gallery.html">Atmosphere & Gallery</a></li>
+      <li><a href="order.html#feedback">Verified Reviews</a></li>
+      <li><a href="reservations.html">Table Reservations</a></li>
+      <li><a href="my-orders.html">Track My Order</a></li>
+      <li><a href="account.html">My Account</a></li>
     </ul>
-  </nav>
-  <button class="nav-toggle" id="navToggle" type="button" aria-label="Toggle navigation menu" aria-expanded="false">
-    <svg class="nav-toggle-icon nav-icon-menu" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
-      <line x1="4" y1="6" x2="20" y2="6"></line>
-      <line x1="4" y1="12" x2="20" y2="12"></line>
-      <line x1="4" y1="18" x2="20" y2="18"></line>
-    </svg>
-    <svg class="nav-toggle-icon nav-icon-close" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
-      <line x1="18" y1="6" x2="6" y2="18"></line>
-      <line x1="6" y1="6" x2="18" y2="18"></line>
-    </svg>
-  </button>
-</header>
-
-<!-- ============ HERO ============ -->
-<section class="fx-hero">
-  <div class="fx-float-circle"></div>
-  <div class="fx-float-circle"></div>
-
-  <div class="fx-hero-inner">
-    <div class="fx-hero-copy">
-      <p class="fx-eyebrow fade-in">Milktea · Snacks · Wings · Baggao</p>
-      <h1 class="fx-title" aria-label="A&J's Foodflix">
-        A&J's<br>Foodflix
-        <span class="fx-title-accent">Sip. Crunch. Repeat.</span>
-      </h1>
-      <p class="fx-subtitle fade-in">Creamy milktea, crispy wings, savory snacks, and handcrafted espresso — all under one roof. 2nd Floor, DKB Building, Poblacion, Baggao.</p>
-      <div class="fx-hero-cta fade-in">
-        <a href="order.html" class="btn">Order Now</a>
-        <a href="menu.html" class="btn btn-outline">View Menu</a>
-      </div>
-    </div>
-    <div class="fx-hero-visual fade-in">
-      <div class="fx-boba-cup">
-        <div class="fx-pearls">
-          <div class="fx-pearl"></div>
-          <div class="fx-pearl"></div>
-          <div class="fx-pearl"></div>
-          <div class="fx-pearl"></div>
-          <div class="fx-pearl"></div>
-          <div class="fx-pearl"></div>
-          <div class="fx-pearl"></div>
-        </div>
+    <div class="mobile-menu-footer">
+      <a href="order.html" class="btn-primary" style="width: 100%;">Launch Order Kiosk →</a>
+      <div style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--silver); text-align: center;">
+        2ND FLOOR, DKB BLDG, BAGGAO, CAGAYAN
       </div>
     </div>
   </div>
-  <div class="fx-scroll-cue">Scroll</div>
-</section>
 
-<!-- ============ MARQUEE ============ -->
-<div class="fx-marquee">
-  <div class="fx-marquee-track">
-    <span>Classic Milktea</span><span>Crispy Wings</span><span>Matcha Series</span><span>Pansit Batil Patung</span><span>Spanish Latte</span><span>Loaded Fries</span><span>Rice Meals</span><span>Biscoff Specials</span>
-    <span>Classic Milktea</span><span>Crispy Wings</span><span>Matcha Series</span><span>Pansit Batil Patung</span><span>Spanish Latte</span><span>Loaded Fries</span><span>Rice Meals</span><span>Biscoff Specials</span>
-  </div>
-</div>
-
-<!-- ============ BESTSELLERS ============ -->
-<section class="fx-bestsellers">
-  <div class="wrap">
-    <div class="section-head">
-      <div>
-        <p class="eyebrow" style="display:block; margin-bottom:8px;">Popular Right Now</p>
-        <h2>What everyone's ordering</h2>
-      </div>
-      <p>Fan favorites — tap "+" to add straight to your cart without leaving the page.</p>
-    </div>
-
-    <div class="fx-product-grid" id="bestsellerGrid">
-      <div class="fx-product-card">
-        <div class="fx-product-thumb"><span class="fx-product-badge">Bestseller</span><svg viewBox="0 0 24 24"><ellipse cx="12" cy="15" rx="9" ry="3.2"/><path d="M3 15V9a9 3.2 0 0 1 18 0v6"/></svg></div>
-        <div class="fx-product-body">
-          <span class="name">Chicken Katsu Rice Meal</span>
-          <div class="row"><span class="price">₱120</span><button type="button" class="add" data-id="chicken-katsu-rice-meal" data-name="Chicken Katsu Rice Meal" data-price="120" onclick="Cart.add(this)">+</button></div>
-        </div>
-      </div>
-      <div class="fx-product-card">
-        <div class="fx-product-thumb"><svg viewBox="0 0 24 24"><path d="M8 4c-2 0-3.5 1.6-3.5 3.6 0 2.6 2.2 4.9 5 6.8l2.5 1.7 2.5-1.7c2.8-1.9 5-4.2 5-6.8C19.5 5.6 18 4 16 4c-1.5 0-2.8.9-3.5 2.2C11.8 4.9 10.5 4 9 4Z"/></svg></div>
-        <div class="fx-product-body">
-          <span class="name">Chicken Wings (6 Pcs)</span>
-          <div class="row"><span class="price">₱180</span><button type="button" class="add" data-id="chicken-wings-6-pcs" data-name="Chicken Wings (6 Pcs)" data-price="180" onclick="Cart.add(this)">+</button></div>
-        </div>
-      </div>
-      <div class="fx-product-card">
-        <div class="fx-product-thumb"><span class="fx-product-badge">Bestseller</span><svg viewBox="0 0 24 24"><path d="M6 8h11v6a5.5 5.5 0 0 1-5.5 5.5h0A5.5 5.5 0 0 1 6 14V8Z"/><path d="M17 9.5h1.5a2 2 0 0 1 0 4H17"/></svg></div>
-        <div class="fx-product-body">
-          <span class="name">Spanish Latte</span>
-          <div class="row"><span class="price">₱110</span><button type="button" class="add" data-id="spanish-latte" data-name="Spanish Latte" data-price="110" onclick="Cart.add(this)">+</button></div>
-        </div>
-      </div>
-      <div class="fx-product-card">
-        <div class="fx-product-thumb"><svg viewBox="0 0 24 24"><path d="M6 8h11v6a5.5 5.5 0 0 1-5.5 5.5h0A5.5 5.5 0 0 1 6 14V8Z"/><path d="M17 9.5h1.5a2 2 0 0 1 0 4H17"/><path d="M8.5 4.5c1.5 1 1.8 2.2.9 3.4M12 4.5c1.5 1 1.8 2.2.9 3.4" stroke-linecap="round"/></svg></div>
-        <div class="fx-product-body">
-          <span class="name">Biscoff Matcha Delight</span>
-          <div class="row"><span class="price">₱130</span><button type="button" class="add" data-id="biscoff-matcha-delight" data-name="Biscoff Matcha Delight" data-price="130" onclick="Cart.add(this)">+</button></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ============ HOW IT WORKS ============ -->
-<section class="fx-how">
-  <div class="wrap">
-    <div class="section-head">
-      <div>
-        <p class="eyebrow" style="display:block; margin-bottom:8px;">How It Works</p>
-        <h2>From craving to confirmed</h2>
-      </div>
-      <p>Four simple steps to get your milktea fix, wings, or a full meal delivered or ready for pickup.</p>
-    </div>
-
-    <div class="fx-how-grid">
-      <div class="fx-how-card">
-        <span class="fx-how-number">01</span>
-        <div class="fx-how-icon">
-          <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></svg>
-        </div>
-        <h3>Browse & Pick</h3>
-        <p>Explore our milktea, wings, snacks, and espresso bar. Something for every mood.</p>
-      </div>
-      <div class="fx-how-card">
-        <span class="fx-how-number">02</span>
-        <div class="fx-how-icon">
-          <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9h18M3 15h18M12 3v18"/></svg>
-        </div>
-        <h3>Choose Your Way</h3>
-        <p>Dine-in, pickup, delivery, or schedule an advance order — totally your call.</p>
-      </div>
-      <div class="fx-how-card">
-        <span class="fx-how-number">03</span>
-        <div class="fx-how-icon">
-          <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-        </div>
-        <h3>Review & Confirm</h3>
-        <p>Double-check your order, quantities, and total before sending it our way.</p>
-      </div>
-      <div class="fx-how-card">
-        <span class="fx-how-number">04</span>
-        <div class="fx-how-icon">
-          <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m9 12 2 2 4-4"/></svg>
-        </div>
-        <h3>Done. Tracked.</h3>
-        <p>Get confirmation and track your order status right from your account.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ============ MENU CATEGORIES ============ -->
-<section class="fx-categories" id="menuShowcase">
-  <div class="wrap">
-    <div class="section-head">
-      <div>
-        <p class="eyebrow" style="display:block; margin-bottom:8px;">The Menu</p>
-        <h2>Everything in one place</h2>
-      </div>
-      <p>From hearty rice meals to the espresso bar — pick a category and jump right in.</p>
-    </div>
-
-    <div class="fx-cat-grid">
-      <!-- 1. Rice Meals & Bowls -->
-      <a class="fx-cat-card" href="menu.html#rice-meals-bowls">
-        <div>
-          <div class="fx-cat-top">
-            <div class="fx-cat-icon">
-              <svg viewBox="0 0 24 24"><ellipse cx="12" cy="15" rx="9" ry="3.2"/><path d="M3 15V9a9 3.2 0 0 1 18 0v6"/></svg>
-            </div>
-            <span class="fx-cat-badge">From ₱100</span>
+  <main>
+    <!-- ==========================================================================
+         HERO SECTION (BESPOKE MONOCHROME & GSAP MOTION)
+         ========================================================================== -->
+    <section class="hero-section">
+      <div class="container hero-grid">
+        <div class="hero-content">
+          <div class="hero-badge-wrap">
+            <span class="tag-label">
+              <span class="dot"></span> ARTISANAL TASTE · BAGGAO ORIGIN
+            </span>
           </div>
-          <h3 class="fx-cat-name">Rice Meals &amp; Bowls</h3>
-          <p class="fx-cat-desc">Pork sisig, chicken katsu, tapsi, poppers, and comforting savory rice bowls.</p>
-        </div>
-        <div class="fx-cat-action">View Rice Meals →</div>
-      </a>
 
-      <!-- 2. Wings, Noodles & Snacks -->
-      <a class="fx-cat-card" href="menu.html#wings-noodles-snacks">
-        <div>
-          <div class="fx-cat-top">
-            <div class="fx-cat-icon">
-              <svg viewBox="0 0 24 24"><path d="M8 4c-2 0-3.5 1.6-3.5 3.6 0 2.6 2.2 4.9 5 6.8l2.5 1.7 2.5-1.7c2.8-1.9 5-4.2 5-6.8C19.5 5.6 18 4 16 4c-1.5 0-2.8.9-3.5 2.2C11.8 4.9 10.5 4 9 4Z"/></svg>
-            </div>
-            <span class="fx-cat-badge">From ₱55</span>
+          <h1 class="hero-title" aria-label="Modern Craft. Crispy Indulgence. Baggao Origin.">
+            <div class="title-line"><span>MODERN CRAFT.</span></div>
+            <div class="title-line"><span class="outline-text">CRISPY INDULGENCE.</span></div>
+            <div class="title-line"><span class="glow-text">BAGGAO ORIGIN.</span></div>
+          </h1>
+
+          <p class="hero-description">
+            Experience our slow-steeped milk teas, freshly pulled espresso, signature glazed crispy chicken wings, and hearty northern bowls. Engineered with obsession, served in an atmosphere built for focus and gathering.
+          </p>
+
+          <div class="hero-actions">
+            <a href="order.html" class="btn-primary magnet-btn">
+              <span>Order Online Now</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </a>
+            <a href="menu.html" class="btn-secondary magnet-btn">
+              <span>View Full Menu</span>
+            </a>
+            <a href="reservations.html" class="btn-secondary magnet-btn">
+              <span>Reserve Table</span>
+            </a>
           </div>
-          <h3 class="fx-cat-name">Wings, Noodles &amp; Snacks</h3>
-          <p class="fx-cat-desc">Crispy flavored wings, Pansit Batil Patung, Lomi, burgers, pasta &amp; loaded fries.</p>
-        </div>
-        <div class="fx-cat-action">View Wings & Snacks →</div>
-      </a>
 
-      <!-- 3. Espresso & Coffee -->
-      <a class="fx-cat-card" href="menu.html#espresso-coffee">
-        <div>
-          <div class="fx-cat-top">
-            <div class="fx-cat-icon">
-              <svg viewBox="0 0 24 24"><path d="M6 8h11v6a5.5 5.5 0 0 1-5.5 5.5h0A5.5 5.5 0 0 1 6 14V8Z"/><path d="M17 9.5h1.5a2 2 0 0 1 0 4H17"/><path d="M8.5 4.5c1.5 1 1.8 2.2.9 3.4M12 4.5c1.5 1 1.8 2.2.9 3.4" stroke-linecap="round"/></svg>
+          <div class="hero-metrics">
+            <div class="metric-item">
+              <span class="metric-number">4.9 ★</span>
+              <span class="metric-label">Baggao Rating</span>
             </div>
-            <span class="fx-cat-badge">From ₱90</span>
-          </div>
-          <h3 class="fx-cat-name">Espresso &amp; Coffee</h3>
-          <p class="fx-cat-desc">Freshly pulled espresso hot or iced — Americano, Spanish Latte, Caramel Macchiato.</p>
-        </div>
-        <div class="fx-cat-action">View Coffee Menu →</div>
-      </a>
-
-      <!-- 4. Specialty Beverages -->
-      <a class="fx-cat-card" href="menu.html#specialty-beverages">
-        <div>
-          <div class="fx-cat-top">
-            <div class="fx-cat-icon">
-              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M7 10c1.5 1 3 1.4 5 1.4s3.5-.4 5-1.4M6 14c2 1.2 4 1.7 6 1.7s4-.5 6-1.7" stroke-linecap="round"/></svg>
+            <div class="metric-item">
+              <span class="metric-number">15 MIN</span>
+              <span class="metric-label">Avg. Prep Speed</span>
             </div>
-            <span class="fx-cat-badge">From ₱80</span>
+            <div class="metric-item">
+              <span class="metric-number">100%</span>
+              <span class="metric-label">Daily Fresh Brew</span>
+            </div>
           </div>
-          <h3 class="fx-cat-name">Milktea &amp; Beverages</h3>
-          <p class="fx-cat-desc">Classic milktea, matcha lattes, blended frappes, fruit teas &amp; non-coffee favorites.</p>
         </div>
-        <div class="fx-cat-action">View Beverages →</div>
-      </a>
-    </div>
-  </div>
-</section>
 
-<!-- ============ HOUSE SPECIALTY ============ -->
-<section class="fx-specialty">
-  <div class="wrap fx-specialty-grid">
-    <div>
-      <p class="eyebrow">House Specialty</p>
-      <h2>Pansit Batil Patung, made the Cagayan way.</h2>
-      <p>Our take on the regional classic — thick miki noodles, a raw egg hand-mixed tableside the traditional batil way, and your choice of balor. It's the dish people from out of town ask for by name.</p>
-      <div class="fx-specialty-prices">
-        <div><strong>₱100</strong><span>Balor 100</span></div>
-        <div><strong>₱120</strong><span>Balor 120</span></div>
-        <div><strong>₱150</strong><span>Balor 150</span></div>
-        <div><strong>₱300+</strong><span>Bilao (Sharing)</span></div>
-      </div>
-      <div style="margin-top:28px;"><a href="menu.html#wings-noodles-snacks" class="btn btn-outline">See Noodle Menu</a></div>
-    </div>
-    <div class="fx-specialty-photo-wrap">
-      <div class="fx-specialty-photo">
-        <video autoplay loop muted playsinline>
-          <source src="../pics&vids/pancit.mp4" type="video/mp4">
-          <img src="../pics&vids/the-yo's_sample-pic-3.jpg" alt="Pansit Batil Patung">
-        </video>
-      </div>
-    </div>
-  </div>
-</section>
+        <!-- 3D Interactive Hero Showcase Frame -->
+        <div class="hero-stage">
+          <div class="hero-card-frame tilt-3d">
+            <!-- Media Toggle Pill -->
+            <div class="hero-media-ctrl">
+              <button type="button" class="btn-media-toggle" id="heroVideoToggle" aria-label="Toggle ambient video">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                  <rect x="6" y="4" width="4" height="16"/>
+                  <rect x="14" y="4" width="4" height="16"/>
+                </svg>
+                PAUSE REEL
+              </button>
+            </div>
 
-<!-- ============ GALLERY TEASER ============ -->
-<section class="fx-gallery-teaser">
-  <div class="wrap">
-    <div class="section-head" style="margin-bottom:20px; border-bottom:none; padding-bottom:0;">
-      <div><p class="eyebrow" style="display:block; margin-bottom:8px;">Life at A&J's Foodflix</p><h2 style="font-size:clamp(1.5rem,3vw,2rem);">See it before you order</h2></div>
-    </div>
-    <div class="fx-gt-grid">
-      <a class="fx-gt-item" href="gallery.html">
-        <img src="../pics&vids/the-yo's_sample-pic-cateting.jpg" alt="Full Catering Setups">
-        <span>Full Catering Setups →</span>
-      </a>
-      <a class="fx-gt-item" href="gallery.html">
-        <img src="../pics&vids/the-yo's_sample-pic-4.jpg" alt="Espresso Bar">
-        <span>Espresso Bar →</span>
-      </a>
-      <a class="fx-gt-item" href="gallery.html">
-        <img src="../pics&vids/the-yo's_customer-1.jpg" alt="Family Gatherings">
-        <span>Family Gatherings →</span>
-      </a>
-    </div>
-  </div>
-</section>
+            <!-- Floating Glass Pill Top Right -->
+            <div class="floating-glass-pill pill-top-right">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+              </svg>
+              <span class="pill-title" style="font-size: 0.85rem;">OPEN DAILY 8AM–8PM</span>
+            </div>
 
-<!-- ============ LOCATION ============ -->
-<section class="fx-location" id="find-us">
-  <div class="wrap">
-    <div class="fx-location-grid">
-      <div>
-        <p class="eyebrow">Where To Find Us</p>
-        <h2>Visit<br>A&J's Foodflix.</h2>
-        <p>Located in the heart of Baggao — your go-to spot for milktea, wings, and good vibes.</p>
-      </div>
-      <div class="fx-arrival-card">
-        <h3>We're here for you.</h3>
-        <address><strong>A&J's Foodflix</strong><br>2nd Floor, DKB Building<br>Poblacion, Baggao, Cagayan</address>
-        <span class="hours">Open daily · 8:00 AM – 8:00 PM</span>
-        <div class="fx-arrival-actions">
-          <a class="btn" href="https://www.google.com/maps/dir/?api=1&amp;destination=2nd+Floor+DKB+Building,+Poblacion,+Baggao,+Cagayan" target="_blank" rel="noopener">Get Directions</a>
-          <a class="btn btn-outline" href="order.html">Order Now</a>
+            <!-- Hero Video Media Wrapper -->
+            <div class="hero-media-wrapper">
+              <video id="heroVideo" autoplay muted loop playsinline poster="../pics&vids/the-yos.jpg">
+                <source src="../pics&vids/coffee.mp4" type="video/mp4">
+                <img src="../pics&vids/the-yos.jpg" alt="A&J's Foodflix Interior">
+              </video>
+              <div class="hero-media-overlay"></div>
+            </div>
+
+            <!-- Floating Glass Pill Bottom Left -->
+            <div class="floating-glass-pill pill-bottom-left">
+              <span class="pill-title">BAGGAO FLAGSHIP STORE</span>
+              <span class="pill-sub">2nd Floor, DKB Building, Poblacion</span>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-  </div>
-</section>
+    </section>
 
-<!-- ============ CTA BAND ============ -->
-<section class="fx-cta-band">
-  <div class="wrap fx-cta-inner">
-    <div>
-      <h3>Reserve Your Table</h3>
-      <p>Planning a celebration or a catering order? Let us set it up for you.</p>
-    </div>
-    <div style="display:flex;gap:12px;flex-wrap:wrap;">
-      <a class="btn" href="reservations.html">Make a Reservation</a>
-      <a class="btn btn-outline" href="about.html">About Us</a>
-    </div>
-  </div>
-</section>
-
-<!-- ============ FOOTER ============ -->
-<footer>
-  <div class="wrap">
-    <div class="footer-grid">
-      <div>
-        <div class="footer-logo">A&J's Foodflix</div>
-        <p>Your favorite milktea shop, snack bar & wings spot in Baggao, Cagayan.</p>
+    <!-- ==========================================================================
+         KINETIC INFINITE MARQUEE (GSAP SCROLL-REACTIVE)
+         ========================================================================== -->
+    <section class="kinetic-marquee-section" aria-hidden="true">
+      <div class="marquee-track" id="marqueeTrack">
+        <div class="marquee-item">
+          <span>ARTISANAL ESPRESSO BAR</span>
+          <span class="marquee-sep">✦</span>
+          <span>CRISPY GLAZED WINGS</span>
+          <span class="marquee-sep">✦</span>
+          <span>SLOW-STEEPED MILKTEA</span>
+          <span class="marquee-sep">✦</span>
+          <span>PANSIT BATIL PATUNG</span>
+          <span class="marquee-sep">✦</span>
+          <span>HANDCRAFTED MATCHA</span>
+          <span class="marquee-sep">✦</span>
+          <span>LOADED SNACK SIZZLERS</span>
+          <span class="marquee-sep">✦</span>
+        </div>
       </div>
-      <div>
-        <h4>Location & Hours</h4>
-        <p>2nd Floor DKB Building, Poblacion, Baggao, Cagayan</p>
-        <p style="color: #fff; font-weight:700;">Open Daily: 8:00 AM – 8:00 PM</p>
+    </section>
+
+    <!-- ==========================================================================
+         CURATED DISHES & INSTANT CART SELECTIONS
+         ========================================================================== -->
+    <section class="curated-section" id="curatedSection">
+      <div class="container">
+        <div class="section-head-wrap reveal-head">
+          <div>
+            <div class="tag-label"><span class="dot"></span> Signature Highlights</div>
+            <h2 class="section-title">CHEF'S CURATED SELECTIONS</h2>
+          </div>
+          <p class="section-intro-text">
+            Add items directly to your cart with one tap. Prepared to order with our signature house sauces and single-origin beans.
+          </p>
+        </div>
+
+        <!-- Category Tabs -->
+        <div class="category-tabs-bar">
+          <button type="button" class="cat-tab-btn active" data-filter="all">All Specialties</button>
+          <button type="button" class="cat-tab-btn" data-filter="wings">Crispy Wings</button>
+          <button type="button" class="cat-tab-btn" data-filter="drinks">Espresso & Milktea</button>
+          <button type="button" class="cat-tab-btn" data-filter="rice">Rice Bowls & Meals</button>
+        </div>
+
+        <!-- 3D Card Grid with Cart Integration -->
+        <div class="products-grid">
+          <!-- Item 1: Crispy Chicken Wings -->
+          <article class="product-card tilt-3d" data-category="wings" data-id="chicken-wings-6-pcs" data-name="Chicken Wings (6 Pcs)" data-price="180">
+            <div class="product-thumb-box">
+              <span class="product-badge">BESTSELLER</span>
+              <img src="../pics&vids/the-yo's_foods.jpg" alt="Crispy Chicken Wings">
+            </div>
+            <div class="product-meta-row">
+              <h3 class="product-title">Crispy Chicken Wings (6 Pcs)</h3>
+            </div>
+            <p class="product-desc">Double-fried to perfection, juicy inside, tossed in your choice of classic garlic parmesan, spicy buffalo, or savory glaze.</p>
+            <div class="product-foot-row">
+              <span class="product-price">₱180</span>
+              <button type="button" class="btn-add-cart" onclick="Cart.add(this)" aria-label="Add Chicken Wings to cart">
+                <span>+ Add to Cart</span>
+              </button>
+            </div>
+          </article>
+
+          <!-- Item 2: Chicken Katsu Rice Meal -->
+          <article class="product-card tilt-3d" data-category="rice" data-id="chicken-katsu-rice-meal" data-name="Chicken Katsu Rice Meal" data-price="120">
+            <div class="product-thumb-box">
+              <span class="product-badge">CHEF'S CHOICE</span>
+              <img src="../pics&vids/the-yo's_sample-pic-3.jpg" alt="Chicken Katsu Rice Meal">
+            </div>
+            <div class="product-meta-row">
+              <h3 class="product-title">Chicken Katsu Rice Bowl</h3>
+            </div>
+            <p class="product-desc">Golden panko-crusted chicken fillet cutlet served over steamed jasmine rice, rich savory tonkatsu drizzle, and crisp coleslaw.</p>
+            <div class="product-foot-row">
+              <span class="product-price">₱120</span>
+              <button type="button" class="btn-add-cart" onclick="Cart.add(this)" aria-label="Add Chicken Katsu to cart">
+                <span>+ Add to Cart</span>
+              </button>
+            </div>
+          </article>
+
+          <!-- Item 3: Spanish Latte -->
+          <article class="product-card tilt-3d" data-category="drinks" data-id="spanish-latte" data-name="Spanish Latte" data-price="110">
+            <div class="product-thumb-box">
+              <span class="product-badge">ESPRESSO BAR</span>
+              <img src="../pics&vids/the-yo's_sample-pic-4.jpg" alt="Signature Spanish Latte">
+            </div>
+            <div class="product-meta-row">
+              <h3 class="product-title">Signature Spanish Latte</h3>
+            </div>
+            <p class="product-desc">Double shot of rich espresso poured over sweet textured condensed milk and chilled fresh milk. Velvety, bold, and indulgent.</p>
+            <div class="product-foot-row">
+              <span class="product-price">₱110</span>
+              <button type="button" class="btn-add-cart" onclick="Cart.add(this)" aria-label="Add Spanish Latte to cart">
+                <span>+ Add to Cart</span>
+              </button>
+            </div>
+          </article>
+
+          <!-- Item 4: Biscoff Matcha Delight -->
+          <article class="product-card tilt-3d" data-category="drinks" data-id="biscoff-matcha-delight" data-name="Biscoff Matcha Delight" data-price="130">
+            <div class="product-thumb-box">
+              <span class="product-badge">SPECIALTY</span>
+              <img src="../pics&vids/the-yo's_beverages.jpg" alt="Biscoff Matcha Delight">
+            </div>
+            <div class="product-meta-row">
+              <h3 class="product-title">Biscoff Matcha Delight</h3>
+            </div>
+            <p class="product-desc">Ceremonial grade green matcha tea layered with caramelized Lotus Biscoff spread and crushed spiced cookie crumbs.</p>
+            <div class="product-foot-row">
+              <span class="product-price">₱130</span>
+              <button type="button" class="btn-add-cart" onclick="Cart.add(this)" aria-label="Add Biscoff Matcha to cart">
+                <span>+ Add to Cart</span>
+              </button>
+            </div>
+          </article>
+
+          <!-- Item 5: Classic Brown Sugar Milktea -->
+          <article class="product-card tilt-3d" data-category="drinks" data-id="classic-milktea-pearl" data-name="Classic Milktea with Pearl" data-price="95">
+            <div class="product-thumb-box">
+              <span class="product-badge">CLASSIC</span>
+              <img src="../pics&vids/the-yo's_sample-pic-1.jpg" alt="Classic Milktea">
+            </div>
+            <div class="product-meta-row">
+              <h3 class="product-title">Classic Brown Sugar Boba</h3>
+            </div>
+            <p class="product-desc">Slow-brewed Assam black tea combined with creamy milk and warm brown sugar tapioca pearls prepared fresh daily.</p>
+            <div class="product-foot-row">
+              <span class="product-price">₱95</span>
+              <button type="button" class="btn-add-cart" onclick="Cart.add(this)" aria-label="Add Classic Milktea to cart">
+                <span>+ Add to Cart</span>
+              </button>
+            </div>
+          </article>
+
+          <!-- Item 6: Loaded Cheese & Bacon Fries -->
+          <article class="product-card tilt-3d" data-category="wings" data-id="loaded-fries-deluxe" data-name="Loaded Fries Deluxe" data-price="115">
+            <div class="product-thumb-box">
+              <span class="product-badge">SNACK CRAFT</span>
+              <img src="../pics&vids/the-yo's_sample-pic-cateting.jpg" alt="Loaded Fries">
+            </div>
+            <div class="product-meta-row">
+              <h3 class="product-title">Loaded Cheese & Bacon Fries</h3>
+            </div>
+            <p class="product-desc">Crispy shoestring potato fries smothered in warm cheddar cheese sauce, crisp bacon bits, and chopped spring onions.</p>
+            <div class="product-foot-row">
+              <span class="product-price">₱115</span>
+              <button type="button" class="btn-add-cart" onclick="Cart.add(this)" aria-label="Add Loaded Fries to cart">
+                <span>+ Add to Cart</span>
+              </button>
+            </div>
+          </article>
+        </div>
+
+        <div style="text-align: center; margin-top: 50px;">
+          <a href="menu.html" class="btn-secondary magnet-btn" style="padding: 16px 36px;">
+            <span>Explore Complete 60+ Item Menu →</span>
+          </a>
+        </div>
       </div>
-      <div>
-        <h4>Quick Links</h4>
-        <a href="menu.html">View Full Menu</a>
-        <a href="reservations.html">Reserve a Table</a>
-        <a href="my-orders.html">Track My Order</a>
-        <a href="https://www.facebook.com/profile.php?id=61555628762441" target="_blank">Facebook Page</a>
-        <a href="https://www.tiktok.com/@ajsfoodflix" target="_blank">TikTok</a>
+    </section>
+
+    <!-- ==========================================================================
+         THE FOODFLIX STANDARD (4-STEP EXPERIENCE)
+         ========================================================================== -->
+    <section class="experience-section">
+      <div class="container">
+        <div class="section-head-wrap reveal-head">
+          <div>
+            <div class="tag-label"><span class="dot"></span> How It Works</div>
+            <h2 class="section-title">THE FOODFLIX STANDARD</h2>
+          </div>
+          <p class="section-intro-text">
+            From your first craving to the final crunch. Designed for seamless dining, advance reservations, and speed pickup.
+          </p>
+        </div>
+
+        <div class="experience-grid">
+          <div class="step-card">
+            <span class="step-num">01</span>
+            <div class="step-content">
+              <h3>Curated Recipes</h3>
+              <p>Every single wing marinade, syrup, and espresso profile is developed in-house using premium ingredients.</p>
+            </div>
+          </div>
+
+          <div class="step-card">
+            <span class="step-num">02</span>
+            <div class="step-content">
+              <h3>Made-To-Order</h3>
+              <p>Nothing sits under a heat lamp. Wings are tossed hot from the fryer and boba is kept at optimal chewiness.</p>
+            </div>
+          </div>
+
+          <div class="step-card">
+            <span class="step-num">03</span>
+            <div class="step-content">
+              <h3>Speed Ordering</h3>
+              <p>Order seamlessly via mobile kiosk, dine-in table QR, or schedule an advance pickup without waiting.</p>
+            </div>
+          </div>
+
+          <div class="step-card">
+            <span class="step-num">04</span>
+            <div class="step-content">
+              <h3>Live Tracking</h3>
+              <p>Follow your ticket live from preparation in the kitchen to completion at the counter via "My Orders".</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+         ATMOSPHERE & GALLERY SHOWCASE
+         ========================================================================== -->
+    <section class="gallery-section">
+      <div class="container">
+        <div class="section-head-wrap reveal-head">
+          <div>
+            <div class="tag-label"><span class="dot"></span> Space & Atmosphere</div>
+            <h2 class="section-title">DESIGNED FOR MOMENTS</h2>
+          </div>
+          <p class="section-intro-text">
+            Whether it's an intensive study session, an afternoon catch-up over Spanish latte, or a birthday party celebration.
+          </p>
+        </div>
+
+        <div class="gallery-grid">
+          <div class="gallery-tile" style="min-height: 480px;">
+            <img src="../pics&vids/the-yos.jpg" alt="A&J's Foodflix Modern Cafe Lounge">
+            <div class="gallery-caption">
+              <div>
+                <h4>Main Lounge & Cafe Counter</h4>
+                <span>Baggao Flagship Interior</span>
+              </div>
+              <a href="reservations.html" class="btn-primary" style="padding: 10px 20px; font-size: 0.85rem;">Reserve Table</a>
+            </div>
+          </div>
+
+          <div class="gallery-stacked">
+            <div class="gallery-tile">
+              <img src="../pics&vids/the-yo's_customer-2.jpg" alt="Friends Gathering at Foodflix">
+              <div class="gallery-caption">
+                <div>
+                  <h4>Community & Birthdays</h4>
+                  <span>Celebration Gatherings</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="gallery-tile">
+              <img src="../pics&vids/the-yo's_sample-pic-4.jpg" alt="Barista Craft Espresso">
+              <div class="gallery-caption">
+                <div>
+                  <h4>Artisanal Coffee Bar</h4>
+                  <span>Handcrafted Daily</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+         TESTIMONIALS (VERIFIED FOODIES)
+         ========================================================================== -->
+    <section class="testimonials-section">
+      <div class="container">
+        <div class="section-head-wrap reveal-head">
+          <div>
+            <div class="tag-label"><span class="dot"></span> Community Love</div>
+            <h2 class="section-title">VERIFIED FOODIE REVIEWS</h2>
+          </div>
+          <p class="section-intro-text">
+            Over 1,200+ local customers in Baggao and Cagayan trust Foodflix for their daily drinks and celebrations.
+          </p>
+        </div>
+
+        <div class="testimonials-grid">
+          <div class="test-card">
+            <div class="test-stars">★★★★★</div>
+            <p class="test-quote">
+              "The chicken wings here have the crispiest skin in town, and the Spanish Latte is an absolute addiction. The aesthetic is clean and modern!"
+            </p>
+            <div class="test-author-row">
+              <img src="../pics&vids/the-yo's_customer-1.jpg" alt="Customer Avatar" class="test-avatar">
+              <div>
+                <span class="test-author-name">Bea Dela Cruz</span>
+                <span class="test-author-role">Verified Baggao Foodie</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="test-card">
+            <div class="test-stars">★★★★★</div>
+            <p class="test-quote">
+              "We held our study group session here twice this week. Strong Wi-Fi, incredible boba tea, and the Katsu Rice Bowl is a hearty favorite."
+            </p>
+            <div class="test-author-row">
+              <img src="../pics&vids/the-yo's_customer-3.jpg" alt="Customer Avatar" class="test-avatar">
+              <div>
+                <span class="test-author-name">Mark Anthony Ramos</span>
+                <span class="test-author-role">Regular Customer</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="test-card">
+            <div class="test-stars">★★★★★</div>
+            <p class="test-quote">
+              "Ordering from the online system and picking it up on the 2nd floor saved us so much time during lunch rush. 10/10 quality!"
+            </p>
+            <div class="test-author-row">
+              <img src="../pics&vids/the-yo's_customer-4.jpg" alt="Customer Avatar" class="test-avatar">
+              <div>
+                <span class="test-author-name">Patricia Joy Lopez</span>
+                <span class="test-author-role">Frequent Diner</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+         LOCATION & SCHEDULE HUB
+         ========================================================================== -->
+    <section class="location-section" id="visitHub">
+      <div class="container">
+        <div class="location-box">
+          <div class="location-info">
+            <div class="tag-label"><span class="dot"></span> Flagship Location</div>
+            <h2>VISIT US IN BAGGAO</h2>
+            <p>
+              Located centrally at the 2nd Floor of the DKB Building in Poblacion. Drop by for your morning espresso, lunch bowls, or evening milktea run.
+            </p>
+
+            <div class="location-specs-list">
+              <div class="spec-line">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                <span>2nd Floor, DKB Building, Poblacion, Baggao, Cagayan</span>
+              </div>
+              <div class="spec-line">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                <span>Monday – Sunday · 8:00 AM – 8:00 PM Daily</span>
+              </div>
+              <div class="spec-line">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                <span>Direct Contact: 0917-XXX-XXXX · Dine-in & Takeaway</span>
+              </div>
+            </div>
+
+            <div class="location-cta-cluster">
+              <a href="reservations.html" class="btn-primary magnet-btn">
+                <span>Book A Table</span>
+              </a>
+              <button type="button" class="btn-secondary magnet-btn" id="copyAddressBtn">
+                <span>Copy Full Address</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="schedule-card">
+            <div class="schedule-status-header">
+              <span class="live-pulse-badge">STORE STATUS</span>
+              <span style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--titanium);">BAGGAO TIME</span>
+            </div>
+
+            <div class="schedule-hours-row highlight">
+              <span>Monday – Friday</span>
+              <span>8:00 AM – 8:00 PM</span>
+            </div>
+            <div class="schedule-hours-row highlight">
+              <span>Saturday – Sunday</span>
+              <span>8:00 AM – 8:00 PM</span>
+            </div>
+            <div class="schedule-hours-row">
+              <span>Kitchen Cut-off</span>
+              <span>7:40 PM</span>
+            </div>
+            <div class="schedule-hours-row">
+              <span>High-Speed Wi-Fi</span>
+              <span>Available for Guests</span>
+            </div>
+            <div class="schedule-hours-row">
+              <span>Payment Methods</span>
+              <span>Cash · GCash · Maya</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ==========================================================================
+       SITE FOOTER
+       ========================================================================== -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-top-grid">
+        <div class="footer-brand">
+          <h3>A&J'S FOODFLIX</h3>
+          <p>
+            Reimagining modern dining in Baggao, Cagayan. Artisanal espresso, craft milk teas, golden crispy wings, and memorable gatherings.
+          </p>
+        </div>
+
+        <div class="footer-col">
+          <h4>Explore</h4>
+          <ul class="footer-nav-list">
+            <li><a href="menu.html">Curated Menu</a></li>
+            <li><a href="order.html">Online Ordering</a></li>
+            <li><a href="gallery.html">Photo Gallery</a></li>
+            <li><a href="about.html">About The Brand</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Services</h4>
+          <ul class="footer-nav-list">
+            <li><a href="reservations.html">Table Reservations</a></li>
+            <li><a href="my-orders.html">Track My Order</a></li>
+            <li><a href="account.html">Customer Account</a></li>
+            <li><a href="../admin/login.html">Staff Portal</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Connect</h4>
+          <ul class="footer-nav-list">
+            <li><a href="https://www.facebook.com/profile.php?id=61555628762441" target="_blank" rel="noopener">Facebook Page</a></li>
+            <li><a href="https://www.tiktok.com/@ajsfoodflix" target="_blank" rel="noopener">TikTok Channel</a></li>
+            <li><a href="order.html#feedback">Customer Reviews</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom-bar">
+        <span>&copy; <span id="currentYear">2026</span> A&J's Foodflix. All rights reserved.</span>
+        <span>2nd Floor, DKB Building, Poblacion, Baggao, Cagayan</span>
+        <a href="#siteHeader" class="btn-back-to-top" id="backToTopBtn">
+          <span>Back to Top</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
+        </a>
       </div>
     </div>
-    <div class="foot-bottom">
-      <span>&copy; <span id="year"></span> A&J's Foodflix.</span>
-      <span>Baggao, Cagayan · Made with care.</span>
-    </div>
-  </div>
-</footer>
+  </footer>
 
-<div class="fx-sticky-bar">
-  <div class="txt"><strong>Order for delivery</strong><span>Baggao only · ₱20–₱150 fee</span></div>
-  <a class="btn" href="order.html" style="padding:9px 18px; font-size:.75rem;">Order</a>
-</div>
-
-<script src="global.js"></script>
-<script src="cart.js"></script>
+  <!-- GSAP Animation Engine & ScrollTrigger -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  
+  <!-- Core Customer Scripts -->
+  <script src="cart.js"></script>
+  <script type="module" src="authNav.js"></script>
+  <script src="home.js"></script>
 </body>
 </html>
