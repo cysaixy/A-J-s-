@@ -2,10 +2,28 @@
 import pool from '../../config/db.js';
 import { restoreOrderInventory } from '../../utils/inventoryRestore.js';
 import { createPaymongoCheckoutSession } from '../../utils/paymongo.js';
+import { postOrderPayment } from '../../services/cashReconciliationService.js';
 
 const VALID_ORDER_TYPES = ['online', 'delivery', 'dine_in', 'pickup'];
 const VALID_PAYMENT_METHODS = ['cash', 'gcash'];
 
+const OPENING_MINUTES = 8 * 60;   // 8:00 AM (480 mins)
+const CLOSING_MINUTES = 20 * 60;  // 8:00 PM (1200 mins)
+
+function validatePreferredTimeInNotes(notes) {
+  if (!notes || typeof notes !== 'string') return true;
+  const match = notes.match(/Preferred Time:\s*(\d{1,2}):(\d{2})(?:\s*(AM|PM))?/i);
+  if (!match) return true;
+  let hours = parseInt(match[1], 10);
+  const minutes = parseInt(match[2], 10);
+  const period = match[3] ? match[3].toUpperCase() : null;
+  if (period === 'PM' && hours < 12) hours += 12;
+  if (period === 'AM' && hours === 12) hours = 0;
+  const totalMinutes = hours * 60 + minutes;
+  return totalMinutes >= OPENING_MINUTES && totalMinutes <= CLOSING_MINUTES;
+}
+
+const normalizePhoneNumber = (value) => String(value ?? '').replace(/\D/g, '').slice(0, 11);
 const round2 = (n) => Math.round((Number(n) + Number.EPSILON) * 100) / 100;
 
 export async function createOrder(req, res, next) {
@@ -21,6 +39,7 @@ export async function createOrder(req, res, next) {
       customer_phone,
       payment_method,
     } = req.body;
+    const normalizedPhone = normalizePhoneNumber(customer_phone);
     const customer_id = req.user?.customer?.id;
 
     if (!customer_id) {
@@ -42,6 +61,12 @@ export async function createOrder(req, res, next) {
       });
     }
 
+    if (!validatePreferredTimeInNotes(notes)) {
+      return res.status(400).json({
+        error: 'The shop is open from 8:00 AM to 8:00 PM. Please select a preferred time within business hours.',
+      });
+    }
+
     // Delivery orders require the customer to provide a
     // delivery location and a contact number. Customers can NEVER set the
     // delivery location and a contact number. Customers can NEVER set the
@@ -49,16 +74,13 @@ export async function createOrder(req, res, next) {
     // later after checking the location. Any delivery_fee value the client
     // sends is deliberately ignored (never trusted from the browser).
     const isDelivery = order_type === 'delivery' || order_type === 'online';
-    // The existing database CHECK constraint stores customer delivery orders
-    // as `online`. Accept the clearer client value too, but normalize before
-    // insertion so old deployments cannot fail with constraint 23514.
-    const storedOrderType = order_type === 'delivery' ? 'online' : order_type;
+    const storedOrderType = isDelivery ? 'delivery' : order_type;
     if (isDelivery) {
       if (!delivery_address || !String(delivery_address).trim()) {
         return res.status(400).json({ error: 'Please enter your delivery address.' });
       }
-      if (!customer_phone || !String(customer_phone).trim()) {
-        return res.status(400).json({ error: 'Please enter your contact number.' });
+      if (!normalizedPhone || normalizedPhone.length !== 11) {
+        return res.status(400).json({ error: 'Contact number must be exactly 11 digits.' });
       }
     }
 
@@ -69,6 +91,10 @@ export async function createOrder(req, res, next) {
 
     // Re-price and validate menu items (without stock checks - those move inside transaction)
     for (const line of cart) {
+      const menuId = parseInt(line.menu_id, 10);
+      if (isNaN(menuId) || menuId <= 0) {
+        return res.status(400).json({ error: 'Invalid menu item ID in cart.' });
+      }
       const menuQty = Number(line.quantity);
       if (!Number.isInteger(menuQty) || menuQty < 1) {
         return res.status(400).json({ error: 'Line quantities must be positive integers.' });
@@ -76,7 +102,7 @@ export async function createOrder(req, res, next) {
 
       const { rows } = await client.query(
         'SELECT id, name, price, cost, stock_quantity, status FROM menu_items WHERE id = $1',
-        [line.menu_id]
+        [menuId]
       );
       const menuItem = rows[0];
 
@@ -101,6 +127,10 @@ export async function createOrder(req, res, next) {
       const addons = [];
       if (Array.isArray(line.add_ons)) {
         for (const ad of line.add_ons) {
+          const addonId = parseInt(ad.addon_id, 10);
+          if (isNaN(addonId) || addonId <= 0) {
+            return res.status(400).json({ error: 'Invalid add-on ID.' });
+          }
           const aQty = Number(ad.quantity);
           if (!Number.isInteger(aQty) || aQty < 1) {
             return res.status(400).json({ error: 'Add-on quantities must be positive integers.' });
@@ -108,7 +138,7 @@ export async function createOrder(req, res, next) {
 
           const { rows: aRows } = await client.query(
             'SELECT id, name, price, cost, status FROM add_ons WHERE id = $1',
-            [ad.addon_id]
+            [addonId]
           );
           const addon = aRows[0];
           if (!addon) {
@@ -168,7 +198,55 @@ export async function createOrder(req, res, next) {
 
     total_amount = round2(total_amount + deliveryFee);
 
+    // ── Pre-flight stock check (before we open a transaction) ──────────────
+    // Aggregate the total inventory needed across ALL cart lines (menu items +
+    // add-ons). If any ingredient would go negative we reject immediately with
+    // a descriptive error so the customer sees it before the order is created.
+    const neededByInventoryId = new Map(); // inventoryId → { needed, name }
+    for (const item of validatedItems) {
+      for (const comp of item.inventory_components) {
+        const key = comp.inventory_id;
+        const qty = Number(comp.quantity) * item.quantity;
+        if (!neededByInventoryId.has(key)) {
+          neededByInventoryId.set(key, { needed: 0, name: comp.inventory_name });
+        }
+        neededByInventoryId.get(key).needed += qty;
+      }
+      for (const a of item.addons) {
+        for (const comp of a.inventory_components) {
+          const key = comp.inventory_id;
+          const qty = Number(comp.quantity) * a.quantity;
+          if (!neededByInventoryId.has(key)) {
+            neededByInventoryId.set(key, { needed: 0, name: comp.inventory_name, addonName: a.name });
+          }
+          const entry = neededByInventoryId.get(key);
+          entry.needed += qty;
+          if (!entry.addonName) entry.addonName = a.name;
+        }
+      }
+    }
+
+    if (neededByInventoryId.size > 0) {
+      const inventoryIds = [...neededByInventoryId.keys()];
+      const { rows: stockRows } = await client.query(
+        'SELECT id, stock_quantity FROM inventory_items WHERE id = ANY($1::int[])',
+        [inventoryIds]
+      );
+      const stockMap = new Map(stockRows.map(r => [r.id, Number(r.stock_quantity ?? Infinity)]));
+      for (const [invId, { needed, name, addonName }] of neededByInventoryId) {
+        const available = stockMap.get(invId) ?? Infinity;
+        if (available < needed) {
+          const label = addonName ? `${addonName} (${name})` : name;
+          return res.status(409).json({
+            error: `Not enough stock for "${label}". Only ${available} available but ${needed} needed across your cart. Please reduce the quantity.`,
+          });
+        }
+      }
+    }
+    // ── End pre-flight check ───────────────────────────────────────────────
+
     await client.query('BEGIN');
+
 
     // Concurrency-safe stock check and deduction inside transaction
     // Lock all inventory rows that will be touched, then check and deduct atomically
@@ -251,7 +329,7 @@ export async function createOrder(req, res, next) {
         delivery_address || null,
         notes || null,
         customer_name || null,
-        customer_phone || null,
+        normalizedPhone || null,
         payment_method || null,
         deliveryFeeStatus,
       ]
@@ -359,7 +437,13 @@ export async function getOrder(req, res, next) {
     if (!rows[0]) return res.status(404).json({ error: 'Order not found.' });
 
     // Customers may only view their own orders.
-    if (req.user?.customer?.id && rows[0].customer_id !== req.user.customer.id) {
+    const customer_id = req.user?.customer?.id;
+    if (!customer_id) {
+      return res.status(400).json({
+        error: 'No customer profile found for this account. Call /api/customer/auth/sync first.',
+      });
+    }
+    if (rows[0].customer_id !== customer_id) {
       return res.status(403).json({ error: 'You don\'t have access to this order.' });
     }
 
@@ -403,7 +487,43 @@ export async function getCustomerOrders(req, res, next) {
       [customer_id]
     );
 
-    res.json({ orders: rows });
+    const ordersWithCustom = rows.map((o) => {
+      let customItems = [];
+      const notesToParse = o.notes || '';
+      if (notesToParse.includes('---CUSTOM_ITEMS_JSON---')) {
+        try {
+          const marker = '---CUSTOM_ITEMS_JSON---';
+          const raw = notesToParse.slice(notesToParse.indexOf(marker) + marker.length).trim();
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed)) {
+            customItems = parsed.map((ci) => {
+              const qty = Number(ci.quantity || ci.qty || 1);
+              const price = Number(ci.price || 0);
+              return {
+                menu_id: null,
+                item_name: ci.name || ci.product_name || 'Custom Item',
+                quantity: qty,
+                price: price,
+                subtotal: ci.subtotal != null ? Number(ci.subtotal) : round2(qty * price),
+                notes: ci.notes || null,
+                add_ons: [],
+                is_custom: true,
+              };
+            });
+          }
+        } catch (parseError) {
+          console.warn('[order.controller] Ignoring malformed custom items JSON:', parseError.message);
+        }
+      }
+      const cleanNotes = (o.notes || '').split('---CUSTOM_ITEMS_JSON---')[0].trim();
+      return {
+        ...o,
+        clean_notes: cleanNotes,
+        custom_items: customItems,
+      };
+    });
+
+    res.json({ orders: ordersWithCustom });
   } catch (err) {
     next(err);
   }
@@ -436,6 +556,24 @@ export async function updateOrder(req, res, next) {
     }
 
     const fields = { order_type, customer_name, customer_phone, delivery_address, payment_method, notes };
+
+    if (notes !== undefined) {
+      if (!validatePreferredTimeInNotes(notes)) {
+        return res.status(400).json({
+          error: 'The shop is open from 8:00 AM to 8:00 PM. Please select a preferred time within business hours.',
+        });
+      }
+      const existingRes = await pool.query(
+        'SELECT notes FROM orders WHERE id = $1 AND customer_id = $2',
+        [id, customer_id]
+      );
+      const existingNotes = existingRes.rows[0]?.notes || '';
+      if (existingNotes.includes('---CUSTOM_ITEMS_JSON---') && !notes.includes('---CUSTOM_ITEMS_JSON---')) {
+        const marker = '---CUSTOM_ITEMS_JSON---';
+        const rawJson = existingNotes.slice(existingNotes.indexOf(marker));
+        fields.notes = (notes ? notes.trim() + '\n' : '') + rawJson;
+      }
+    }
     const cols = [];
     const vals = [];
     for (const [col, val] of Object.entries(fields)) {
@@ -676,6 +814,13 @@ export async function confirmOrderPayment(req, res, next) {
            VALUES ($1, 'gcash', $2, $3, 'paid', NOW())`,
           [order_id, amountPaid, `gcash_auto_${order_id}`]
         );
+
+        await postOrderPayment(pool, {
+          orderId: order_id,
+          paymentMethod: 'gcash',
+          amount: amountPaid,
+          description: `Customer Order #${order_id} payment (GCash)`,
+        });
       }
     }
 

@@ -52,6 +52,18 @@ export async function getReservationOrder(req, res, next) {
       }
     }
 
+    // Parse custom advance items from notes if present
+    let customItems = [];
+    const notesToParse = order?.notes || reservation.notes || '';
+    if (notesToParse.includes('---CUSTOM_ITEMS_JSON---')) {
+      const marker = '---CUSTOM_ITEMS_JSON---';
+      const raw = notesToParse.slice(notesToParse.indexOf(marker) + marker.length).trim();
+      customItems = JSON.parse(raw);
+      if (!Array.isArray(customItems)) {
+        throw new TypeError('Stored reservation custom items must be an array.');
+      }
+    }
+
     // Calculate order editing deadline status
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -84,7 +96,16 @@ export async function getReservationOrder(req, res, next) {
         notes: order.notes,
         datetime_ordered: order.datetime_ordered,
         items: orderItems,
-      } : null,
+        custom_items: customItems,
+      } : (customItems.length > 0 ? {
+        id: null,
+        status: 'pending',
+        total_amount: customItems.reduce((acc, ci) => acc + (parseFloat(ci.qty) || 1) * (parseFloat(ci.price) || 0), 0),
+        notes: reservation.notes,
+        datetime_ordered: null,
+        items: [],
+        custom_items: customItems,
+      } : null),
       menu_items: await getAvailableMenuItems(),
     });
   } catch (err) {
@@ -109,7 +130,7 @@ export async function upsertReservationOrder(req, res, next) {
   try {
     const { id } = req.params;
     const { items, notes, status, custom_order_notes } = req.body;
-    const staff_id = req.user?.staff?.id;
+    const staff_id = req.staff?.id;
 
     // Check reservation exists
     const resv = await pool.query(
@@ -139,7 +160,7 @@ export async function upsertReservationOrder(req, res, next) {
     }
 
     // Check if admin_override is used by authorized admin
-    if (admin_override && req.user?.staff?.role !== 'Admin') {
+    if (admin_override && req.staff?.role !== 'Admin') {
       return res.status(403).json({
         error: 'Only administrators can override the order editing deadline.',
       });
@@ -191,7 +212,7 @@ export async function upsertReservationOrder(req, res, next) {
         // ── Inventory: restore old stock if we're re-saving a finalized order ──
         // (items are about to be deleted and re-inserted; without this step the
         //  same ingredients would be deducted twice.)
-        if (orderRes.rows[0] && currentOrderStatus === 'finalized' && newOrderStatus === 'finalized') {
+        if (currentOrderStatus === 'finalized') {
         // Restore menu-item ingredients
           const { rows: oldItemComps } = await client.query(
             `SELECT mii.inventory_id, mii.quantity AS ing_qty, oi.quantity AS item_qty
@@ -311,10 +332,16 @@ export async function upsertReservationOrder(req, res, next) {
           );
           for (const comp of itemComps) {
             const consumed = Number(comp.ing_qty) * Number(oi.item_qty);
-            await client.query(
-              'UPDATE inventory_items SET stock_quantity = GREATEST(0, stock_quantity - $1) WHERE id = $2',
+            const deducted = await client.query(
+              'UPDATE inventory_items SET stock_quantity = stock_quantity - $1 WHERE id = $2 AND stock_quantity >= $1',
               [consumed, comp.inventory_id]
             );
+            if (deducted.rowCount === 0) {
+              const shortage = new Error(`Not enough ${comp.inventory_name} in stock to finalize this order.`);
+              shortage.status = 409;
+              shortage.isOperational = true;
+              throw shortage;
+            }
             await client.query(
               `INSERT INTO inventory_log (inventory_id, menu_id, staff_id, transaction_type, quantity_change, remarks)
                VALUES ($1, $2, $3, 'sale', $4, $5)`,
@@ -338,10 +365,16 @@ export async function upsertReservationOrder(req, res, next) {
             );
             for (const comp of addonComps) {
               const consumed = Number(comp.ing_qty) * Number(addon.addon_qty);
-              await client.query(
-                'UPDATE inventory_items SET stock_quantity = GREATEST(0, stock_quantity - $1) WHERE id = $2',
+              const deducted = await client.query(
+                'UPDATE inventory_items SET stock_quantity = stock_quantity - $1 WHERE id = $2 AND stock_quantity >= $1',
                 [consumed, comp.inventory_id]
               );
+              if (deducted.rowCount === 0) {
+                const shortage = new Error(`Not enough ${comp.inventory_name} in stock to finalize this order.`);
+                shortage.status = 409;
+                shortage.isOperational = true;
+                throw shortage;
+              }
               await client.query(
                 `INSERT INTO inventory_log (inventory_id, menu_id, staff_id, transaction_type, quantity_change, remarks)
                  VALUES ($1, $2, $3, 'sale', $4, $5)`,
@@ -352,6 +385,28 @@ export async function upsertReservationOrder(req, res, next) {
         }
       }
 
+      // Parse custom advance items from notes to include in order total
+      let customItemsTotal = 0;
+      let parsedCustomItems = [];
+      if (combinedNotes && combinedNotes.includes('---CUSTOM_ITEMS_JSON---')) {
+        try {
+          const marker = '---CUSTOM_ITEMS_JSON---';
+          const raw = combinedNotes.slice(combinedNotes.indexOf(marker) + marker.length).trim();
+          parsedCustomItems = JSON.parse(raw);
+          if (Array.isArray(parsedCustomItems)) {
+            for (const ci of parsedCustomItems) {
+              const q = parseFloat(ci.qty) || 0;
+              const p = parseFloat(ci.price) || 0;
+              customItemsTotal += (q * p);
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to parse custom items JSON in upsert:', e);
+        }
+      }
+
+      totalAmount += customItemsTotal;
+
       // Update order total
       await client.query(
         'UPDATE orders SET total_amount = $1 WHERE id = $2',
@@ -361,7 +416,7 @@ export async function upsertReservationOrder(req, res, next) {
 
       // Update reservation order_status and reservation_status
       let newReservationStatus = reservation.reservation_status;
-      if (newOrderStatus === 'editable' && newReservationStatus === 'pending') {
+      if (newOrderStatus === 'editable' && (newReservationStatus === 'pending' || newReservationStatus === 'contact_customer')) {
         newReservationStatus = 'order_preparing';
       } else if (newOrderStatus === 'finalized' && newReservationStatus === 'order_preparing') {
         newReservationStatus = 'order_finalized';
@@ -405,6 +460,7 @@ export async function upsertReservationOrder(req, res, next) {
           notes: updatedOrderRes.rows[0].notes,
           datetime_ordered: updatedOrderRes.rows[0].datetime_ordered,
           items: orderItems,
+          custom_items: parsedCustomItems,
         },
         reservation: {
           order_status: newOrderStatus,
@@ -454,9 +510,15 @@ export async function updateReservationStatus(req, res, next) {
     }
 
     // Track order finalization
-    if (reservation_status === 'order_finalized' && !reservation.order_finalized_at) {
-      setClauses.push(`order_finalized_at = $${paramIndex}`);
-      params.push(new Date());
+    if (reservation_status === 'order_finalized') {
+      if (!reservation.order_finalized_at) {
+        setClauses.push(`order_finalized_at = $${paramIndex}`);
+        params.push(new Date());
+        paramIndex++;
+      }
+      // Also mark order_status as finalized so adminConfirmReservation check passes
+      setClauses.push(`order_status = $${paramIndex}`);
+      params.push('finalized');
       paramIndex++;
     }
 
@@ -510,34 +572,31 @@ export async function adminConfirmReservation(req, res, next) {
       });
     }
 
-    if (!table_no || !String(table_no).trim()) {
-      return res.status(400).json({
-        error: 'Assign a table before confirming - a confirmed reservation needs a seat.'
-      });
+    // table_no is optional — table is assigned by staff when the guest arrives
+    const cleanTableNo = table_no ? String(table_no).trim() : null;
+
+    // Only check for table conflicts if a table was provided
+    if (cleanTableNo) {
+      const CONFLICT_WINDOW_MINUTES = 120;
+      const conflict = await pool.query(
+        `SELECT r.id, r.table_no, r.reservation_time, r.guests
+         FROM reservations r
+         WHERE r.table_no = $1
+           AND r.reservation_date = $2
+           AND r.status = 'confirmed'
+           AND r.id <> $3
+           AND ABS(EXTRACT(EPOCH FROM (r.reservation_time - $4::time))) / 60 < $5`,
+        [cleanTableNo, reservation.reservation_date, reservation.id, reservation.reservation_time, CONFLICT_WINDOW_MINUTES]
+      );
+      if (conflict.rows[0]) {
+        const other = conflict.rows[0];
+        return res.status(409).json({
+          error: `${cleanTableNo} is already reserved that day at ${String(other.reservation_time).slice(0, 5)} (${other.guests} guests). Pick a different table or time.`
+        });
+      }
     }
 
-    const cleanTableNo = String(table_no).trim();
-
-    // Check conflicts
-    const CONFLICT_WINDOW_MINUTES = 120;
-    const conflict = await pool.query(
-      `SELECT r.id, r.table_no, r.reservation_time, r.guests
-       FROM reservations r
-       WHERE r.table_no = $1
-         AND r.reservation_date = $2
-         AND r.status = 'confirmed'
-         AND r.id <> $3
-         AND ABS(EXTRACT(EPOCH FROM (r.reservation_time - $4::time))) / 60 < $5`,
-      [cleanTableNo, reservation.reservation_date, reservation.id, reservation.reservation_time, CONFLICT_WINDOW_MINUTES]
-    );
-    if (conflict.rows[0]) {
-      const other = conflict.rows[0];
-      return res.status(409).json({
-        error: `${cleanTableNo} is already reserved that day at ${String(other.reservation_time).slice(0, 5)} (${other.guests} guests). Pick a different table or time.`
-      });
-    }
-
-    // Update reservation
+    // Update reservation — only set table_no if one was provided
     const { rows } = await pool.query(
       `UPDATE reservations
        SET status = 'confirmed', table_no = $1, reservation_status = 'confirmed', confirmed_at = NOW()
@@ -594,7 +653,7 @@ export async function checkOrderEditPermission(req, res, next) {
     }
 
     const canEdit = (reservation.order_status === 'editable' || reservation.order_status === 'finalized') && !isPastDeadline;
-    const canEditWithOverride = canEdit || (admin_override === 'true' && req.user?.staff?.role === 'Admin');
+    const canEditWithOverride = canEdit || (admin_override === 'true' && req.staff?.role === 'Admin');
 
     res.json({
       can_edit: canEdit,

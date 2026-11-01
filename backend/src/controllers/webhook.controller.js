@@ -1,21 +1,23 @@
 // src/controllers/webhook.controller.js
 import pool from '../config/db.js';
 import { verifyPaymongoSignature } from '../utils/paymongo.js';
+import { postOrderPayment } from '../services/cashReconciliationService.js';
 
 export async function handlePaymongoWebhook(req, res) {
   const signatureHeader = req.headers['paymongo-signature'];
   const webhookSecret = process.env.PAYMONGO_WEBHOOK_SECRET;
 
-  // 1. Signature verification
-  if (webhookSecret) {
-    const rawBody = req.rawBody || JSON.stringify(req.body);
-    const isValid = verifyPaymongoSignature(rawBody, signatureHeader, webhookSecret);
-    if (!isValid) {
-      console.warn('⚠️ [PayMongo Webhook] Invalid signature detected.');
-      return res.status(400).json({ error: 'Invalid signature.' });
-    }
-  } else {
-    console.warn('⚠️ [PayMongo Webhook] PAYMONGO_WEBHOOK_SECRET not set, skipping signature verification.');
+  // 1. Signature verification — mandatory. Never skip, even in non-production.
+  if (!webhookSecret) {
+    console.error('[PayMongo Webhook] PAYMONGO_WEBHOOK_SECRET is not set. Rejecting all webhook events.');
+    return res.status(500).json({ error: 'Webhook secret not configured on the server.' });
+  }
+
+  const rawBody = req.rawBody || JSON.stringify(req.body);
+  const isValid = verifyPaymongoSignature(rawBody, signatureHeader, webhookSecret);
+  if (!isValid) {
+    console.warn('⚠️ [PayMongo Webhook] Invalid signature detected.');
+    return res.status(400).json({ error: 'Invalid signature.' });
   }
 
   try {
@@ -31,19 +33,23 @@ export async function handlePaymongoWebhook(req, res) {
     console.log(`🔔 [PayMongo Webhook] Event received: ${eventType}`);
 
     if (eventType === 'checkout_session.payment.paid') {
-      const session = eventData.attributes;
-      const metadata = session.metadata || {};
-      const orderId = metadata.order_id || metadata.orderId;
-      const payments = session.payments || [];
+      // For checkout_session.payment.paid:
+      // event.attributes.data IS the checkout session object — no extra .attributes needed.
+      const session = eventData;
+      const metadata = session?.metadata || {};
+      const payments = session?.payments || [];
       const primaryPayment = payments[0]?.attributes || {};
 
-      const amountPaid = (primaryPayment.amount || session.line_items?.reduce((acc, item) => acc + item.amount, 0) || 0) / 100;
+      const amountPaid = (primaryPayment.amount || session?.line_items?.reduce((acc, item) => acc + item.amount, 0) || 0) / 100;
       const paymentMethod = primaryPayment.source?.type || 'card';
-      const referenceNumber = primaryPayment.id || session.id;
+      const referenceNumber = primaryPayment.id || session?.id;
 
-      console.log(`💰 Checkout Session Paid: Order ID=${orderId}, Amount=₱${amountPaid}, Ref=${referenceNumber}`);
+      // Validate orderId is a safe integer before touching the DB
+      const orderId = parseInt(metadata.order_id || metadata.orderId, 10);
 
-      if (orderId) {
+      console.log(`💰 Checkout Session Paid: Order ID=${orderId}, Ref=${referenceNumber}`);
+
+      if (orderId && !isNaN(orderId)) {
         // Record payment in payments table if not already recorded
         const existingPayment = await pool.query(
           'SELECT id FROM payments WHERE reference_number = $1 LIMIT 1',
@@ -67,20 +73,35 @@ export async function handlePaymongoWebhook(req, res) {
             [paymentMethod, orderId]
           );
 
+          // Post payment to matching cash / e-wallet / bank account
+          try {
+            await postOrderPayment(pool, {
+              orderId,
+              paymentMethod,
+              amount: amountPaid,
+              description: `Online Order #${orderId} payment (${paymentMethod})`,
+            });
+          } catch (e) {
+            console.error('[PayMongo Webhook] Failed to post payment to cash account:', e);
+          }
+
           console.log(`✅ Order #${orderId} marked as confirmed and paid.`);
         }
       }
     } else if (eventType === 'payment.paid') {
-      const payment = eventData.attributes;
-      const metadata = payment.metadata || {};
-      const orderId = metadata.order_id || metadata.orderId;
-      const amountPaid = payment.amount / 100;
-      const paymentMethod = payment.source?.type || 'card';
-      const referenceNumber = eventData.id;
+      // For payment.paid:
+      // event.attributes.data IS the payment object — read .attributes from it.
+      const payment = eventData?.attributes;
+      const metadata = payment?.metadata || {};
+      // Validate orderId is a safe integer before touching the DB
+      const orderId = parseInt(metadata.order_id || metadata.orderId, 10);
+      const amountPaid = (payment?.amount || 0) / 100;
+      const paymentMethod = payment?.source?.type || 'card';
+      const referenceNumber = eventData?.id;
 
-      console.log(`💰 Payment Paid: Amount=₱${amountPaid}, Ref=${referenceNumber}`);
+      console.log(`💰 Payment Paid: Ref=${referenceNumber}`);
 
-      if (orderId) {
+      if (orderId && !isNaN(orderId)) {
         const existingPayment = await pool.query(
           'SELECT id FROM payments WHERE reference_number = $1 LIMIT 1',
           [referenceNumber]
@@ -101,6 +122,18 @@ export async function handlePaymongoWebhook(req, res) {
              WHERE id = $2 AND status = 'pending'`,
             [paymentMethod, orderId]
           );
+
+          // Post payment to matching cash / e-wallet / bank account
+          try {
+            await postOrderPayment(pool, {
+              orderId,
+              paymentMethod,
+              amount: amountPaid,
+              description: `Online Order #${orderId} payment (${paymentMethod})`,
+            });
+          } catch (e) {
+            console.error('[PayMongo Webhook] Failed to post payment to cash account:', e);
+          }
 
           console.log(`✅ Order #${orderId} payment saved.`);
         }

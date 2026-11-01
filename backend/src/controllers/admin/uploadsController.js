@@ -15,7 +15,7 @@ export async function uploadProductImage(req, res, next) {
     if (!cloudName || !apiKey || !apiSecret) return res.status(503).json({ error: 'Image upload is not configured yet.' });
 
     const timestamp = Math.floor(Date.now() / 1000);
-    const folder = 'the-yos/products';
+    const folder = 'ajs-foodflix/products';
     const signature = crypto.createHash('sha1').update(`folder=${folder}&timestamp=${timestamp}${apiSecret}`).digest('hex');
     const payload = new URLSearchParams({ file: dataUrl, api_key: apiKey, timestamp: String(timestamp), folder, signature });
     const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, { method: 'POST', body: payload });

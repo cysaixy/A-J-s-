@@ -1,14 +1,61 @@
-// src/controllers/customer/auth.controller.js
+import crypto from 'crypto';
 import pool from '../../config/db.js';
-import { issueCode, checkCode, deleteCode } from '../../utils/otpStore.js';
-import { sendOtpEmail } from '../../utils/email.util.js';
 import { getFirebaseAuth } from '../../config/firebase.js';
+import { sendOtpEmail } from '../../utils/email.util.js';
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const OTP_TTL_MINUTES = 5;
+const OTP_MAX_ATTEMPTS = 5;
+const OTP_RESEND_COOLDOWN_SECONDS = 60;
+
+function normalizeEmail(email) {
+  return String(email || '').trim().toLowerCase();
+}
+
+function normalizePhoneNumber(value) {
+  return String(value ?? '').replace(/\D/g, '').slice(0, 11);
+}
+
+function generateVerificationCode() {
+  return String(crypto.randomInt(100000, 1000000));
+}
+
+function hashCode(email, code) {
+  const pepper = process.env.OTP_PEPPER;
+  if (!pepper) {
+    throw new Error('OTP_PEPPER must be configured before email verification codes can be used.');
+  }
+  return crypto
+    .createHmac('sha256', pepper)
+    .update(`${email}:${code}`)
+    .digest('hex');
+}
+
+// Serverless instances do not share memory, so codes live in Postgres.
+let otpTableReady = null;
+function ensureOtpTable() {
+  if (!otpTableReady) {
+    otpTableReady = pool
+      .query(`
+        CREATE TABLE IF NOT EXISTS email_otps (
+          email VARCHAR(150) PRIMARY KEY,
+          code_hash CHAR(64) NOT NULL,
+          expires_at TIMESTAMPTZ NOT NULL,
+          attempts INTEGER NOT NULL DEFAULT 0,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        )
+      `)
+      .catch((err) => {
+        otpTableReady = null;
+        throw err;
+      });
+  }
+  return otpTableReady;
+}
+
 
 // Returns the currently authenticated customer profile. Called on page load
 // so the frontend can prefill forms and hide/show account-gated sections.
-export async function getMe(req, res) {
+export async function getMe(req, res, next) {
   try {
     if (!req.user) {
       return res.status(401).json({ error: 'Unauthorized: User context missing.' });
@@ -26,13 +73,12 @@ export async function getMe(req, res) {
     }
 
     return res.json({ customer: null });
-  } catch (error) {
-    console.error('getMe error:', error);
-    return res.status(500).json({ error: 'Couldn\'t load profile.' });
+  } catch (err) {
+    next(err);
   }
 }
 
-export async function syncCustomerProfile(req, res) {
+export async function syncCustomerProfile(req, res, next) {
   try {
     if (!req.user) {
       return res.status(401).json({ error: 'Unauthorized: User context missing.' });
@@ -40,10 +86,15 @@ export async function syncCustomerProfile(req, res) {
 
     const { firebaseUid, email } = req.user;
     const { name, phone, address } = req.body || {};
+    const normalizedPhone = normalizePhoneNumber(phone);
     let customer = req.user.customer;
 
     if (customer) {
       // Existing user: Update details
+      if (normalizedPhone && normalizedPhone.length !== 11) {
+        return res.status(400).json({ error: 'Contact number must be exactly 11 digits.' });
+      }
+
       const updateQuery = `
         UPDATE customers
         SET name = COALESCE($1, name),
@@ -55,7 +106,7 @@ export async function syncCustomerProfile(req, res) {
       `;
       const { rows } = await pool.query(updateQuery, [
         name || null,
-        phone || null,
+        normalizedPhone || null,
         address || null,
         email,
         firebaseUid,
@@ -69,9 +120,9 @@ export async function syncCustomerProfile(req, res) {
       // gate in account.html normally supplies this before this branch is
       // ever hit; this check exists so the rule holds even if that gate is
       // bypassed or a future auth path forgets to collect it.
-      if (!phone || !String(phone).trim()) {
+      if (!normalizedPhone || normalizedPhone.length !== 11) {
         return res.status(400).json({
-          error: 'A mobile number is required to create your account.',
+          error: 'A valid 11-digit contact number is required to create your account.',
           code: 'PHONE_REQUIRED',
         });
       }
@@ -85,7 +136,7 @@ export async function syncCustomerProfile(req, res) {
         firebaseUid,
         email,
         name || 'New Customer',
-        phone || null,
+        normalizedPhone,
         address || null,
       ]);
       customer = rows[0];
@@ -95,64 +146,100 @@ export async function syncCustomerProfile(req, res) {
       message: 'Customer profile synced successfully.',
       customer,
     });
-  } catch (error) {
-    console.error('Sync Profile Error:', error);
-    return res.status(500).json({
-      error: 'Internal server error during sync.',
-      details: error.message
-    });
+  } catch (err) {
+    next(err);
   }
 }
 
-// --- EMAIL VERIFICATION (OTP) FOR REGISTRATION & SECURITY ---
-export async function sendVerificationCode(req, res) {
-  const { email } = req.body || {};
+export async function sendVerificationCode(req, res, next) {
   try {
-    if (!email || !EMAIL_RE.test(email)) {
-      return res.status(400).json({ error: 'Please provide a valid email address.' });
+    const { email } = req.body || {};
+    const normalizedEmail = normalizeEmail(email);
+
+    if (!normalizedEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+      return res.status(400).json({ error: 'A valid email address is required.' });
     }
 
-    const result = issueCode(email);
-    if (result.error) {
-      return res.status(429).json({ error: result.error });
-    }
+    await ensureOtpTable();
 
-    await sendOtpEmail(email, result.code);
-
-    return res.status(200).json({ message: 'Verification code sent.' });
-  } catch (error) {
-    console.error('sendVerificationCode error:', error);
-    if (email) deleteCode(email); // failed send -> allow immediate retry
-    if (error && (error.responseCode === 535 || error.code === 'EAUTH')) {
-      return res.status(502).json({
-        error: 'Couldn\'t send the verification email. The email service rejected the SMTP credentials - check SMTP_USER and SMTP_PASS in backend/.env.',
+    // Resend cooldown: stops someone from spamming an inbox.
+    const { rows: recent } = await pool.query(
+      `SELECT 1 FROM email_otps
+       WHERE email = $1 AND created_at > NOW() - make_interval(secs => $2)`,
+      [normalizedEmail, OTP_RESEND_COOLDOWN_SECONDS]
+    );
+    if (recent.length > 0) {
+      return res.status(429).json({
+        error: `Please wait ${OTP_RESEND_COOLDOWN_SECONDS} seconds before requesting another code.`,
       });
     }
-    return res.status(500).json({ error: 'Couldn\'t send verification email. Please try again.' });
+
+    const code = generateVerificationCode();
+    await pool.query(
+      `INSERT INTO email_otps (email, code_hash, expires_at, attempts, created_at)
+       VALUES ($1, $2, NOW() + make_interval(mins => $3), 0, NOW())
+       ON CONFLICT (email) DO UPDATE
+         SET code_hash = EXCLUDED.code_hash,
+             expires_at = EXCLUDED.expires_at,
+             attempts = 0,
+             created_at = NOW()`,
+      [normalizedEmail, hashCode(normalizedEmail, code), OTP_TTL_MINUTES]
+    );
+
+    const delivery = await sendOtpEmail(normalizedEmail, code);
+
+    return res.status(200).json({
+      message: delivery.sent ? 'Verification code sent.' : 'Verification code generated successfully.',
+      ...(process.env.NODE_ENV !== 'production' && !delivery.sent ? { debugCode: code } : {}),
+    });
+  } catch (err) {
+    next(err);
   }
 }
 
-export async function verifyEmailCode(req, res) {
+export async function verifyVerificationCode(req, res, next) {
   try {
     const { email, code } = req.body || {};
-    if (!email || !code) {
-      return res.status(400).json({ error: 'Email and code are both required.' });
+    const normalizedEmail = normalizeEmail(email);
+    const normalizedCode = String(code || '').trim();
+
+    if (!normalizedEmail || !normalizedCode) {
+      return res.status(400).json({ error: 'Email and verification code are required.' });
     }
 
-    const result = checkCode(email, code);
-    if (result.error) {
-      return res.status(400).json({ error: result.error });
-    }
+    await ensureOtpTable();
 
-    return res.status(200).json({ verified: true });
-  } catch (error) {
-    console.error('verifyEmailCode error:', error);
-    return res.status(500).json({ error: 'Couldn\'t verify code. Please try again.' });
+    // Count the attempt first, atomically, so parallel guesses cannot
+    // sneak past the limit.
+    const { rows } = await pool.query(
+      `UPDATE email_otps
+       SET attempts = attempts + 1
+       WHERE email = $1 AND expires_at > NOW() AND attempts < $2
+       RETURNING code_hash`,
+      [normalizedEmail, OTP_MAX_ATTEMPTS]
+    );
+
+    const invalid = () =>
+      res.status(400).json({ error: 'Invalid or expired verification code.', verified: false });
+
+    if (!rows[0]) return invalid();
+
+    const expected = Buffer.from(rows[0].code_hash, 'hex');
+    const actual = Buffer.from(hashCode(normalizedEmail, normalizedCode), 'hex');
+    const matches = expected.length === actual.length && crypto.timingSafeEqual(expected, actual);
+    if (!matches) return invalid();
+
+    await pool.query('DELETE FROM email_otps WHERE email = $1', [normalizedEmail]);
+    return res.status(200).json({ verified: true, message: 'Verification code accepted.' });
+  } catch (err) {
+    next(err);
   }
 }
 
-// --- PASSWORD UPDATE (POST-OTP) ---
-export async function updatePassword(req, res) {
+export const verifyEmailCode = verifyVerificationCode;
+
+// --- PASSWORD UPDATE ---
+export async function updatePassword(req, res, next) {
   try {
     if (!req.user || !req.user.firebaseUid) {
       return res.status(401).json({ error: 'Unauthorized: User context missing.' });
@@ -166,8 +253,20 @@ export async function updatePassword(req, res) {
     await getFirebaseAuth().updateUser(req.user.firebaseUid, { password: newPassword });
 
     return res.status(200).json({ message: 'Password updated successfully.' });
-  } catch (error) {
-    console.error('updatePassword error:', error);
-    return res.status(500).json({ error: 'Couldn\'t update password. Please try again.' });
+  } catch (err) {
+    // Firebase errors are operational — surface a clean message rather than
+    // the raw Firebase SDK object, which can contain internal details.
+    if (err.code?.startsWith('auth/')) {
+      const firebaseMessages = {
+        'auth/invalid-password': 'Password must be at least 6 characters.',
+        'auth/user-not-found': 'User not found.',
+      };
+      const message = firebaseMessages[err.code] || 'Could not update password. Please try again.';
+      const opErr = new Error(message);
+      opErr.status = 400;
+      opErr.isOperational = true;
+      return next(opErr);
+    }
+    next(err);
   }
 }

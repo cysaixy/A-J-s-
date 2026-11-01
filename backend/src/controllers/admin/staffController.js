@@ -5,6 +5,23 @@ import pool from '../../config/db.js';
 import { generateStaffToken } from '../../utils/generateToken.js';
 
 const COOKIE_NAME = 'staff_token';
+
+// This account is the permanent owner-level admin.
+// Its role, status, and permissions can never be changed by anyone — not
+// even by another Admin — through the API. Password changes are still
+// allowed (only by the account itself, verified via current password).
+const SUPERADMIN_EMAIL = 'admin@ajsfoodflix.com';
+
+/**
+ * Shared password strength validator.
+ * Returns an error string if invalid, or null if the password is acceptable.
+ */
+function validatePassword(password) {
+  if (typeof password !== 'string' || password.length < 10) {
+    return 'Password must be at least 10 characters.';
+  }
+  return null;
+}
 const COOKIE_OPTIONS = {
   httpOnly: true,
   secure: process.env.NODE_ENV === 'production',
@@ -12,6 +29,23 @@ const COOKIE_OPTIONS = {
   maxAge: 24 * 60 * 60 * 1000, // 1 day
   path: '/',
 };
+
+function setCSRFTokenCookie(res) {
+  const csrfToken = crypto.randomBytes(32).toString('hex');
+  res.cookie('csrf_token', csrfToken, {
+    httpOnly: false,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    maxAge: 24 * 60 * 60 * 1000,
+    path: '/',
+  });
+  return csrfToken;
+}
+
+export function issueCSRFToken(req, res) {
+  const csrfToken = setCSRFTokenCookie(res);
+  res.json({ csrfToken });
+}
 
 export async function login(req, res, next) {
   try {
@@ -58,14 +92,7 @@ export async function login(req, res, next) {
 
     // Set separate non-httpOnly CSRF token cookie (frontend reads this,
     // sends it back as X-CSRF-Token header on state-changing requests)
-    const csrfToken = crypto.randomBytes(32).toString('hex');
-    res.cookie('csrf_token', csrfToken, {
-      httpOnly: false,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-      maxAge: 24 * 60 * 60 * 1000, // 1 day
-      path: '/',
-    });
+    const csrfToken = setCSRFTokenCookie(res);
 
     res.json({ staff, csrfToken });
   } catch (err) {
@@ -138,6 +165,8 @@ export async function createStaff(req, res, next) {
     if (!name || !email || !password) {
       return res.status(400).json({ error: 'name, email, and password are required.' });
     }
+    const passwordError = validatePassword(password);
+    if (passwordError) return res.status(400).json({ error: passwordError });
 
     // The database permission columns are NOT NULL and have no defaults.
     // Omitted permissions start disabled; explicit false values stay false.
@@ -187,6 +216,20 @@ export async function createStaff(req, res, next) {
 export async function updateStaff(req, res, next) {
   try {
     const { name, role, status } = req.body;
+
+    // Fetch the target account's email first so we can apply the superadmin guard.
+    const { rows: target } = await pool.query(
+      'SELECT email FROM staff WHERE id = $1',
+      [req.params.id]
+    );
+    if (!target[0]) return res.status(404).json({ error: 'Staff member not found.' });
+
+    if (target[0].email.toLowerCase() === SUPERADMIN_EMAIL) {
+      return res.status(403).json({
+        error: 'This account is protected and cannot be modified.',
+      });
+    }
+
     const { rows } = await pool.query(
       `UPDATE staff SET
          name = COALESCE($1, name),
@@ -203,9 +246,106 @@ export async function updateStaff(req, res, next) {
   }
 }
 
+// PUT/PATCH /api/admin/staff/:id/profile
+// Any logged-in staff can update their own name.
+// Admin can also update their own email (email is unique — checked here).
+// No other role or status changes — use updateStaff for those.
+export async function updateProfile(req, res, next) {
+  try {
+    const targetId = Number(req.params.id);
+    const requesterId = Number(req.staff.id);
+
+    // Protect the primary admin account (same rule as updateStaff / updatePermissions).
+    const { rows: targetRows } = await pool.query(
+      'SELECT email FROM staff WHERE id = $1',
+      [targetId]
+    );
+    if (!targetRows[0]) return res.status(404).json({ error: 'Staff member not found.' });
+
+    const targetIsSuper = targetRows[0].email.toLowerCase() === SUPERADMIN_EMAIL;
+    const requesterIsSuper = String(req.staff.email || '').toLowerCase() === SUPERADMIN_EMAIL;
+
+    if (targetIsSuper && !requesterIsSuper) {
+      return res.status(403).json({ error: 'This account is protected and cannot be modified.' });
+    }
+    if (
+      targetIsSuper &&
+      req.body?.email !== undefined &&
+      String(req.body.email).trim().toLowerCase() !== SUPERADMIN_EMAIL
+    ) {
+      return res.status(403).json({ error: 'The primary admin email cannot be changed.' });
+    }
+
+    // Staff can only edit their own profile. Admins can edit any profile,
+    // but in practice settings.html only ever calls this for self.
+    if (requesterId !== targetId && req.staff.role !== 'Admin') {
+      return res.status(403).json({ error: 'You can only update your own profile.' });
+    }
+
+    const { name, email } = req.body;
+
+    if (name !== undefined && (typeof name !== 'string' || !name.trim())) {
+      return res.status(400).json({ error: 'Name cannot be empty.' });
+    }
+
+    // Email changes are Admin-only — prevents privilege abuse through email swap.
+    if (email !== undefined && req.staff.role !== 'Admin') {
+      return res.status(403).json({ error: 'Only an Admin can change their email address.' });
+    }
+
+    if (email !== undefined) {
+      const cleanEmail = email.trim().toLowerCase();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+        return res.status(400).json({ error: 'Please enter a valid email address.' });
+      }
+      // Check uniqueness — exclude the current staff member's own row.
+      const { rows: existing } = await pool.query(
+        'SELECT id FROM staff WHERE LOWER(email) = $1 AND id != $2',
+        [cleanEmail, targetId]
+      );
+      if (existing.length > 0) {
+        return res.status(409).json({ error: 'That email address is already in use.' });
+      }
+    }
+
+    const { rows } = await pool.query(
+      `UPDATE staff SET
+         name  = COALESCE($1, name),
+         email = COALESCE($2, email)
+       WHERE id = $3
+       RETURNING id, name, email, role, status`,
+      [
+        name ? name.trim() : null,
+        email ? email.trim().toLowerCase() : null,
+        targetId,
+      ]
+    );
+
+    if (!rows[0]) return res.status(404).json({ error: 'Staff member not found.' });
+
+    res.json({ staff: rows[0] });
+  } catch (err) {
+    next(err);
+  }
+}
+
 export async function updatePermissions(req, res, next) {
   try {
     const { can_access_inventory, can_access_stock_in, can_access_reports } = req.body;
+
+    // Superadmin permissions are fixed — no changes allowed.
+    const { rows: target } = await pool.query(
+      'SELECT email FROM staff WHERE id = $1',
+      [req.params.id]
+    );
+    if (!target[0]) return res.status(404).json({ error: 'Staff member not found.' });
+
+    if (target[0].email.toLowerCase() === SUPERADMIN_EMAIL) {
+      return res.status(403).json({
+        error: 'This account is protected and cannot be modified.',
+      });
+    }
+
     const { rows } = await pool.query(
       `UPDATE staff_permissions
        SET can_access_inventory = $2, can_access_stock_in = $3, can_access_reports = $4, updated_at = NOW()
@@ -240,9 +380,8 @@ export async function changePassword(req, res, next) {
     if (!current_password || !new_password) {
       return res.status(400).json({ error: 'Current and new passwords are required.' });
     }
-    if (typeof new_password !== 'string' || new_password.length < 6) {
-      return res.status(400).json({ error: 'New password must be at least 6 characters.' });
-    }
+    const passwordError = validatePassword(new_password);
+    if (passwordError) return res.status(400).json({ error: passwordError });
 
     const { rows } = await pool.query(
       'SELECT id, password FROM staff WHERE id = $1',
@@ -260,6 +399,39 @@ export async function changePassword(req, res, next) {
     await pool.query('UPDATE staff SET password = $1 WHERE id = $2', [hashedPassword, staff.id]);
 
     res.json({ success: true, message: 'Password updated.' });
+  } catch (err) {
+    next(err);
+  }
+}
+
+// PUT /api/admin/staff/:id/reset-password — lets an Admin reset any staff member's
+// password directly without requiring the current password (e.g. forgotten password).
+export async function resetStaffPassword(req, res, next) {
+  try {
+    const { id } = req.params;
+    const { new_password } = req.body;
+
+    if (!new_password) {
+      return res.status(400).json({ error: 'New password is required.' });
+    }
+    const passwordError = validatePassword(new_password);
+    if (passwordError) return res.status(400).json({ error: passwordError });
+
+    const { rows: target } = await pool.query(
+      'SELECT id, name, email, role FROM staff WHERE id = $1',
+      [id]
+    );
+    if (!target[0]) return res.status(404).json({ error: 'Staff member not found.' });
+
+    // Superadmin protection: another admin cannot reset the superadmin's password
+    if (target[0].email.toLowerCase() === SUPERADMIN_EMAIL && req.staff.email.toLowerCase() !== SUPERADMIN_EMAIL) {
+      return res.status(403).json({ error: 'The primary admin account is protected and cannot be reset by another user.' });
+    }
+
+    const hashedPassword = await bcrypt.hash(new_password, 10);
+    await pool.query('UPDATE staff SET password = $1 WHERE id = $2', [hashedPassword, id]);
+
+    res.json({ success: true, message: `Password for ${target[0].name || target[0].email} has been reset.` });
   } catch (err) {
     next(err);
   }

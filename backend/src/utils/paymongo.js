@@ -85,8 +85,8 @@ export async function createPaymongoCheckoutSession({
   successUrl,
   cancelUrl,
   customerEmail,
-  customerName,
-  customerPhone,
+  customerName: _customerName,
+  customerPhone: _customerPhone,
 }) {
   const centavos = Math.round(Number(amount) * 100);
 
@@ -105,7 +105,7 @@ export async function createPaymongoCheckoutSession({
           },
         ],
         payment_method_types: ['gcash', 'qrph'],
-        description: description || `The Yo's - Order #${orderId}`,
+        description: description || `A&J's - Order #${orderId}`,
         metadata: {
           order_id: String(orderId),
         },

@@ -1,7 +1,7 @@
 import { Prisma } from '@prisma/client';
 import prisma from './prisma.js';
 
-const columnCacheKey = Symbol.for('the-yos.product-json-columns');
+const columnCacheKey = Symbol.for('ajs-foodflix.product-json-columns');
 
 function normalizeArray(value) {
   if (Array.isArray(value)) return value;
