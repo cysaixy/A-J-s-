@@ -56,7 +56,7 @@ export async function adminFetch(path, options = {}) {
     const isOffline = typeof navigator !== 'undefined' && navigator.onLine === false;
     const error = new Error(isOffline
       ? 'You appear to be offline. Reconnect to the internet, then try again.'
-      : 'We could not reach The Yo\'s server. Check your internet connection or DNS, then try again.');
+      : 'We could not reach A&J\'s server. Check your internet connection or DNS, then try again.');
     error.code = isOffline ? 'OFFLINE' : 'NETWORK_UNREACHABLE';
     error.cause = cause;
     throw error;

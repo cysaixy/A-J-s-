@@ -889,7 +889,7 @@
     return `${viewBtn}`;
   }
 
-  // ---- Confirm modal: table assignment is mandatory ----
+  // ---- Confirm modal: table assignment is optional ----
   function openConfirmModal(id) {
     const r = reservations.find(x => x.id == id);
     if (!r) return;
@@ -906,9 +906,8 @@
           <dt>Guests</dt><dd><span class="guests-badge">${r.guests} guests</span></dd>
         </div>
         <div class="form-field" style="margin-top:16px;">
-          <label for="confirmTable">Assign Table *</label>
-          <input type="text" id="confirmTable" placeholder="e.g. Table 1, T-02, Patio A" value="${escapeHtml(currentTable)}" required>
-          <small style="color:var(--ink-muted); font-size:0.70rem; margin-top:3px; display:block;">Enter any table identifier (e.g., Table 1, T-05, Outdoor 2)</small>
+          <label for="confirmTable">Assign Table (optional)</label>
+          <input type="text" id="confirmTable" placeholder="e.g. Table 1, T-02, Patio A" value="${escapeHtml(currentTable)}">
         </div>
         <div class="modal-error" id="confirmError"></div>
         <div class="modal-close-row">
@@ -928,16 +927,11 @@
       const errEl = backdrop.querySelector("#confirmError");
       errEl.classList.remove("show");
       const tableNo = input.value.trim();
-      if (!tableNo) {
-        errEl.textContent = "Please enter a table number/identifier.";
-        errEl.classList.add("show");
-        return;
-      }
       btn.disabled = true;
       try {
         const res = await adminFetch(`/api/admin/reservations/${id}/confirm`, {
           method: "PATCH",
-          body: JSON.stringify({ table_no: tableNo }),
+          body: JSON.stringify({ table_no: tableNo || null }),
         });
         const data = await res.json();
         if (!res.ok) {
@@ -954,7 +948,7 @@
           r0.order_status = "finalized";
         }
         close();
-        toast(`Confirmed — Table ${data.reservation.table_no} assigned.`, "success");
+        toast(data.reservation.table_no ? `Confirmed — Table ${data.reservation.table_no} assigned.` : "Reservation confirmed.", "success");
         render();
       } catch (err) {
         errEl.textContent = err.message;
@@ -984,7 +978,7 @@
           </div>
           <div class="form-field">
             <label for="walkinPhone">Contact Phone *</label>
-            <input type="text" id="walkinPhone" placeholder="09XXXXXXXXX" required>
+            <input type="text" id="walkinPhone" inputmode="numeric" pattern="[0-9]{11}" maxlength="11" placeholder="09XXXXXXXXX" required>
           </div>
         </div>
         <div class="form-field" style="margin-bottom:14px;">
@@ -1041,6 +1035,11 @@
 
       if (!name || !phone || !date || !time) {
         errEl.textContent = 'Name, phone, date, and time are required.';
+        errEl.classList.add('show');
+        return;
+      }
+      if (!/^\d{11}$/.test(phone)) {
+        errEl.textContent = 'Contact number must be exactly 11 digits.';
         errEl.classList.add('show');
         return;
       }
@@ -1152,7 +1151,7 @@
           </dd>
         </div>
 
-        ${order && order.items && order.items.length ? `
+        ${order && ((order.items?.length || 0) + (order.custom_items?.length || 0) > 0) ? `
         <div style="border-top:1px solid var(--line); padding-top:14px;">
           <h4 style="font-family:'Bricolage Grotesque',sans-serif; text-transform:uppercase; font-size:0.85rem; margin:0 0 10px;">Order Items</h4>
           <table class="order-items-table">
@@ -1163,7 +1162,7 @@
               <th class="item-subtotal">Subtotal</th>
             </tr></thead>
             <tbody>
-              ${order.items.map(item => `
+              ${(order.items || []).map(item => `
                 <tr>
                   <td>
                     <div class="item-name">${escapeHtml(item.name || item.item_name)}</div>
@@ -1175,6 +1174,18 @@
                   <td class="item-subtotal">${peso(item.subtotal)}</td>
                 </tr>
               `).join('')}
+              ${(order.custom_items || []).map(item => {
+                const quantity = Number(item.qty ?? item.quantity) || 1;
+                const price = Number(item.price) || 0;
+                return `
+                  <tr>
+                    <td><div class="item-name">${escapeHtml(item.name || item.product_name || 'Custom Item')}</div></td>
+                    <td class="item-qty">${quantity}</td>
+                    <td class="item-price">${peso(price)}</td>
+                    <td class="item-subtotal">${peso(quantity * price)}</td>
+                  </tr>
+                `;
+              }).join('')}
             </tbody>
           </table>
           <div class="order-total-row">
@@ -1242,6 +1253,12 @@
     });
 
     orderEditorState.selectedItems.clear();
+    orderEditorState.customItems = (existingOrder?.custom_items || []).map(item => ({
+      name: String(item.name || ''),
+      qty: Number(item.qty ?? item.quantity) || 1,
+      price: Number(item.price) || 0,
+    }));
+    orderEditorState.baseNotes = existingOrder?.notes || reservation.notes || '';
     if (existingOrder?.items) {
       existingOrder.items.forEach(item => {
         const key = `${item.menu_id}||`;
@@ -1271,6 +1288,24 @@
 
         <div id="orderEditorContent"></div>
 
+        <div class="form-grid" style="margin-top:14px;">
+          <div class="form-field">
+            <label for="customItemName">Custom Item</label>
+            <input type="text" id="customItemName" maxlength="150">
+          </div>
+          <div class="form-field">
+            <label for="customItemQty">Quantity</label>
+            <input type="number" id="customItemQty" min="0.01" step="0.01" value="1">
+          </div>
+          <div class="form-field">
+            <label for="customItemPrice">Price</label>
+            <input type="number" id="customItemPrice" min="0" step="0.01" value="0">
+          </div>
+          <div class="form-field">
+            <button type="button" class="res-btn res-btn-primary" id="addCustomItemBtn">Add Custom Item</button>
+          </div>
+        </div>
+
         <div style="margin-top:16px; border-top:1px solid var(--line); padding-top:14px;">
           <h4 style="font-family:'Bricolage Grotesque',sans-serif; text-transform:uppercase; font-size:0.82rem; margin:0 0 10px;">Selected Order Items</h4>
           <div id="currentOrderItems" style="max-height:180px; overflow-y:auto;"></div>
@@ -1295,6 +1330,23 @@
     backdrop.addEventListener('click', (e) => { if (e.target === backdrop) close(); });
 
     renderOrderEditorCategories(backdrop, categories);
+    backdrop.querySelector('#addCustomItemBtn').addEventListener('click', () => {
+      const name = backdrop.querySelector('#customItemName').value.trim();
+      const qty = Number(backdrop.querySelector('#customItemQty').value);
+      const price = Number(backdrop.querySelector('#customItemPrice').value);
+      const error = backdrop.querySelector('#orderEditorError');
+      if (!name || !Number.isFinite(qty) || qty <= 0 || !Number.isFinite(price) || price < 0) {
+        error.textContent = 'Enter a name, positive quantity, and non-negative price for the custom item.';
+        error.classList.add('show');
+        return;
+      }
+      orderEditorState.customItems.push({ name, qty, price });
+      backdrop.querySelector('#customItemName').value = '';
+      backdrop.querySelector('#customItemQty').value = '1';
+      backdrop.querySelector('#customItemPrice').value = '0';
+      error.classList.remove('show');
+      updateCurrentOrderDisplay(backdrop);
+    });
 
     backdrop.querySelector('#orderEditorSaveBtn').addEventListener('click', async () => {
       await saveOrderFromEditor(reservationId, backdrop, adminOverride);
@@ -1303,6 +1355,8 @@
 
   let orderEditorState = {
     selectedItems: new Map(),
+    customItems: [],
+    baseNotes: '',
   };
 
   function renderOrderEditorCategories(backdrop, categories) {
@@ -1426,14 +1480,14 @@
     const totalRow = backdrop.querySelector('#orderTotalRow');
     const totalDisplay = backdrop.querySelector('#orderTotalDisplay');
 
-    if (orderEditorState.selectedItems.size === 0) {
+    if (orderEditorState.selectedItems.size === 0 && orderEditorState.customItems.length === 0) {
       container.innerHTML = '<div style="padding:12px; color:var(--ink-muted); text-align:center; font-size:0.80rem;">No items selected yet.</div>';
       totalRow.style.display = 'none';
       return;
     }
 
     let total = 0;
-    container.innerHTML = Array.from(orderEditorState.selectedItems.entries()).map(([key, data]) => {
+    const menuItemRows = Array.from(orderEditorState.selectedItems.entries()).map(([key, data]) => {
       const subtotal = data.menuItem.price * data.quantity;
       total += subtotal;
       const addonTotal = Array.from(data.addons.values()).reduce((sum, a) => sum + a.price * a.quantity, 0);
@@ -1451,6 +1505,24 @@
         </div>
       `;
     }).join('');
+    const customItemRows = orderEditorState.customItems.map((item, index) => {
+      const subtotal = item.qty * item.price;
+      total += subtotal;
+      return `
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:7px 0; border-bottom:1px dashed var(--line); font-size:0.82rem;">
+          <div><strong>${escapeHtml(item.name)}</strong><span style="font-family:'DM Sans', sans-serif; color:var(--brass-dark); margin-left:6px;">× ${item.qty} · Custom</span></div>
+          <span style="font-family:'DM Sans', sans-serif; font-weight:700; color:var(--brass-dark);">₱${subtotal.toFixed(2)}</span>
+          <button type="button" class="res-btn" data-remove-custom="${index}">Remove</button>
+        </div>
+      `;
+    }).join('');
+    container.innerHTML = menuItemRows + customItemRows;
+    container.querySelectorAll('[data-remove-custom]').forEach(button => {
+      button.addEventListener('click', () => {
+        orderEditorState.customItems.splice(Number(button.dataset.removeCustom), 1);
+        updateCurrentOrderDisplay(backdrop);
+      });
+    });
 
     totalDisplay.textContent = `₱${total.toFixed(2)}`;
     totalRow.style.display = 'flex';
@@ -1460,7 +1532,7 @@
     const errEl = backdrop.querySelector('#orderEditorError');
     const saveBtn = backdrop.querySelector('#orderEditorSaveBtn');
 
-    if (orderEditorState.selectedItems.size === 0) {
+    if (orderEditorState.selectedItems.size === 0 && orderEditorState.customItems.length === 0) {
       errEl.textContent = 'Please add at least one item to the order.';
       errEl.classList.add('show');
       return;
@@ -1475,6 +1547,10 @@
         quantity: addon.quantity
       }))
     }));
+    const baseNotes = orderEditorState.baseNotes.split('---CUSTOM_ITEMS_JSON---')[0].trim();
+    const notes = orderEditorState.customItems.length
+      ? `${baseNotes}${baseNotes ? '\n\n' : ''}---CUSTOM_ITEMS_JSON---${JSON.stringify(orderEditorState.customItems)}`
+      : baseNotes || null;
 
     saveBtn.disabled = true;
     saveBtn.textContent = 'Saving…';
@@ -1485,6 +1561,7 @@
         method: 'POST',
         body: JSON.stringify({ 
           items, 
+          notes,
           status: 'editable',
           admin_override: adminOverride
         }),
@@ -1661,5 +1738,3 @@
 </script>
 </body>
 </html>
-
-

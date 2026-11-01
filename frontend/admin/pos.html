@@ -792,7 +792,7 @@
               </div>
               <div>
                 <label style="display:block; font-size:0.65rem; text-transform:uppercase; color:var(--ink-muted); margin-bottom:4px;">Phone Number</label>
-                <input type="tel" id="posDeliveryPhone" placeholder="Phone number" style="width:100%; padding:7px 9px; border:1px solid var(--line); border-radius:6px; background:var(--component-bg); font-family:'DM Sans', sans-serif; font-size:0.82rem;">
+                <input type="tel" id="posDeliveryPhone" inputmode="numeric" pattern="[0-9]{11}" maxlength="11" placeholder="11-digit phone number" style="width:100%; padding:7px 9px; border:1px solid var(--line); border-radius:6px; background:var(--component-bg); font-family:'DM Sans', sans-serif; font-size:0.82rem;">
               </div>
             </div>
             <div>
@@ -822,7 +822,7 @@
                 </div>
                 <div>
                   <label style="display:block; font-size:0.65rem; text-transform:uppercase; color:var(--ink-muted); margin-bottom:4px;">Phone *</label>
-                  <input type="tel" id="custFormPhone" placeholder="Phone number" style="width:100%; padding:8px 10px; border:1px solid var(--line); border-radius:6px; background:var(--component-bg); font-family:'DM Sans', sans-serif; font-size:0.84rem;">
+                  <input type="tel" id="custFormPhone" inputmode="numeric" pattern="[0-9]{11}" maxlength="11" placeholder="11-digit phone number" style="width:100%; padding:8px 10px; border:1px solid var(--line); border-radius:6px; background:var(--component-bg); font-family:'DM Sans', sans-serif; font-size:0.84rem;">
                 </div>
                 <div style="grid-column:1/-1;">
                   <label style="display:block; font-size:0.65rem; text-transform:uppercase; color:var(--ink-muted); margin-bottom:4px;">Email</label>
@@ -1574,7 +1574,13 @@
 
     const order_type = document.getElementById('posOrderType').value;
     const isDelivery = order_type === 'delivery';
-    const delivery_fee = isDelivery ? (Number(document.getElementById('deliveryFeeInput').value) || 0) : 0;
+    const deliveryFeeValue = document.getElementById('deliveryFeeInput').value;
+    const delivery_fee = isDelivery ? Number(deliveryFeeValue || 0) : 0;
+    if (isDelivery && (!Number.isFinite(delivery_fee) || delivery_fee < 0)) {
+      errEl.textContent = 'Delivery fee must be a non-negative amount.';
+      errEl.style.display = 'block';
+      return;
+    }
     const totalAmount = cart.reduce((sum, c) => sum + lineTotal(c), 0);
     paymentGrandTotal = totalAmount + delivery_fee;
 
@@ -1598,6 +1604,16 @@
       if (nameInp && nameInp.value.trim()) customer_name = nameInp.value.trim();
       const phoneInp = document.getElementById('posDeliveryPhone');
       if (phoneInp && phoneInp.value.trim()) customer_phone = phoneInp.value.trim();
+    }
+    if (customer_phone && !/^\d{11}$/.test(customer_phone)) {
+      errEl.textContent = 'Contact number must be exactly 11 digits.';
+      errEl.style.display = 'block';
+      return;
+    }
+    if (isDelivery && !customer_phone) {
+      errEl.textContent = 'Delivery orders require an 11-digit contact number.';
+      errEl.style.display = 'block';
+      return;
     }
 
     // Cache params for final submit
@@ -2134,6 +2150,7 @@
 
     if (!name) { alert('Name is required'); return; }
     if (!phone) { alert('Phone is required'); return; }
+    if (!/^\d{11}$/.test(phone)) { alert('Contact number must be exactly 11 digits.'); return; }
     if (orderType === 'delivery' && !address) { alert('Address is required for delivery orders'); return; }
 
     selectedCustomer = {

@@ -469,7 +469,7 @@
 
         <div class="form-row">
           <div><label for="name">Name</label><input id="name" type="text" required placeholder="Name"></div>
-          <div><label for="phone">Mobile Number</label><input id="phone" type="text" inputmode="numeric" pattern="[0-9]+" oninput="this.value = this.value.replace(/[^0-9]/g, '');" required placeholder="09xxxxxxxxx"></div>
+          <div><label for="phone">Mobile Number</label><input id="phone" type="text" inputmode="numeric" pattern="[0-9]{11}" maxlength="11" oninput="this.value = this.value.replace(/[^0-9]/g, '');" required placeholder="09xxxxxxxxx"></div>
         </div>
 
         <div class="form-row">
@@ -1412,6 +1412,10 @@
       if (!orderType) { showStep2Error('Please select an order type.'); return; }
       if (!name || !phone || !timeInput) {
         showStep2Error('Please fill in your name, mobile number, and preferred time before continuing.');
+        return;
+      }
+      if (!/^\d{11}$/.test(phone)) {
+        showStep2Error('Contact number must be exactly 11 digits.');
         return;
       }
       if (orderType === 'Delivery' && !addr) {
