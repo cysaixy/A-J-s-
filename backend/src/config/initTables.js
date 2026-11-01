@@ -27,7 +27,7 @@ export async function initTables() {
         id SERIAL PRIMARY KEY,
         inventory_id INTEGER NOT NULL REFERENCES inventory_items(id) ON DELETE RESTRICT,
         staff_id INTEGER REFERENCES staff(id) ON DELETE SET NULL,
-        incident_type VARCHAR(20) NOT NULL CHECK (incident_type IN ('spoilage', 'theft')),
+        incident_type VARCHAR(50) NOT NULL,
         quantity NUMERIC(10,2) NOT NULL CHECK (quantity > 0),
         occurred_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
         description TEXT NOT NULL,
@@ -36,6 +36,8 @@ export async function initTables() {
         created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
       );
     `);
+    await pool.query('ALTER TABLE inventory_incidents DROP CONSTRAINT IF EXISTS inventory_incidents_incident_type_check');
+    await pool.query('ALTER TABLE inventory_incidents ALTER COLUMN incident_type TYPE VARCHAR(50)');
     await pool.query('CREATE INDEX IF NOT EXISTS inventory_incidents_occurred_at_idx ON inventory_incidents(occurred_at DESC)');
 
     // 2. add_ons
@@ -141,19 +143,20 @@ export async function initTables() {
     await pool.query(
       'ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_method VARCHAR(50)'
     );
+    await pool.query(
+      'ALTER TABLE orders ADD COLUMN IF NOT EXISTS handled_by_staff_id INTEGER REFERENCES staff(id) ON DELETE SET NULL'
+    );
+    await pool.query(
+      'ALTER TABLE orders ADD COLUMN IF NOT EXISTS status_updated_at TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP'
+    );
+    await pool.query(
+      'CREATE INDEX IF NOT EXISTS orders_handled_by_staff_id_idx ON orders(handled_by_staff_id)'
+    );
 
     // Delivery-fee status column: 'pending' while Admin assigns fee, 'confirmed' once fee is set.
     await pool.query(
       'ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivery_fee_status VARCHAR(20)'
     );
-
-    // Clean up dropped/redundant columns
-    await pool.query('ALTER TABLE orders DROP COLUMN IF EXISTS table_time');
-    await pool.query('ALTER TABLE orders DROP COLUMN IF EXISTS delivery_fee_assigned_by');
-    await pool.query('ALTER TABLE orders DROP COLUMN IF EXISTS delivery_fee_assigned_at');
-    await pool.query('ALTER TABLE orders DROP COLUMN IF EXISTS delivery_barangay');
-    await pool.query('ALTER TABLE orders DROP COLUMN IF EXISTS delivery_city');
-    await pool.query('ALTER TABLE orders DROP COLUMN IF EXISTS delivery_landmark');
 
     // Delivery fees are set by staff in the POS and may be any non-negative
     // amount. Keep the database rule aligned with the POS input (which allows
@@ -229,17 +232,34 @@ export async function initTables() {
     }
 
     // 11. Menu item flavors and tracking mode
-    await pool.query("ALTER TABLE menu_items ADD COLUMN IF NOT EXISTS flavors TEXT[] NOT NULL DEFAULT '{}';");
-    await pool.query("ALTER TABLE menu_items ADD COLUMN IF NOT EXISTS tracking_mode VARCHAR(10) NOT NULL DEFAULT 'direct';");
+    await pool.query('ALTER TABLE menu_items ADD COLUMN IF NOT EXISTS flavors TEXT[] NOT NULL DEFAULT \'{}\';');
+    await pool.query('ALTER TABLE menu_items ADD COLUMN IF NOT EXISTS tracking_mode VARCHAR(10) NOT NULL DEFAULT \'direct\';');
     await pool.query('ALTER TABLE stock_in ADD COLUMN IF NOT EXISTS inventory_id INTEGER REFERENCES inventory_items(id) ON DELETE SET NULL;');
     await pool.query('ALTER TABLE stock_in ALTER COLUMN menu_id DROP NOT NULL;');
+    await pool.query('ALTER TABLE stock_in ADD COLUMN IF NOT EXISTS supplier VARCHAR(150);');
+    await pool.query('ALTER TABLE stock_in ADD COLUMN IF NOT EXISTS unit_cost NUMERIC(10,4);');
+    await pool.query('ALTER TABLE stock_in ADD COLUMN IF NOT EXISTS total_cost NUMERIC(10,2);');
+    // 12. Pack size support
+    await pool.query('ALTER TABLE inventory_items ADD COLUMN IF NOT EXISTS pack_size NUMERIC(10,2);');
+    await pool.query('ALTER TABLE stock_in ALTER COLUMN quantity TYPE NUMERIC(10,2);');
+    // Widen unit_cost to 4 decimal places so per-base-unit costs (e.g. PS0.098/g) are
+    // stored precisely. Existing values are preserved -- idempotent if already NUMERIC(10,4).
+    await pool.query('ALTER TABLE inventory_items ALTER COLUMN unit_cost TYPE NUMERIC(10,4);');
 
-    // Drop legacy tables table — table numbers are now free-form text
-    // assigned directly by staff on reservation confirm / walk-in.
-    await pool.query('DROP TABLE IF EXISTS tables CASCADE;');
+    // 13. email_otps for serverless OTP verification
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS email_otps (
+        email VARCHAR(150) PRIMARY KEY,
+        code_hash CHAR(64) NOT NULL,
+        expires_at TIMESTAMPTZ NOT NULL,
+        attempts INTEGER NOT NULL DEFAULT 0,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      );
+    `);
 
     console.log('Database tables initialized successfully.');
   } catch (err) {
     console.error('Error initializing tables:', err.message);
+    throw err;
   }
 }

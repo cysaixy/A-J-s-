@@ -1,5 +1,5 @@
 // ============================================================
-// The-Yo's Restaurant Management System - Prisma Schema
+// A&J's Foodflix Restaurant Management System - Prisma Schema
 // ORIGINAL 23-table design (reverted from consolidated version)
 // Target: PostgreSQL (Neon)
 // ============================================================
@@ -156,8 +156,9 @@ model InventoryItem {
   sku           String?  @db.VarChar(50)
   stockQuantity Decimal  @map("stock_quantity") @db.Decimal(10, 2)
   unit          String?  @db.VarChar(30)
-  unitCost      Decimal  @map("unit_cost") @db.Decimal(10, 2)
+  unitCost      Decimal  @map("unit_cost") @db.Decimal(10, 4)
   reorderLevel  Decimal? @map("reorder_level") @db.Decimal(10, 2)
+  packSize      Decimal? @map("pack_size") @db.Decimal(10, 2)
   supplier      String?  @db.VarChar(150)
   status        String?  @db.VarChar(30)
   notes         String?
@@ -177,7 +178,7 @@ model InventoryIncident {
   id              Int      @id @default(autoincrement())
   inventoryId     Int      @map("inventory_id")
   staffId         Int?     @map("staff_id")
-  incidentType    String   @map("incident_type") @db.VarChar(20)
+  incidentType    String   @map("incident_type") @db.VarChar(50)
   quantity        Decimal  @db.Decimal(10, 2)
   occurredAt      DateTime @default(now()) @map("occurred_at")
   description     String
@@ -398,7 +399,7 @@ model StockIn {
   // purchases replenish ingredients, not finished products.
   inventoryId    Int?      @map("inventory_id")
   staffId        Int       @map("staff_id")
-  quantity       Int
+  quantity       Decimal   @db.Decimal(10, 2)
   expirationDate DateTime? @map("expiration_date") @db.Date
   stockinDate    DateTime  @default(now()) @map("stockin_date")
   remarks        String?
@@ -431,4 +432,3 @@ model DailyReconciliation {
   @@index([reconciliationDate], map: "daily_reconciliations_date_idx")
   @@map("daily_reconciliations")
 }
-
