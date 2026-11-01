@@ -1,26 +1,36 @@
-// src/config/db.js
 import pkg from 'pg';
-const { Pool } = pkg;
+const { Pool, types } = pkg;
 import dotenv from 'dotenv';
 dotenv.config({ quiet: true });
 
+// Type 1114 is TIMESTAMP without time zone.
+// Since the database session uses Asia/Manila timezone, timestamps are saved in Manila local time.
+// Appending +08:00 ensures JS Date correctly interprets the time without an extra 8-hour shift.
+types.setTypeParser(1114, (str) => (str ? new Date(str.replace(' ', 'T') + '+08:00') : null));
+
 let connectionString =
-  process.env.DIRECT_URL ||
   process.env.POSTGRES_URL_DATABASE_URL ||
   process.env.DATABASE_URL ||
   process.env.POSTGRES_URL;
 
 const isLocal =
-  !connectionString ||
-  connectionString.includes('localhost') ||
-  connectionString.includes('127.0.0.1');
+  connectionString &&
+  (connectionString.includes('localhost') || connectionString.includes('127.0.0.1'));
+
+// If hosted Postgres connection string uses legacy sslmode aliases (e.g. sslmode=require),
+// upgrade to sslmode=verify-full to satisfy pg-connection-string and eliminate stderr security warnings in Vercel logs.
+if (connectionString && !isLocal) {
+  connectionString = connectionString.replace(/([?&]sslmode=)(?:require|prefer|verify-ca)(?=&|$)/, '$1verify-full');
+}
 
 const pool = connectionString
   ? new Pool({
     connectionString:
-      !isLocal && connectionString.includes('.c-') && !connectionString.includes('-pooler')
-        ? (() => {
-            const hostMatch = connectionString.match(/@([^\/]+)/);
+      isLocal
+        ? connectionString
+        : !connectionString.includes('-pooler')
+          ? (() => {
+            const hostMatch = connectionString.match(/@([^/]+)/);
             if (hostMatch) {
               const host = hostMatch[1];
               const newHost = host.replace(/\.c-/, '-pooler.c-');
@@ -28,10 +38,10 @@ const pool = connectionString
             }
             return connectionString;
           })()
-        : connectionString,
-    ssl: isLocal ? false : { rejectUnauthorized: false },
+          : connectionString,
+    ssl: isLocal ? false : { rejectUnauthorized: true },
     options: '-c timezone=Asia/Manila',
-    max: 10,
+    max: 2,
     idleTimeoutMillis: 30_000,
     connectionTimeoutMillis: 15_000,
   })
@@ -42,7 +52,7 @@ const pool = connectionString
     port: process.env.DB_PORT,
     database: process.env.DB_NAME,
     options: '-c timezone=Asia/Manila',
-    max: 10,
+    max: 2,
     idleTimeoutMillis: 30_000,
     connectionTimeoutMillis: 15_000,
   });

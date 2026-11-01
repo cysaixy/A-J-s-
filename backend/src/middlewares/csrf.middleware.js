@@ -1,9 +1,14 @@
 // src/middlewares/csrf.middleware.js
-import cookieParser from 'cookie-parser';
 
 export function csrfMiddleware(req, res, next) {
   // Only apply CSRF protection to state-changing admin routes
   if (req.method === 'GET' || req.method === 'HEAD') {
+    return next();
+  }
+
+  // Exempt authentication endpoints from CSRF check (pre-session login & logout)
+  const path = req.originalUrl || req.path || '';
+  if (path.includes('/staff/login') || path.includes('/staff/logout')) {
     return next();
   }
 
