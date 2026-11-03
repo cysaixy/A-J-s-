@@ -1,9 +1,37 @@
-/* Shared behaviour for redesigned pages: mobile nav + footer year. Replaces global.js (no theme injection). */
-document.addEventListener('DOMContentLoaded',()=>{
-  const y=document.getElementById('year');if(y)y.textContent=new Date().getFullYear();
-  const t=document.getElementById('navToggle'),n=document.getElementById('siteNav');if(!t||!n)return;
-  const set=o=>{n.classList.toggle('open',o);t.classList.toggle('open',o);t.setAttribute('aria-expanded',o);document.body.style.overflow=o?'hidden':''};
-  t.addEventListener('click',e=>{e.stopPropagation();set(!n.classList.contains('open'))});
-  n.addEventListener('click',e=>{if(e.target.closest('a'))set(false)});
-  addEventListener('keydown',e=>{if(e.key==='Escape')set(false)});
+document.addEventListener('DOMContentLoaded', () => {
+  const year = document.getElementById('year');
+  if (year) year.textContent = new Date().getFullYear();
+
+  const toggle = document.getElementById('navToggle');
+  const nav = document.getElementById('siteNav');
+  if (!toggle || !nav) return;
+
+  function setOpen(open) {
+    nav.classList.toggle('open', open);
+    toggle.classList.toggle('open', open);
+    toggle.setAttribute('aria-expanded', String(open));
+    toggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+    document.body.style.overflow = open ? 'hidden' : '';
+  }
+
+  toggle.addEventListener('click', (event) => {
+    event.stopPropagation();
+    setOpen(!nav.classList.contains('open'));
+  });
+  nav.addEventListener('click', (event) => {
+    if (event.target.closest('a')) setOpen(false);
+  });
+  document.addEventListener('click', (event) => {
+    if (nav.classList.contains('open')
+      && !nav.contains(event.target)
+      && !toggle.contains(event.target)) {
+      setOpen(false);
+    }
+  });
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') setOpen(false);
+  });
+  window.addEventListener('resize', () => {
+    if (window.innerWidth > 1080) setOpen(false);
+  });
 });

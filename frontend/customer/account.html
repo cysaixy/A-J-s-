@@ -2,17 +2,35 @@
 <html lang="en"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sign in — A&J's Foodflix</title>
+<script src="customer-theme.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="foodflix.css">
+<link rel="stylesheet" href="customer-nav.css">
 </head><body class="auth">
 <header>
   <a href="index.html" class="logo-link"><img src="../pics&vids/the-yo's_logo.jpg" alt="A&J's Foodflix logo" class="logo-img"><span>A&J's Foodflix</span></a>
   <nav id="siteNav"><ul>
     <li><a href="about.html">About</a></li><li><a href="menu.html">Menu</a></li><li><a href="gallery.html">Gallery</a></li>
     <li><a href="order.html#feedback">Reviews</a></li><li><a href="reservations.html">Reserve</a></li><li><a href="my-orders.html">My Orders</a></li>
-    <li><a href="account.html" class="nav-account-btn active" id="navAccountLink" title="My Account"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></a></li>
-    <li id="navSignOutItem" style="display:none"><a href="#" id="navSignOutLink">Sign Out</a></li>
+    <li><button type="button" class="theme-toggle" id="themeToggle" aria-label="Switch to light theme" aria-pressed="false" title="Switch to light theme">
+      <svg class="theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"></path>
+      </svg>
+      <svg class="theme-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M20.9 13A9 9 0 0 1 11 3.1 9 9 0 1 0 20.9 13Z"></path>
+      </svg>
+    </button></li>
+    <li id="navAccountItem" class="nav-account-li">
+      <a href="account.html" class="nav-account-pill nav-account-signin" id="navAccountLink" title="Sign In / My Account" aria-label="Sign in or view your account">
+        <span class="nav-account-avatar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+          </svg>
+        </span>
+        <span class="nav-account-name">Sign In</span>
+      </a>
+    </li>
     <li><a href="order.html" class="nav-btn">Order Now</a></li>
   </ul></nav>
   <button class="nav-toggle" id="navToggle" type="button" aria-label="Toggle navigation menu" aria-expanded="false">
@@ -255,6 +273,7 @@
   <div class="perks"><span>Live tracking</span><span>Saved address</span><span>Fast reserve</span></div>
 </div>
 </div></section>
+<script type="module" src="authNav.js"></script>
 <script type="module">
   import { 
     auth, 

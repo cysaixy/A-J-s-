@@ -56,7 +56,9 @@
     if (!mobileMenu || !mobileToggle) return;
     const isOpen = open !== undefined ? open : !mobileMenu.classList.contains('open');
     mobileMenu.classList.toggle('open', isOpen);
+    mobileToggle.classList.toggle('open', isOpen);
     mobileToggle.setAttribute('aria-expanded', isOpen);
+    mobileToggle.setAttribute('aria-label', isOpen ? 'Close navigation menu' : 'Open navigation menu');
     document.body.style.overflow = isOpen ? 'hidden' : '';
 
     if (isOpen && typeof gsap !== 'undefined') {
@@ -77,6 +79,9 @@
 
   window.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') toggleMobileMenu(false);
+  });
+  window.addEventListener('resize', () => {
+    if (window.innerWidth > 1150) toggleMobileMenu(false);
   });
 
   /* --------------------------------------------------------------------------

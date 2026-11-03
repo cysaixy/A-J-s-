@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>A&J's Foodflix — Modern Milktea, Crispy Wings & Espresso</title>
   <meta name="description" content="A&J's Foodflix Flagship in Baggao, Cagayan. Artisanal milktea, specialty espresso, handcrafted wings, and comfort dining in an ultra-modern space.">
+  <script src="customer-theme.js"></script>
   
   <!-- Preconnect to Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,6 +14,7 @@
   
   <!-- Modern Black & White Design System -->
   <link rel="stylesheet" href="index.css?v=2">
+  <link rel="stylesheet" href="customer-nav.css">
 </head>
 <body>
 
@@ -51,17 +53,24 @@
 
       <!-- Action Cluster -->
       <div class="nav-action-cluster">
-        <!-- Account Icon Button (Synced via authNav.js) -->
-        <a href="account.html" class="icon-btn" id="navAccountLink" title="Account / Sign In" aria-label="My Account">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
-            <circle cx="12" cy="7" r="4"/>
+        <button type="button" class="theme-toggle" id="themeToggle" aria-label="Switch to light theme" aria-pressed="false" title="Switch to light theme">
+          <svg class="theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"></path>
           </svg>
-        </a>
+          <svg class="theme-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M20.9 13A9 9 0 0 1 11 3.1 9 9 0 1 0 20.9 13Z"></path>
+          </svg>
+        </button>
 
-        <!-- Sign Out Link (revealed by authNav.js when signed in) -->
-        <div id="navSignOutItem" style="display: none;">
-          <a href="#" id="navSignOutLink" class="btn-secondary" style="padding: 8px 16px; font-size: 0.82rem;">Sign Out</a>
+        <div class="nav-account-wrap" id="navAccountItem">
+          <a href="account.html" class="nav-account-pill nav-account-signin" id="navAccountLink" title="Sign In / My Account" aria-label="Sign in or view your account">
+            <span class="nav-account-avatar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+              </svg>
+            </span>
+            <span class="nav-account-name">Sign In</span>
+          </a>
         </div>
 
         <!-- Primary Order CTA Button -->
@@ -75,10 +84,13 @@
 
         <!-- Mobile Menu Toggle Button -->
         <button class="mobile-toggle" id="mobileNavToggle" type="button" aria-label="Toggle navigation menu" aria-expanded="false">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <svg class="nav-icon-menu" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
             <line x1="3" y1="12" x2="21" y2="12"></line>
             <line x1="3" y1="6" x2="21" y2="6"></line>
             <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+          <svg class="nav-icon-close" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>
           </svg>
         </button>
       </div>
