@@ -200,6 +200,43 @@ html[data-ajs-theme='light'] .site-header.scrolled {
   background: rgba(250, 250, 248, 0.98);
 }
 
+html[data-ajs-theme='light'] .brand-name,
+html[data-ajs-theme='light'] .nav-links-list a,
+html[data-ajs-theme='light'] .nav-links-list a:hover,
+html[data-ajs-theme='light'] .nav-links-list a.active,
+html[data-ajs-theme='light'] .theme-toggle,
+html[data-ajs-theme='light'] .nav-account-pill {
+  color: var(--pure-white);
+}
+
+html[data-ajs-theme='light'] .nav-links-list a {
+  color: rgba(17, 17, 17, 0.7);
+}
+
+html[data-ajs-theme='light'] .nav-links-list a:hover,
+html[data-ajs-theme='light'] .nav-links-list a.active {
+  color: #111111;
+  background: rgba(17, 17, 17, 0.08);
+}
+
+html[data-ajs-theme='light'] .theme-toggle,
+html[data-ajs-theme='light'] .nav-account-pill {
+  background: rgba(17, 17, 17, 0.04);
+  border-color: rgba(17, 17, 17, 0.12);
+  color: #111111;
+}
+
+html[data-ajs-theme='light'] .theme-toggle:hover,
+html[data-ajs-theme='light'] .nav-account-pill:hover {
+  background: rgba(17, 17, 17, 0.08);
+  border-color: rgba(17, 17, 17, 0.2);
+}
+
+html[data-ajs-theme='light'] .nav-account-avatar {
+  background: #111111;
+  color: #ffffff;
+}
+
 .header-inner {
   height: 100%;
   display: flex;
