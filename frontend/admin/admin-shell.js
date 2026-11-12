@@ -31,37 +31,37 @@ const NAV_SECTIONS = [
   {
     label: 'Overview',
     items: [
-      { key: 'dashboard', label: 'Dashboard', href: 'dashboard.html', icon: 'dashboard' },
+      { key: 'dashboard', label: 'Dashboard', href: 'dashboard', icon: 'dashboard' },
     ],
   },
   {
     label: 'Sales & Service',
     items: [
-      { key: 'pos', label: 'Point of Sale', href: 'pos.html', icon: 'pos' },
-      { key: 'sales', label: 'Sales Transactions', href: 'sales.html', icon: 'sales', badge: 'orders' },
-      { key: 'reservations', label: 'Reservations', href: 'reservations.html', icon: 'reservations' },
+      { key: 'pos', label: 'Point of Sale', href: 'pos', icon: 'pos' },
+      { key: 'sales', label: 'Sales Transactions', href: 'sales', icon: 'sales', badge: 'orders' },
+      { key: 'reservations', label: 'Reservations', href: 'reservations', icon: 'reservations' },
     ],
   },
   {
     label: 'Inventory',
     items: [
-      { key: 'inventory', label: 'Inventory', href: 'inventory.html', icon: 'inventory', perm: 'can_access_inventory', badge: 'inventory' },
-      { key: 'products', label: 'Products', href: 'products.html', icon: 'products' },
-      { key: 'purchases', label: 'Purchases', href: 'purchases.html', icon: 'purchases', perm: 'can_access_stock_in' },
+      { key: 'inventory', label: 'Inventory', href: 'inventory', icon: 'inventory', perm: 'can_access_inventory', badge: 'inventory' },
+      { key: 'products', label: 'Products', href: 'products', icon: 'products', adminOnly: true },
+      { key: 'purchases', label: 'Purchases', href: 'purchases', icon: 'purchases', perm: 'can_access_stock_in' },
     ],
   },
   {
     label: 'Finance',
     items: [
-      { key: 'cash-transactions', label: 'Cash Transactions', href: 'cash-transactions.html', icon: 'cashtx', perm: 'can_access_reports' },
-      { key: 'cash-accounts', label: 'Cash Accounts', href: 'cash-accounts.html', icon: 'cashacc', perm: 'can_access_reports' },
+      { key: 'cash-transactions', label: 'Cash Transactions', href: 'cash-transactions', icon: 'cashtx', perm: 'can_access_reports' },
+      { key: 'cash-accounts', label: 'Cash Accounts', href: 'cash-accounts', icon: 'cashacc', perm: 'can_access_reports' },
     ],
   },
   {
     label: 'Admin',
     items: [
-      { key: 'staff', label: 'Staff', href: 'staff.html', icon: 'staff', adminOnly: true },
-      { key: 'settings', label: 'Settings', href: 'settings.html', icon: 'settings' },
+      { key: 'staff', label: 'Staff', href: 'staff', icon: 'staff', adminOnly: true },
+      { key: 'settings', label: 'Settings', href: 'settings', icon: 'settings' },
     ],
   },
 ];
@@ -79,7 +79,7 @@ function hasAccess(item, staff) {
   if (staff.role === 'Admin') return true;
   if (item.adminOnly) return false;
   if (item.perm) return !!staff[item.perm];
-  return true; // default access - Dashboard, POS, Sales, Reservations, Products (read), Settings
+  return true; // default access - Dashboard, POS, Sales, Reservations, Settings
 }
 
 function navLinkHTML(item, active, staff) {
@@ -93,7 +93,7 @@ function navLinkHTML(item, active, staff) {
       ${badge}<span class="lock-icon">${iconSvg('lock')}</span>
     </span>`;
   }
-  return `<a class="admin-nav-link${item.key === active ? ' active' : ''}" href="${item.href}" title="${item.label}">
+  return `<a class="admin-nav-link${item.key === active ? ' active' : ''}" href="${item.href}" title="${item.label}" data-admin-nav-key="${item.key}">
     <span class="icon">${iconSvg(item.icon)}</span><span class="nav-text">${item.label}</span>${badge}
   </a>`;
 }
@@ -271,7 +271,7 @@ function showAdminToast(notification) {
       <strong>${escapeNotificationHtml(notification.title)}</strong>
       <span>${escapeNotificationHtml(notification.message)}</span>
     </div>
-    <button type="button" aria-label="Dismiss notification">×</button>
+    <button type="button" aria-label="Dismiss notification">&times;</button>
   `;
   stack.appendChild(toast);
   const dismiss = () => {
@@ -308,13 +308,13 @@ function initOnlineOrderNotifications(staff) {
   const renderPanel = () => {
     const history = getActiveNotificationHistory();
     panel.innerHTML = `
-      <div class="online-order-panel-head"><div><strong>Notifications</strong><span>${activeAlertCount} active ${activeAlertCount === 1 ? 'alert' : 'alerts'}</span></div><button type="button" id="closeOnlineOrderPanel" aria-label="Close notifications">×</button></div>
+      <div class="online-order-panel-head"><div><strong>Notifications</strong><span>${activeAlertCount} active ${activeAlertCount === 1 ? 'alert' : 'alerts'}</span></div><button type="button" id="closeOnlineOrderPanel" aria-label="Close notifications"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div>
       <div class="online-order-panel-list">${history.length ? history.map(item => `
-        <a href="${escapeNotificationHtml(item.href || 'dashboard.html')}" class="online-order-panel-item">
+        <a href="${escapeNotificationHtml(item.href || 'dashboard')}" class="online-order-panel-item">
           <span class="online-order-dot notification-${escapeNotificationHtml(item.type || 'order')}"></span>
           <div><strong>${escapeNotificationHtml(item.title)}</strong><span>${escapeNotificationHtml(item.message)}</span><time>${escapeNotificationHtml(notificationTime(item.createdAt))}</time></div>
         </a>`).join('') : '<div class="online-order-panel-empty">No notifications yet.</div>'}</div>
-      <a class="online-order-panel-action" href="dashboard.html">Open dashboard →</a>`;
+      <a class="online-order-panel-action" href="dashboard">Open dashboard &rarr;</a>`;
     panel.querySelector('#closeOnlineOrderPanel')?.addEventListener('click', () => panel.classList.remove('open'));
   };
 
@@ -361,8 +361,8 @@ function initOnlineOrderNotifications(staff) {
             id: `order-${order.id}-${order.status}`,
             type: 'order',
             title: order.source === 'online' ? 'New online order' : 'New order',
-            message: `Order #${order.id} · ${order.customer_name || 'Customer'} · ₱${Number(order.total_amount || 0).toLocaleString('en-PH')}`,
-            href: 'sales.html',
+            message: `Order #${order.id} \u00b7 ${order.customer_name || 'Customer'} \u00b7 \u20b1${Number(order.total_amount || 0).toLocaleString('en-PH')}`,
+            href: 'sales',
           };
           if (addNotification(notification) && hadOrderSnapshot) notifications.push(notification);
           if (hadOrderSnapshot) changedIds.push(String(order.id));
@@ -371,8 +371,8 @@ function initOnlineOrderNotifications(staff) {
             id: `order-${order.id}-${order.status}`,
             type: 'status',
             title: `Order #${order.id} updated`,
-            message: `Status changed to ${String(order.status).replace(/_/g, ' ')}${order.handler_name ? ` · ${order.handler_name}` : ''}`,
-            href: 'sales.html',
+            message: `Status changed to ${String(order.status).replace(/_/g, ' ')}${order.handler_name ? ` \u00b7 ${order.handler_name}` : ''}`,
+            href: 'sales',
           };
           if (addNotification(notification)) notifications.push(notification);
           changedIds.push(String(order.id));
@@ -397,7 +397,7 @@ function initOnlineOrderNotifications(staff) {
               type: 'inventory',
               title: 'Inventory needs attention',
               message: `${inventoryAlerts} ${inventoryAlerts === 1 ? 'item is' : 'items are'} at or below the alert threshold`,
-              href: 'inventory.html',
+              href: 'inventory',
             };
             if (addNotification(notification)) notifications.push(notification);
           }
@@ -440,7 +440,7 @@ export function renderAdminShell({ active, title }) {
   const staffRaw = localStorage.getItem('staffInfo');
 
   if (!staffRaw) {
-    window.location.href = 'login.html';
+    window.location.href = 'login';
     return null;
   }
 
@@ -448,11 +448,19 @@ export function renderAdminShell({ active, title }) {
   try {
     staff = JSON.parse(staffRaw);
   } catch {
-    window.location.href = 'login.html';
+    window.location.href = 'login';
+    return null;
+  }
+
+  const activeItem = NAV_ITEMS.find(i => i.key === active);
+  if (activeItem && !hasAccess(activeItem, staff)) {
+    alert("You don't have permission to access this page. Ask an Admin to grant it.");
+    window.location.href = 'dashboard';
     return null;
   }
 
   const root = document.getElementById('adminShell');
+
   const initial = (staff.name || staff.email || '?').charAt(0).toUpperCase();
 
   root.innerHTML = `
@@ -460,7 +468,7 @@ export function renderAdminShell({ active, title }) {
       <div class="admin-sidebar-backdrop" id="adminSidebarBackdrop"></div>
       <aside class="admin-sidebar">
         <div class="admin-logo">
-          <span class="mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2.5 13 6.5"/><path d="M5 8c0-1.7 3.1-3 7-3s7 1.3 7 3"/><path d="M4.5 8h15"/><path d="M6 8l1.3 11.6A1.6 1.6 0 0 0 8.9 21h6.2a1.6 1.6 0 0 0 1.6-1.4L18 8"/><circle cx="10" cy="17" r=".9" fill="currentColor" stroke="none"/><circle cx="13.5" cy="17.4" r=".9" fill="currentColor" stroke="none"/><circle cx="12" cy="14.3" r=".9" fill="currentColor" stroke="none"/></svg></span>
+          <img src="/pics&vids/the-yo's_logo.jpg" alt="A&J's Foodflix logo" class="mark">
           <span class="brand-label"><b>A&amp;J's</b><small>Foodflix</small></span>
           <button class="sidebar-toggle" id="adminSidebarToggle" type="button" aria-label="Minimize sidebar" title="Minimize sidebar">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
@@ -519,7 +527,7 @@ document.getElementById('adminLogoutBtn').addEventListener('click', async () => 
       await fetch('/api/admin/staff/logout', { method: 'POST', credentials: 'include' });
     } catch {}
     clearStaffSession();
-    window.location.href = 'login.html';
+    window.location.href = 'login';
   });
 
   const shell = root.querySelector('.admin-shell');
@@ -563,7 +571,20 @@ document.getElementById('adminLogoutBtn').addEventListener('click', async () => 
   // Tapping a nav link (or trying to, if disabled) should close the drawer
   // instead of leaving it open behind the newly-loaded page/alert.
   shell.querySelector('.admin-sidebar').addEventListener('click', (e) => {
-    if (e.target.closest('.admin-nav-link')) closeMobileNav();
+    const link = e.target.closest('a.admin-nav-link');
+    if (!link) return;
+    closeMobileNav();
+    // Pages opened over the POS run in its overlay frame; "Point of Sale"
+    // closes the overlay instead of reloading POS (which would drop the
+    // Bluetooth printer connection).
+    if (
+      link.dataset.adminNavKey === 'pos' &&
+      window.parent !== window &&
+      e.button === 0 && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey
+    ) {
+      e.preventDefault();
+      window.parent.postMessage({ type: 'ajs:return-to-pos' }, window.location.origin);
+    }
   });
 
 initOnlineOrderNotifications(staff);
@@ -571,12 +592,5 @@ initOnlineOrderNotifications(staff);
   // A signed-in staff member who isn't allowed on this page (e.g. they
   // bookmarked it before permissions changed) gets bounced to Home rather
   // than seeing a broken/empty page.
-  const activeItem = NAV_ITEMS.find(i => i.key === active);
-  if (activeItem && !hasAccess(activeItem, staff)) {
-    alert("You don't have permission to access this page. Ask an Admin to grant it.");
-    window.location.href = 'dashboard.html';
-    return null;
-  }
-
   return { staff };
 }

@@ -13,20 +13,20 @@
 
   <style>
     /* ==========================================================================
-       STAFF TERMINAL — PURE BLACK & WHITE DESIGN SYSTEM
+       STAFF TERMINAL — A&J ESPRESSO / EMBER DESIGN SYSTEM
        ========================================================================== */
     :root {
-      --void: #050505;
-      --obsidian: #0b0b0e;
-      --carbon: #121216;
-      --surface: #18181f;
-      --surface-raised: #202028;
+      --void: #120d0a;
+      --obsidian: #19120e;
+      --carbon: #1e1713;
+      --surface: #241b16;
+      --surface-raised: #2c221c;
       
-      --pure-white: #ffffff;
-      --titanium: #f4f4f7;
-      --platinum: #e4e4eb;
-      --silver: #9e9ea8;
-      --charcoal: #484852;
+      --pure-white: #fbf3ea;
+      --titanium: #f6ede3;
+      --platinum: #e6d8c9;
+      --silver: #ab9b8c;
+      --charcoal: #5e4f45;
       --border-faint: rgba(255, 255, 255, 0.08);
       --border-mid: rgba(255, 255, 255, 0.16);
       --border-bold: rgba(255, 255, 255, 0.3);
@@ -41,6 +41,8 @@
       --radius-pill: 9999px;
       
       --transition-fast: 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      --ember: #e0571d;
+      --ember-strong: #ff7a3d;
     }
 
     *, *::before, *::after {
@@ -448,7 +450,7 @@
       justify-content: center;
       gap: 10px;
       margin-top: 26px;
-      transition: all var(--transition-fast);
+      transition: background-color var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast);
       box-shadow: 0 4px 20px rgba(255, 255, 255, 0.15);
     }
 
@@ -517,6 +519,25 @@
         padding: 18px 24px;
       }
     }
+    /* ---- A&J brand layer: ember accents on the espresso terminal ---- */
+    .ambient-glow { background: radial-gradient(circle, rgba(224, 87, 29, 0.16) 0%, transparent 65%) !important; }
+    .brand-avatar img { filter: none !important; }
+    .board-headline span { -webkit-text-stroke-color: var(--ember-strong) !important; }
+    .badge-status .status-dot { background: var(--ember-strong) !important; box-shadow: 0 0 0 4px rgba(255, 122, 61, 0.2) !important; }
+    .btn-submit-login {
+      background: var(--ember) !important;
+      border-color: var(--ember) !important;
+      color: #fff !important;
+      box-shadow: 0 14px 34px -14px rgba(224, 87, 29, 0.9) !important;
+    }
+    .btn-submit-login:hover:not(:disabled) {
+      background: var(--ember-strong) !important;
+      border-color: var(--ember-strong) !important;
+      color: #1a0e07 !important;
+      box-shadow: 0 18px 40px -14px rgba(255, 122, 61, 0.9) !important;
+    }
+    input:focus { border-color: var(--ember-strong) !important; box-shadow: 0 0 0 3px rgba(255, 122, 61, 0.18) !important; }
+    ::selection { background: var(--ember); color: #fff; }
   </style>
 </head>
 <body>
@@ -683,7 +704,9 @@
         .from('.telemetry-card', { y: 20, opacity: 0, duration: 0.7 }, '-=0.5')
         .from('#loginCard', { scale: 0.94, opacity: 0, duration: 1.1, ease: 'power3.out' }, '-=0.8')
         .from('.form-group', { y: 15, opacity: 0, duration: 0.6, stagger: 0.1 }, '-=0.5')
-        .from('#loginBtn', { y: 15, opacity: 0, duration: 0.6 }, '-=0.3');
+        // fromTo with explicit end values: the button's CSS transition used to
+        // make GSAP record opacity 0 as the end state, leaving it invisible.
+        .fromTo('#loginBtn', { y: 15, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, clearProps: 'transform,opacity' }, '-=0.3');
     }
 
     // Check for expired session query param
@@ -721,9 +744,17 @@
         const email = document.getElementById('staffEmail').value.trim();
         const password = document.getElementById('staffPassword').value;
 
+        // Bootstrap the double-submit CSRF cookie before the first write so
+        // every later admin request carries a matching token.
+        const csrfRes = await fetch('/api/admin/staff/csrf-token', { credentials: 'include' });
+        const csrfData = await csrfRes.json().catch(() => ({}));
+        if (!csrfRes.ok || !csrfData.csrfToken) {
+          throw new Error(csrfData.error || 'Unable to initialize a secure session. Please refresh and try again.');
+        }
+
         const res = await fetch('/api/admin/staff/login', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrfData.csrfToken },
           credentials: 'include',
           body: JSON.stringify({ email, password }),
         });
@@ -754,13 +785,15 @@
           localStorage.setItem('__admin_csrf_token', data.csrfToken);
         }
 
-        const redirect = params.get('redirect') || 'dashboard.html';
+        const redirect = params.get('redirect') || 'dashboard';
         setTimeout(() => {
           window.location.href = redirect;
         }, 600);
 
       } catch (err) {
-        statusEl.textContent = 'Connection timeout. Check network link and retry.';
+        statusEl.textContent = (err && err.message && !/fetch|network/i.test(err.message))
+          ? err.message
+          : 'Connection timeout. Check network link and retry.';
         statusEl.className = 'login-status-box error';
 
         if (typeof gsap !== 'undefined') {

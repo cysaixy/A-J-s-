@@ -44,6 +44,25 @@ describe('Critical Bug Fixes - API & Code Verification', () => {
       expect(res.status).toBe(401);
       expect(res.body.error).toContain('Unauthorized');
     });
+
+    it('should issue a CSRF token for the login bootstrap', async () => {
+      const res = await request(app).get('/api/admin/staff/csrf-token');
+      expect(res.status).toBe(200);
+      expect(res.body.csrfToken).toMatch(/^[a-f0-9]{64}$/);
+    });
+  });
+
+  describe('Admin order status updates', () => {
+    it('should route PATCH /api/admin/sales/orders/:id/status through staff authentication', async () => {
+      const res = await request(app)
+        .patch('/api/admin/sales/orders/999/status')
+        .set('Cookie', 'csrf_token=test-csrf-token')
+        .set('X-CSRF-Token', 'test-csrf-token')
+        .send({ status: 'confirmed' });
+
+      expect(res.status).toBe(401);
+      expect(res.body.error).toContain('Unauthorized');
+    });
   });
 
   describe('Rate Limiting with Redis Fallback', () => {

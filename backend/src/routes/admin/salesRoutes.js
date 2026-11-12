@@ -34,6 +34,8 @@ salesRouter.patch('/pos/orders/:id/status', updateOrderStatus);
 salesRouter.get('/orders', listOrders);
 salesRouter.get('/live-state', liveStateLimiter, liveOrderState);
 salesRouter.get('/orders/:id', getOrder);
+// Live Orders rail on the dashboard advances/cancels online orders.
+salesRouter.patch('/orders/:id/status', updateOrderStatus);
 // Assigning/editing the delivery fee is order management, same default
 // Cashier access as viewing and confirming orders above — not gated
 // behind can_access_reports.

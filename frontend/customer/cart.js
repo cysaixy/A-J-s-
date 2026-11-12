@@ -241,6 +241,10 @@
     badgeEl.style.display = c > 0 ? 'flex' : 'none';
   }
 
+  function escapeHtml(value) {
+    return String(value ?? '').replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+  }
+
   function renderDrawerContents() {
     if (!panelEl) return;
     const items = readCart();
@@ -253,14 +257,14 @@
       linesEl.innerHTML = items.map(i => `
         <div class="qc-line">
           <div class="qc-line-info">
-            <span class="qc-line-name">${i.name}</span>
+            <span class="qc-line-name">${escapeHtml(i.name)}</span>
             <span class="qc-line-price">${i.source === 'tray' ? `Saved order line · ₱${i.total}` : `₱${i.price} &times; ${i.qty}`}</span>
           </div>
           <div class="qc-line-actions">
-            <button type="button" data-id="${i.id}" data-source="${i.source}" data-d="-1" class="qc-qty-btn">&minus;</button>
+            <button type="button" data-id="${escapeHtml(i.id)}" data-source="${i.source}" data-d="-1" class="qc-qty-btn">&minus;</button>
             <span class="qc-qty">${i.qty}</span>
-            <button type="button" data-id="${i.id}" data-source="${i.source}" data-d="1" class="qc-qty-btn">+</button>
-            <button type="button" data-id="${i.id}" data-source="${i.source}" class="qc-remove-btn" aria-label="Remove">&times;</button>
+            <button type="button" data-id="${escapeHtml(i.id)}" data-source="${i.source}" data-d="1" class="qc-qty-btn">+</button>
+            <button type="button" data-id="${escapeHtml(i.id)}" data-source="${i.source}" class="qc-remove-btn" aria-label="Remove">&times;</button>
           </div>
         </div>
       `).join('');

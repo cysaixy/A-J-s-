@@ -2,7 +2,7 @@
 // Mounted last in app.js so any next(err) call from a controller lands here
 // instead of crashing the server or leaking a stack trace to the client.
 
-function errorHandler(err, req, res, next) {
+function errorHandler(err, req, res, _next) {
   console.error(err);
 
   // Postgres NOT NULL constraint violation — surface as clean 400
@@ -28,6 +28,16 @@ function errorHandler(err, req, res, next) {
     return res.status(400).json({ error: 'Invalid value for one of the fields (violates a database constraint).' });
   }
 
+  // Postgres invalid syntax for type integer/numeric (e.g. invalid ID format in parameters)
+  if (err.code === '22P02') {
+    return res.status(400).json({ error: 'Invalid ID or numerical parameter format.' });
+  }
+
+  // Postgres numeric value out of range
+  if (err.code === '22003') {
+    return res.status(400).json({ error: 'Numeric value out of allowed range.' });
+  }
+
   // Postgres connection timeout or terminated connection — surface as clean 503
   if (
     err.code === '08006' ||
@@ -42,11 +52,15 @@ function errorHandler(err, req, res, next) {
     return res.status(503).json({ error: 'Database service is temporarily unavailable. Please try again in a few seconds.' });
   }
 
+  // For unexpected errors in production, always serve a generic message regardless
+  // of status code, so internal details (table names, column names, etc.) don't leak.
+  // Errors thrown with err.isOperational = true are considered safe to expose.
   const status = err.status || 500;
+  const isProduction = process.env.NODE_ENV === 'production';
   const message =
-    process.env.NODE_ENV === 'production' && status === 500
-      ? 'Something went wrong on our end.'
-      : err.message;
+    !isProduction || err.isOperational
+      ? err.message
+      : 'An unexpected error occurred.';
 
   res.status(status).json({ error: message || 'An unexpected error occurred.' });
 }

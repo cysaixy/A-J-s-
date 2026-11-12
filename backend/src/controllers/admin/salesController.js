@@ -2,6 +2,7 @@
 import pool from '../../config/db.js';
 import { restoreOrderInventory } from '../../utils/inventoryRestore.js';
 import { postOrderPayment, reverseCashOrderSale } from '../../services/cashReconciliationService.js';
+import { parseCustomItemsFromNotes } from '../../utils/customItems.js';
 
 const VALID_ORDER_TYPES = ['dine_in', 'pickup', 'delivery'];
 const VALID_PAYMENT_METHODS = ['cash', 'card', 'gcash', 'bank_transfer', 'other'];
@@ -595,30 +596,22 @@ export async function getOrder(req, res, next) {
     // Parse custom advance/catering items from order notes or reservation notes
     let customItems = [];
     const notesToParse = order.notes || order.reservation_notes || '';
-    if (notesToParse.includes('---CUSTOM_ITEMS_JSON---')) {
-      const marker = '---CUSTOM_ITEMS_JSON---';
-      const raw = notesToParse.slice(notesToParse.indexOf(marker) + marker.length).trim();
-      const parsed = JSON.parse(raw);
-      if (!Array.isArray(parsed)) {
-        throw new TypeError('Stored reservation custom items must be an array.');
-      }
-      customItems = parsed.map((ci) => {
-        const qty = Number(ci.quantity || ci.qty || 1);
-        const price = round2(ci.price || 0);
-        const cost = round2(ci.cost || 0);
-        return {
-          name: ci.name || ci.product_name || 'Custom Item',
-          product_name: ci.name || ci.product_name || 'Custom Item',
-          quantity: qty,
-          price: price,
-          cost: cost,
-          subtotal: round2(qty * price),
-          is_custom: true,
-          notes: ci.notes || null,
-          add_ons: [],
-        };
-      });
-    }
+    customItems = parseCustomItemsFromNotes(notesToParse, 'salesController').map((ci) => {
+      const qty = Number(ci.quantity || ci.qty || 1);
+      const price = round2(ci.price || 0);
+      const cost = round2(ci.cost || 0);
+      return {
+        name: ci.name || ci.product_name || 'Custom Item',
+        product_name: ci.name || ci.product_name || 'Custom Item',
+        quantity: qty,
+        price: price,
+        cost: cost,
+        subtotal: round2(qty * price),
+        is_custom: true,
+        notes: ci.notes || null,
+        add_ons: [],
+      };
+    });
 
     let { rows: payments } = await pool.query(
       `SELECT id, payment_method, amount, status, datetime_paid, reference_number
@@ -671,8 +664,15 @@ export async function updateOrderStatus(req, res, next) {
 
     const allowedPrevious = ALLOWED_PREVIOUS_STATUSES[status] || [];
     const assignsHandler = ['confirmed', 'preparing', 'ready', 'completed'].includes(status);
-    const { rows } = await pool.query(
-      `UPDATE orders
+
+    // Cancelling must flip the status, restore stock and reverse the drawer
+    // entry as one unit; otherwise a failed restore leaves a cancelled order
+    // whose ingredients never came back.
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+      const { rows } = await client.query(
+        `UPDATE orders
        SET status = $1,
            status_updated_at = NOW(),
            handled_by_staff_id = CASE
@@ -682,37 +682,35 @@ export async function updateOrderStatus(req, res, next) {
        WHERE id = $4
          AND status = ANY($5::varchar[])
        RETURNING id, status, handled_by_staff_id`,
-      [status, req.staff.id, assignsHandler, req.params.id, allowedPrevious]
-    );
-    if (!rows[0]) {
-      const current = await pool.query('SELECT status FROM orders WHERE id = $1', [req.params.id]);
-      if (!current.rows[0]) return res.status(404).json({ error: 'Order not found.' });
-      return res.status(409).json({
-        error: `Order is already ${current.rows[0].status}. Refresh before applying another action.`,
-        current_status: current.rows[0].status,
-      });
-    }
+        [status, req.staff.id, assignsHandler, req.params.id, allowedPrevious]
+      );
+      if (!rows[0]) {
+        await client.query('ROLLBACK');
+        const current = await pool.query('SELECT status FROM orders WHERE id = $1', [req.params.id]);
+        if (!current.rows[0]) return res.status(404).json({ error: 'Order not found.' });
+        return res.status(409).json({
+          error: `Order is already ${current.rows[0].status}. Refresh before applying another action.`,
+          current_status: current.rows[0].status,
+        });
+      }
 
-    if (status === 'cancelled') {
-      const client = await pool.connect();
-      try {
-        await client.query('BEGIN');
+      if (status === 'cancelled') {
         await restoreOrderInventory(client, req.params.id, req.staff.id);
         // Reverse any cash payment posted to the drawer for this order
         await reverseCashOrderSale(client, {
           orderId: Number(req.params.id),
           staffId: req.staff.id,
         });
-        await client.query('COMMIT');
-      } catch (err) {
-        await client.query('ROLLBACK');
-        return next(err);
-      } finally {
-        client.release();
       }
-    }
 
-    res.json({ order: rows[0] });
+      await client.query('COMMIT');
+      res.json({ order: rows[0] });
+    } catch (err) {
+      await client.query('ROLLBACK').catch(() => {});
+      throw err;
+    } finally {
+      client.release();
+    }
   } catch (err) {
     next(err);
   }

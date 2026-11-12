@@ -1,12 +1,12 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
-<head>
+<head><base href="/admin/">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Inventory — A&J's Foodflix Admin</title>
 <meta name="description" content="Manage A&J's Foodflix inventory — ingredients, raw materials, packaging, and supplies.">
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="admin-shell.css?v=7">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&family=JetBrains+Mono:wght@500;700&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="admin-shell.css?v=9">
 <style>
 /* ================================================================
    INVENTORY PAGE — Scoped styles (.inv-* namespace)
@@ -43,45 +43,33 @@
 .inv-stat-card {
   --accent: var(--brass);
   --accent-dark: var(--brass-dark);
-  background: #fff; border: 1px solid var(--line); border-radius: 14px;
-  padding: 20px 22px 20px 24px; display: flex; flex-direction: column; gap: 6px;
-  position: relative; overflow: hidden;
-  box-shadow: var(--shadow-sm);
-  transition: box-shadow var(--transition-base), transform var(--transition-fast), border-color var(--transition-base);
+  background: #fff;
+  border: 1px solid var(--line); border-radius: 10px;
+  padding: 18px 20px; display: grid; grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto 1fr; align-items: end; column-gap: 12px; row-gap: 12px;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
 }
 .inv-summary-row .inv-stat-card:nth-child(3) { --accent: var(--ink-muted); --accent-dark: var(--ink); }
-.inv-stat-card::before {
-  content: '';
-  position: absolute; top: 0; left: 0; bottom: 0; width: 4px;
-  background: linear-gradient(180deg, var(--accent) 0%, var(--accent-dark) 100%);
-  transition: width var(--transition-fast);
-}
-.inv-stat-card::after {
-  content: '';
-  position: absolute; top: -34px; right: -34px; width: 110px; height: 110px;
-  border-radius: 50%; background: var(--accent); opacity: 0.07; pointer-events: none;
-  transition: opacity var(--transition-base), transform var(--transition-base);
-}
-.inv-stat-card:hover { box-shadow: var(--shadow-md); transform: translateY(-3px); border-color: var(--line-strong); }
-.inv-stat-card:hover::before { width: 6px; }
-.inv-stat-card:hover::after { opacity: 0.13; transform: scale(1.12); }
+.inv-stat-card:hover { background: #fbfaf7; border-color: var(--line-strong); }
 .inv-stat-card .isc-label {
-  position: relative; z-index: 1;
-  display: flex; align-items: center; gap: 7px;
+  grid-column: 1 / -1;
+  padding-bottom: 9px;
+  border-bottom: 1px solid var(--line);
   font-family: 'DM Sans', sans-serif; font-size: 0.63rem; font-weight: 700; text-transform: uppercase;
   letter-spacing: 0.08em; color: var(--ink-muted);
 }
-.inv-stat-card .isc-label::before {
-  content: ''; width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; background: var(--accent);
-}
 .inv-stat-card .isc-value {
-  position: relative; z-index: 1;
-  font-family: 'Bricolage Grotesque', sans-serif; font-weight: 900; font-size: 2rem;
+  font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 2rem;
   line-height: 1; color: var(--ink); letter-spacing: -0.03em; font-variant-numeric: tabular-nums;
 }
-.inv-stat-card .isc-value.gold { color: var(--brass-dark); }
+.inv-stat-card .isc-value.gold { color: var(--ink); }
 .inv-stat-card .isc-value.sm { font-size: 1.08rem; font-weight: 700; font-family: 'DM Sans', sans-serif; color: var(--ink); }
-.inv-stat-card .isc-sub { position: relative; z-index: 1; font-size: 0.76rem; color: var(--ink-muted); margin-top: 2px; }
+.inv-stat-card .isc-sub { justify-self: end; text-align: right; font-size: 0.72rem; color: var(--ink-muted); }
+.inv-stat-card-primary { background: #1b1410; border-color: #1b1410; }
+.inv-stat-card-primary:hover { background: #1b1410; border-color: #393631; }
+.inv-stat-card-primary .isc-label { color: rgba(255,255,255,0.68); border-color: rgba(255,255,255,0.16); }
+.inv-stat-card-primary .isc-value, .inv-stat-card-primary .isc-value.gold { color: #78d6a5; }
+.inv-stat-card-primary .isc-sub { color: rgba(255,255,255,0.68); }
 
 /* ---- Status strip ---- */
 .inv-status-strip {
@@ -99,9 +87,18 @@
   font-size: 0.82rem; font-weight: 600; color: var(--ink);
   padding: 7px 14px 7px 12px; border-radius: 20px;
   background: var(--stone); border: 1px solid var(--line);
-  transition: all var(--transition-fast); cursor: default;
+  transition: all var(--transition-fast); cursor: pointer;
+  /* reset button defaults */
+  font-family: inherit; line-height: 1;
+  appearance: none; -webkit-appearance: none;
 }
 .inv-status-item:hover { border-color: var(--line-strong); background: var(--stone-hover); transform: translateY(-1px); box-shadow: var(--shadow-xs); }
+/* active (filtered) states — each dot color has its own tint */
+.inv-status-item.is-active[data-status="in_stock"]      { background: rgba(34,197,94,.12);  border-color: var(--success); color: var(--success); }
+.inv-status-item.is-active[data-status="below_reorder"] { background: rgba(44,95,176,.12);  border-color: #2c5fb0;        color: #2c5fb0; }
+.inv-status-item.is-active[data-status="low_stock"]     { background: rgba(234,179,8,.13);  border-color: var(--warning); color: var(--warning); }
+.inv-status-item.is-active[data-status="out_of_stock"]  { background: rgba(239,68,68,.12);  border-color: var(--danger);  color: var(--danger); }
+.inv-status-item.is-active { transform: translateY(-1px); box-shadow: var(--shadow-xs); }
 .inv-status-dot {
   width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
 }
@@ -109,7 +106,7 @@
 .dot-yellow { background: var(--warning); }
 .dot-blue { background: #2c5fb0; }
 .dot-red { background: var(--danger); }
-.inv-status-item .count { font-family: 'Bricolage Grotesque', sans-serif; font-weight: 900; }
+.inv-status-item .count { font-family: 'Outfit', sans-serif; font-weight: 900; }
 
 /* ---- Sub-tabs (Stock / Cost / Activities / Bulk Add) ---- */
 .inv-sub-tabs {
@@ -187,7 +184,7 @@
   vertical-align: middle; color: var(--ink);
 }
 .inv-table tbody tr:last-child td { border-bottom: none; }
-.inv-table tbody tr:hover td { background: rgba(0,0,0,0.04); }
+.inv-table tbody tr:hover td { background: rgba(207,74,20,0.04); }
 .inv-table .item-name { font-weight: 600; }
 .inv-table .item-cat { font-size: 0.77rem; opacity: 0.5; margin-top: 2px; }
 .inv-table .stock-qty {
@@ -220,7 +217,7 @@
   background: #fff; cursor: pointer; display: flex; align-items: center;
   justify-content: center; transition: all .15s ease; flex-shrink: 0;
 }
-.inv-action-btn:hover { border-color: var(--brass); background: rgba(0,0,0,0.07); }
+.inv-action-btn:hover { border-color: var(--brass); background: rgba(207,74,20,0.07); }
 .inv-action-btn svg { width: 15px; height: 15px; fill: none; stroke: var(--ink); stroke-width: 2; stroke-linecap: round; }
 .inv-action-dropdown {
   position: absolute; right: 0; top: 36px; z-index: 40;
@@ -251,7 +248,7 @@
   margin-bottom: 4px;
 }
 .inv-empty-icon svg { width: 30px; height: 30px; fill: none; stroke: var(--brass); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
-.inv-empty h3 { margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-size: 1.05rem; }
+.inv-empty h3 { margin: 0; font-family: 'Outfit', sans-serif; font-size: 1.05rem; }
 .inv-empty p { margin: 0; font-size: 0.84rem; opacity: 0.55; max-width: 280px; line-height: 1.5; }
 
 /* ---- Modals ---- */
@@ -272,7 +269,7 @@
   margin-bottom: 22px;
 }
 .inv-modal-head h2 {
-  margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-size: 1.1rem;
+  margin: 0; font-family: 'Outfit', sans-serif; font-size: 1.1rem;
   text-transform: uppercase; letter-spacing: 0.02em;
 }
 .inv-modal-head .close-btn {
@@ -318,7 +315,7 @@
   margin-bottom: 20px; flex-wrap: wrap; gap: 12px;
 }
 .inv-header-row h2 {
-  font-family: 'Bricolage Grotesque', sans-serif; font-size: 1.4rem; font-weight: 900;
+  font-family: 'Outfit', sans-serif; font-size: 1.4rem; font-weight: 900;
   text-transform: uppercase; letter-spacing: 0.02em; margin: 0;
 }
 .inv-header-actions { display: flex; align-items: center; gap: 10px; }
@@ -359,6 +356,7 @@
 }
 @media (max-width: 640px) {
   .inv-summary-row { grid-template-columns: 1fr; }
+  .inv-stat-card { min-height: 112px; }
   .inv-tabs { overflow-x: auto; }
   .inv-form-grid { grid-template-columns: 1fr; }
   .inv-header-row { flex-direction: column; align-items: flex-start; }
@@ -399,6 +397,107 @@ const INVENTORY_CATEGORIES = [
 const PREDEFINED_UNITS = [
   "pcs", "kg", "g", "L", "ml", "pack", "box", "bottle", "can", "sachet", "tray", "dozen"
 ];
+
+/* Helper functions for dynamic categories and incident types */
+let customCategories = (() => {
+  try {
+    const s = JSON.parse(localStorage.getItem('custom_inventory_categories') || '[]');
+    return Array.isArray(s) ? s : [];
+  } catch { return []; }
+})();
+
+function getAllCategories() {
+  const set = new Set([...INVENTORY_CATEGORIES, ...customCategories]);
+  (allItems || []).forEach(i => {
+    if (i.category && i.category.trim()) set.add(i.category.trim());
+  });
+  return Array.from(set);
+}
+
+function addCustomCategory(cat) {
+  if (!cat || !cat.trim()) return;
+  const trimmed = cat.trim();
+  if (!customCategories.includes(trimmed)) {
+    customCategories.push(trimmed);
+    try {
+      localStorage.setItem('custom_inventory_categories', JSON.stringify(customCategories));
+    } catch {}
+  }
+  populateCategoryDropdowns(trimmed);
+}
+
+function populateCategoryDropdowns(selectedVal = '') {
+  const cats = getAllCategories();
+
+  const filterSel = document.getElementById('catFilter');
+  if (filterSel) {
+    const prev = filterSel.value;
+    filterSel.innerHTML = `<option value="">All Categories</option>` +
+      cats.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+    if (prev && cats.includes(prev)) filterSel.value = prev;
+  }
+
+  const itemSel = document.getElementById('itemCategory');
+  if (itemSel) {
+    const cur = selectedVal || itemSel.value;
+    itemSel.innerHTML = `<option value="">Select category…</option>` +
+      cats.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('') +
+      `<option value="__new_category__">+ Add new category…</option>`;
+    if (cur && (cats.includes(cur) || cur === '__new_category__')) {
+      itemSel.value = cur;
+    }
+  }
+}
+
+const PREDEFINED_INCIDENT_TYPES = ['spoilage', 'theft', 'damage', 'expired'];
+let customIncidentTypes = (() => {
+  try {
+    const s = JSON.parse(localStorage.getItem('custom_incident_types') || '[]');
+    return Array.isArray(s) ? s : [];
+  } catch { return []; }
+})();
+
+function formatIncidentType(t) {
+  if (!t) return 'Incident';
+  return t.charAt(0).toUpperCase() + t.slice(1).replace(/_/g, ' ');
+}
+
+function getIncidentPillClass(t) {
+  const s = String(t || '').toLowerCase();
+  if (s === 'theft') return 'pill-danger';
+  if (s === 'spoilage') return 'pill-neutral';
+  if (s === 'damage' || s === 'broken') return 'pill-yellow';
+  if (s === 'expired' || s === 'waste') return 'pill-danger';
+  return 'pill-neutral';
+}
+
+function getAllIncidentTypes() {
+  return Array.from(new Set([...PREDEFINED_INCIDENT_TYPES, ...customIncidentTypes]));
+}
+
+function addCustomIncidentType(type) {
+  if (!type || !type.trim()) return;
+  const trimmed = type.trim().toLowerCase();
+  if (!customIncidentTypes.includes(trimmed)) {
+    customIncidentTypes.push(trimmed);
+    try {
+      localStorage.setItem('custom_incident_types', JSON.stringify(customIncidentTypes));
+    } catch {}
+  }
+  populateIncidentTypeDropdown(trimmed);
+}
+
+function populateIncidentTypeDropdown(selectedVal = 'spoilage') {
+  const typeSel = document.getElementById('incidentType');
+  if (!typeSel) return;
+  const types = getAllIncidentTypes();
+  const cur = selectedVal || typeSel.value || 'spoilage';
+  typeSel.innerHTML = types.map(t => `<option value="${escapeHtml(t)}">${escapeHtml(formatIncidentType(t))}</option>`).join('') +
+    `<option value="__new_type__">+ Add new incident type…</option>`;
+  if (cur && (types.includes(cur) || cur === '__new_type__')) {
+    typeSel.value = cur;
+  }
+}
 
 const CATEGORY_PREFIX_MAP = {
   "Coffee & Espresso": "COF",
@@ -467,6 +566,7 @@ if (session) init();
    STATE
    ================================================================ */
 let allItems = [];      // raw items from API
+let lastItemPackSize = 1;
 let filtered  = [];     // after search+filter
 let editingItem = null;
 let viewItem = null;
@@ -526,7 +626,7 @@ function buildPageHTML() {
         <div class="isc-value" id="statTotal">—</div>
         <div class="isc-sub">Ingredients & supplies</div>
       </div>
-      <div class="inv-stat-card">
+      <div class="inv-stat-card inv-stat-card-primary">
         <div class="isc-label">Current Stock Value</div>
         <div class="isc-value" id="statValue">—</div>
         <div class="isc-sub">SUM(stock × unit cost)</div>
@@ -540,10 +640,10 @@ function buildPageHTML() {
     <!-- Status strip -->
     <div class="inv-status-strip">
       <span class="strip-label">Status</span>
-      <div class="inv-status-item"><span class="inv-status-dot dot-green"></span><span class="count" id="cntInStock">—</span>&nbsp;In Stock</div>
-      <div class="inv-status-item"><span class="inv-status-dot dot-blue"></span><span class="count" id="cntBelow">—</span>&nbsp;Below Reorder</div>
-      <div class="inv-status-item"><span class="inv-status-dot dot-yellow"></span><span class="count" id="cntLow">—</span>&nbsp;Low Stock</div>
-      <div class="inv-status-item"><span class="inv-status-dot dot-red"></span><span class="count" id="cntOut">—</span>&nbsp;Out of Stock</div>
+      <button type="button" class="inv-status-item" data-status="in_stock"      id="filterBtnInStock"><span class="inv-status-dot dot-green" ></span><span class="count" id="cntInStock">—</span>&nbsp;In Stock</button>
+      <button type="button" class="inv-status-item" data-status="below_reorder" id="filterBtnBelow"  ><span class="inv-status-dot dot-blue"  ></span><span class="count" id="cntBelow">—</span>&nbsp;Below Reorder</button>
+      <button type="button" class="inv-status-item" data-status="low_stock"     id="filterBtnLow"   ><span class="inv-status-dot dot-yellow"></span><span class="count" id="cntLow">—</span>&nbsp;Low Stock</button>
+      <button type="button" class="inv-status-item" data-status="out_of_stock"  id="filterBtnOut"   ><span class="inv-status-dot dot-red"   ></span><span class="count" id="cntOut">—</span>&nbsp;Out of Stock</button>
     </div>
 
     <!-- Toolbar -->
@@ -595,7 +695,7 @@ function buildPageHTML() {
   <!-- ===== AUDITS PANEL ===== -->
   <div class="inv-panel" id="panel-audits">
     <div style="margin-bottom:18px;">
-      <div style="font-family:'Bricolage Grotesque',sans-serif; font-weight:900; font-size:1rem; text-transform:uppercase;">Inventory Audits</div>
+      <div style="font-family:'Outfit',sans-serif; font-weight:900; font-size:1rem; text-transform:uppercase;">Inventory Audits</div>
       <div style="font-size:0.80rem; color:var(--ink-muted); margin-top:2px;">Consolidated history of inventory entries and adjustments.</div>
     </div>
     <div class="inv-table-wrap" id="auditsWrap"><div class="admin-loading">Loading audit log…</div></div>
@@ -604,7 +704,7 @@ function buildPageHTML() {
   <!-- ===== USAGE PANEL ===== -->
   <div class="inv-panel" id="panel-usage">
     <div style="margin-bottom:18px;">
-      <div style="font-family:'Bricolage Grotesque',sans-serif; font-weight:900; font-size:1rem; text-transform:uppercase;">Usage History</div>
+      <div style="font-family:'Outfit',sans-serif; font-weight:900; font-size:1rem; text-transform:uppercase;">Usage History</div>
       <div style="font-size:0.80rem; color:var(--ink-muted); margin-top:2px;">Stock consumed by POS sales, recipes, and add-ons.</div>
     </div>
     <div class="inv-table-wrap" id="usageWrap"><div class="admin-loading">Loading usage data…</div></div>
@@ -613,7 +713,7 @@ function buildPageHTML() {
   <!-- ===== ADJUSTMENTS PANEL ===== -->
   <div class="inv-panel" id="panel-adjustments">
     <div style="margin-bottom:18px;">
-      <div style="font-family:'Bricolage Grotesque',sans-serif; font-weight:900; font-size:1rem; text-transform:uppercase;">Adjustments Log</div>
+      <div style="font-family:'Outfit',sans-serif; font-weight:900; font-size:1rem; text-transform:uppercase;">Adjustments Log</div>
       <div style="font-size:0.80rem; color:var(--ink-muted); margin-top:2px;">Manual stock quantity changes and corrections.</div>
     </div>
     <div class="inv-table-wrap" id="adjustmentsWrap"><div class="admin-loading">Loading adjustments…</div></div>
@@ -622,7 +722,7 @@ function buildPageHTML() {
   <div class="inv-panel" id="panel-incidents">
     <div style="margin-bottom:18px; display:flex; justify-content:space-between; align-items:flex-start; gap:16px;">
       <div>
-        <div style="font-family:'Bricolage Grotesque',sans-serif; font-weight:900; font-size:1rem; text-transform:uppercase;">Incident Reports</div>
+        <div style="font-family:'Outfit',sans-serif; font-weight:900; font-size:1rem; text-transform:uppercase;">Incident Reports</div>
         <div style="font-size:0.80rem; color:var(--ink-muted); margin-top:2px;">Recorded spoilage and theft, including the resulting stock loss.</div>
       </div>
       <button class="inv-btn inv-btn-gold" id="openIncidentTabBtn">Report Incident</button>
@@ -652,7 +752,9 @@ function buildPageHTML() {
         <select id="itemCategory">
           <option value="">Select category…</option>
           ${INVENTORY_CATEGORIES.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('')}
+          <option value="__new_category__">+ Add new category…</option>
         </select>
+        <input type="text" id="itemCategoryCustom" placeholder="Enter new category name…" style="display:none; margin-top:6px;" autocomplete="off">
       </div>
       <div class="inv-form-field">
         <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -663,24 +765,31 @@ function buildPageHTML() {
         <div style="font-size:0.70rem; color:var(--ink-muted); margin-top:2px;" id="skuHint">Auto-assigned based on category</div>
       </div>
       <div class="inv-form-field">
-        <label>Current Stock *</label>
+        <label id="itemStockLabel">Current Stock *</label>
         <input type="number" id="itemStock" min="0" step="0.01" placeholder="0">
+        <small style="font-size:0.65rem; color:var(--ink-muted);" id="stockUnitHint">Enter the total quantity in the selected unit.</small>
       </div>
-      <div class="inv-form-field">
+<div class="inv-form-field">
         <label>Unit *</label>
         <select id="itemUnit">
           ${PREDEFINED_UNITS.map(u => `<option value="${u}">${u}</option>`).join('')}
           <option value="custom">+ Custom Unit</option>
         </select>
-        <input type="text" id="itemUnitCustom" placeholder="Enter unit (e.g. roll)" style="display:none; margin-top:6px;">
+        <input type="text" id="itemUnitCustom" style="display:none; margin-top:6px;">
       </div>
       <div class="inv-form-field">
-        <label>Pack Size (optional)</label>
-        <input type="number" id="itemPackSize" min="0.01" step="0.01" placeholder="Units per pack">
+        <label>Pack size</label>
+        <input type="number" id="itemPackSize" min="0" step="1" placeholder="e.g. 500 for a 500 g pack">
+        <small style="font-size:0.65rem; color:var(--ink-muted);">How many units are in one pack. Leave blank if not bought in packs.</small>
+      </div>
+      <div class="inv-form-field">
+        <label>Price per pack (₱)</label>
+        <input type="number" id="itemPricePerPack" min="0" step="0.01" placeholder="0.00">
+        <small style="font-size:0.65rem; color:var(--ink-muted);" id="pricePerPackResult">₱0.00 per pcs</small>
       </div>
       <div class="inv-form-field">
         <label>Unit Cost (₱) *</label>
-        <input type="number" id="itemUnitCost" min="0" step="0.0001" placeholder="0.0000">
+        <input type="number" id="itemUnitCost" min="0" step="0.01" placeholder="0.00">
       </div>
       <div class="inv-form-field">
         <label>Reorder Level *</label>
@@ -714,7 +823,17 @@ function buildPageHTML() {
     </div>
     <div class="inv-form-grid">
       <div class="inv-form-field span2"><label>Inventory Item *</label><select id="incidentItem"></select></div>
-      <div class="inv-form-field"><label>Incident Type *</label><input type="text" id="incidentType" maxlength="50" placeholder="e.g. spoilage, theft, damage"></div>
+      <div class="inv-form-field">
+        <label>Incident Type *</label>
+        <select id="incidentType">
+          <option value="spoilage">Spoilage</option>
+          <option value="theft">Theft</option>
+          <option value="damage">Damage</option>
+          <option value="expired">Expired</option>
+          <option value="__new_type__">+ Add new incident type…</option>
+        </select>
+        <input type="text" id="incidentTypeCustom" placeholder="e.g. Damage, Expired, Spillage…" style="display:none; margin-top:6px;" autocomplete="off">
+      </div>
       <div class="inv-form-field"><label>Quantity Lost *</label><input type="number" id="incidentQty" min="0.01" step="0.01" placeholder="e.g. 2"></div>
       <div class="inv-form-field span2"><label>Occurred At *</label><input type="datetime-local" id="incidentOccurredAt"></div>
       <div class="inv-form-field span2"><label>Description *</label><textarea id="incidentDescription" placeholder="Describe what happened and any relevant details…"></textarea></div>
@@ -791,40 +910,101 @@ function bindAll() {
   // Search & filters
   document.getElementById('stockSearch').addEventListener('input', applyFilters);
   document.getElementById('catFilter').addEventListener('change', applyFilters);
-  document.getElementById('statusFilter').addEventListener('change', applyFilters);
+  document.getElementById('statusFilter').addEventListener('change', () => {
+    // Keep pills in sync when the dropdown is changed directly
+    syncStatusPills(document.getElementById('statusFilter').value);
+    applyFilters();
+  });
+
+  // Status strip pill buttons — click to filter, click again to clear
+  document.querySelectorAll('.inv-status-item[data-status]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const sel = document.getElementById('statusFilter');
+      const val = btn.dataset.status;
+      // Toggle: if already active, clear; otherwise set
+      sel.value = (sel.value === val) ? '' : val;
+      syncStatusPills(sel.value);
+      applyFilters();
+    });
+  });
 
   // Unit dropdown toggle for custom unit
   document.getElementById('itemUnit').addEventListener('change', e => {
     const customInp = document.getElementById('itemUnitCustom');
     customInp.style.display = e.target.value === 'custom' ? 'block' : 'none';
+    updatePackCostPreview();
   });
+  document.getElementById('itemUnitCustom').addEventListener('input', updatePackCostPreview);
+  document.getElementById('itemPackSize').addEventListener('input', event => {
+    const stockInput = document.getElementById('itemStock');
+    const currentStock = Number(stockInput.value) || 0;
+    const baseStock = currentStock * lastItemPackSize;
+    const nextPackSize = Number(event.target.value);
+    lastItemPackSize = Number.isFinite(nextPackSize) && nextPackSize > 0 ? nextPackSize : 1;
+    stockInput.value = String(Number((baseStock / lastItemPackSize).toFixed(4)));
+    updatePackCostPreview();
+  });
+  document.getElementById('itemStock').addEventListener('input', updatePackCostPreview);
+  document.getElementById('itemPricePerPack').addEventListener('input', updatePackCostPreview);
 
   // Auto SKU generation when category changes or when Auto Code button is clicked
   document.getElementById('itemCategory').addEventListener('change', e => {
-    const cat = e.target.value;
+    const isNew = e.target.value === '__new_category__';
+    const customInp = document.getElementById('itemCategoryCustom');
+    customInp.style.display = isNew ? 'block' : 'none';
+    if (isNew) {
+      customInp.focus();
+      const hintEl = document.getElementById('skuHint');
+      if (hintEl) hintEl.textContent = 'Auto-assigned based on new category';
+    } else {
+      customInp.value = '';
+      const cat = e.target.value;
+      const skuInp = document.getElementById('itemSku');
+      if (!editingItem || !skuInp.value.trim()) {
+        if (cat) {
+          skuInp.value = generateNextSku(cat, editingItem ? editingItem.id : null);
+          const hintEl = document.getElementById('skuHint');
+          if (hintEl) hintEl.textContent = 'Auto-suggested for ' + cat;
+        } else {
+          const hintEl = document.getElementById('skuHint');
+          if (hintEl) hintEl.textContent = 'Auto-assigned based on category';
+        }
+      }
+    }
+  });
+
+  document.getElementById('itemCategoryCustom').addEventListener('input', e => {
+    const cat = e.target.value.trim();
     const skuInp = document.getElementById('itemSku');
     if (!editingItem || !skuInp.value.trim()) {
       if (cat) {
         skuInp.value = generateNextSku(cat, editingItem ? editingItem.id : null);
         const hintEl = document.getElementById('skuHint');
         if (hintEl) hintEl.textContent = 'Auto-suggested for ' + cat;
-      } else {
-        const hintEl = document.getElementById('skuHint');
-        if (hintEl) hintEl.textContent = 'Auto-assigned based on category';
       }
     }
   });
 
   document.getElementById('itemSkuGenBtn').addEventListener('click', () => {
-    const cat = document.getElementById('itemCategory').value;
+    const catSel = document.getElementById('itemCategory').value;
+    const cat = catSel === '__new_category__' ? document.getElementById('itemCategoryCustom').value.trim() : catSel;
     if (!cat) {
-      alert('Please select a category first to generate a code.');
+      alert('Please select or enter a category first to generate a code.');
       return;
     }
     const nextCode = generateNextSku(cat, editingItem ? editingItem.id : null);
     document.getElementById('itemSku').value = nextCode;
     const hintEl = document.getElementById('skuHint');
     if (hintEl) hintEl.textContent = 'Generated code: ' + nextCode;
+  });
+
+  // Incident type dropdown toggle for custom incident type
+  document.getElementById('incidentType').addEventListener('change', e => {
+    const isNew = e.target.value === '__new_type__';
+    const customInp = document.getElementById('incidentTypeCustom');
+    customInp.style.display = isNew ? 'block' : 'none';
+    if (isNew) customInp.focus();
+    else customInp.value = '';
   });
 
   // Open Add modal
@@ -886,6 +1066,7 @@ async function loadStock() {
     if (!res.ok) throw new Error(data.error || 'Could not load inventory.');
 
     allItems = data.items || [];
+    populateCategoryDropdowns();
     updateSummaryCards();
     applyFilters();
     loadLastAudit();
@@ -927,6 +1108,14 @@ async function loadLastAudit() {
 /* ================================================================
    FILTER & RENDER
    ================================================================ */
+
+// Highlight the matching pill button (or clear all) when the status filter changes
+function syncStatusPills(activeValue) {
+  document.querySelectorAll('.inv-status-item[data-status]').forEach(btn => {
+    btn.classList.toggle('is-active', btn.dataset.status === activeValue && activeValue !== '');
+  });
+}
+
 function applyFilters() {
   const q      = (document.getElementById('stockSearch').value || '').toLowerCase().trim();
   const cat    = document.getElementById('catFilter').value;
@@ -945,7 +1134,7 @@ function applyFilters() {
 function renderStockTable() {
   const tbody = document.getElementById('stockTbody');
   if (filtered.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="9"><div class="inv-empty"><p>No inventory items found.</p></div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="10"><div class="inv-empty"><p>No inventory items found.</p></div></td></tr>`;
     return;
   }
 
@@ -959,7 +1148,7 @@ function renderStockTable() {
     <tr data-id="${i.id}">
       <td>
         <div style="display:flex;align-items:center;gap:10px;">
-          <div style="width:32px;height:32px;border-radius:7px;background:var(--stone);display:flex;align-items:center;justify-content:center;font-family:'Bricolage Grotesque',sans-serif;font-weight:900;font-size:0.78rem;color:var(--brass-dark);flex-shrink:0;">${escapeHtml(init)}</div>
+          <div style="width:32px;height:32px;border-radius:7px;background:var(--stone);display:flex;align-items:center;justify-content:center;font-family:'Outfit',sans-serif;font-weight:900;font-size:0.78rem;color:var(--brass-dark);flex-shrink:0;">${escapeHtml(init)}</div>
           <div>
             <div class="item-name">${escapeHtml(i.name)}</div>
             ${i.sku ? `<div class="item-cat">SKU: ${escapeHtml(i.sku)}</div>` : ''}
@@ -968,14 +1157,12 @@ function renderStockTable() {
       </td>
       <td><span style="font-size:0.80rem;">${escapeHtml(i.category)}</span></td>
       <td class="right"><span class="stock-qty">${i.stock_quantity}</span></td>
-      <td>
-        <span class="unit-label">${escapeHtml(i.unit || 'pcs')}</span>
-        ${i.pack_size != null ? `<div class="item-cat">${escapeHtml(i.pack_size)} per pack</div>` : ''}
-      </td>
+      <td><span class="unit-label">${escapeHtml(i.unit || 'pcs')}</span></td>
       <td class="right"><span class="price-val">${peso(cost)}</span></td>
       <td class="right"><span class="price-val" style="color:var(--brass-dark);font-weight:700;">${peso(val)}</span></td>
       <td><span class="inv-badge ${s.cls}">${s.label}</span></td>
       <td><span class="reorder-val">${i.reorder_level} ${escapeHtml(i.unit || 'pcs')}</span></td>
+      <td style="font-size:0.75rem; color:var(--ink-muted);">${i.pack_size || ''} ${escapeHtml(i.unit || 'pcs')}</td>
       <td>
         <div class="inv-action-wrap">
           <button class="inv-action-btn action-toggle" data-id="${i.id}" title="Actions">
@@ -1045,14 +1232,25 @@ function openItemModal(item = null) {
   document.getElementById('itemModalTitle').textContent = item ? `Edit — ${item.name}` : 'Add Inventory Item';
   document.getElementById('itemId').value       = item ? item.id : '';
   document.getElementById('itemName').value     = item ? item.name : '';
-  document.getElementById('itemCategory').value = item ? item.category : '';
+  
+  populateCategoryDropdowns(item ? item.category : '');
+  const customCatInp = document.getElementById('itemCategoryCustom');
+  customCatInp.value = '';
+  customCatInp.style.display = 'none';
+
   document.getElementById('itemSku').value      = item ? (item.sku || '') : '';
-  document.getElementById('itemStock').value    = item ? item.stock_quantity : '';
-  document.getElementById('itemPackSize').value = item && item.pack_size != null ? item.pack_size : '';
   document.getElementById('itemUnitCost').value = item ? item.unit_cost : '';
   document.getElementById('itemReorder').value  = item ? item.reorder_level : '5';
   document.getElementById('itemSupplier').value = item ? (item.supplier || '') : '';
   document.getElementById('itemNotes').value    = item ? (item.notes || '') : '';
+  document.getElementById('itemPackSize').value = item ? item.pack_size || '' : '';
+  document.getElementById('itemPricePerPack').value = item && item.pack_size
+    ? (Number(item.unit_cost) * Number(item.pack_size)).toFixed(2)
+    : '';
+  document.getElementById('itemStock').value = item
+    ? (item.pack_size ? Number(item.stock_quantity) / Number(item.pack_size) : item.stock_quantity)
+    : '';
+  lastItemPackSize = item && Number(item.pack_size) > 0 ? Number(item.pack_size) : 1;
 
   const unitSel = document.getElementById('itemUnit');
   const customInp = document.getElementById('itemUnitCustom');
@@ -1070,6 +1268,7 @@ function openItemModal(item = null) {
     unitSel.value = 'pcs';
     customInp.style.display = 'none';
   }
+  updatePackCostPreview();
 
   const skuHint = document.getElementById('skuHint');
   if (skuHint) {
@@ -1080,14 +1279,50 @@ function openItemModal(item = null) {
   openModal('itemModal');
 }
 
+function updatePackCostPreview() {
+  const unitSelect = document.getElementById('itemUnit');
+  const unit = unitSelect.value === 'custom'
+    ? (document.getElementById('itemUnitCustom').value.trim() || 'pcs')
+    : unitSelect.value;
+  const result = document.getElementById('pricePerPackResult');
+  const stockHint = document.getElementById('stockUnitHint');
+  const stockLabel = document.getElementById('itemStockLabel');
+  const packSizeValue = document.getElementById('itemPackSize').value;
+  const packSize = Number(packSizeValue);
+  if (stockLabel && stockHint) {
+    if (packSizeValue !== '' && Number.isFinite(packSize) && packSize > 0) {
+      stockLabel.textContent = 'Packs in stock *';
+      const baseQuantity = Number(document.getElementById('itemStock').value) * packSize;
+      stockHint.textContent = Number.isFinite(baseQuantity)
+        ? `${packSize} ${unit} per pack · ${baseQuantity} ${unit} total`
+        : `Enter the number of packs you have (${packSize} ${unit} per pack).`;
+    } else {
+      stockLabel.textContent = `Current Stock (${unit}) *`;
+      stockHint.textContent = `Enter the total quantity in ${unit}.`;
+    }
+  }
+  if (result) {
+    const priceValue = document.getElementById('itemPricePerPack').value;
+    const price = Number(priceValue);
+    const unitCost = priceValue !== '' && Number.isFinite(price) && Number.isFinite(packSize) && packSize > 0
+      ? (price / packSize).toFixed(2)
+      : '0.00';
+    result.textContent = `₱${unitCost} per ${unit}`;
+
+    if (priceValue !== '' && Number.isFinite(price) && Number.isFinite(packSize) && packSize > 0) {
+      document.getElementById('itemUnitCost').value = (price / packSize).toFixed(2);
+    }
+  }
+}
+
 async function saveItem() {
   const id     = document.getElementById('itemId').value;
   const name   = document.getElementById('itemName').value.trim();
-  const cat    = document.getElementById('itemCategory').value.trim();
+  const catSel = document.getElementById('itemCategory').value;
+  const catCustom = document.getElementById('itemCategoryCustom').value.trim();
+  const cat    = catSel === '__new_category__' ? catCustom : catSel.trim();
   const stock  = parseFloat(document.getElementById('itemStock').value);
-  const packSizeRaw = document.getElementById('itemPackSize').value.trim();
-  const packSize = packSizeRaw === '' ? null : Number(packSizeRaw);
-  const cost   = parseFloat(document.getElementById('itemUnitCost').value);
+  let cost   = parseFloat(document.getElementById('itemUnitCost').value);
   const reorder = parseFloat(document.getElementById('itemReorder').value);
   const unitSel = document.getElementById('itemUnit').value;
   const unitCustom = document.getElementById('itemUnitCustom').value.trim();
@@ -1095,12 +1330,48 @@ async function saveItem() {
 
   const unit = unitSel === 'custom' ? unitCustom : unitSel;
 
-  if (!name)             { errEl.textContent = 'Item name is required.'; errEl.classList.add('show'); return; }
-  if (!cat)              { errEl.textContent = 'Category is required.'; errEl.classList.add('show'); return; }
+  if (!name) { errEl.textContent = 'Item name is required.'; errEl.classList.add('show'); return; }
+  if (!cat)  {
+    errEl.textContent = catSel === '__new_category__' ? 'Please enter a name for the new category.' : 'Category is required.';
+    errEl.classList.add('show');
+    return;
+  }
+  if (catSel === '__new_category__' && cat) {
+    addCustomCategory(cat);
+  }
   if (isNaN(stock) || stock < 0) { errEl.textContent = 'Enter valid stock quantity.'; errEl.classList.add('show'); return; }
-  if (packSize !== null && (!Number.isFinite(packSize) || packSize <= 0)) { errEl.textContent = 'Pack size must be greater than zero.'; errEl.classList.add('show'); return; }
-  if (isNaN(cost) || cost < 0)   { errEl.textContent = 'Enter valid unit cost.'; errEl.classList.add('show'); return; }
   if (isNaN(reorder) || reorder < 0) { errEl.textContent = 'Enter valid reorder level.'; errEl.classList.add('show'); return; }
+
+  const pricePerPackValue = document.getElementById('itemPricePerPack').value;
+  const packSizeValue = document.getElementById('itemPackSize').value;
+  const packSize = packSizeValue === '' ? null : Number(packSizeValue);
+  if (packSize !== null && (!Number.isFinite(packSize) || packSize <= 0)) {
+    errEl.textContent = 'Enter a positive pack size.';
+    errEl.classList.add('show');
+    return;
+  }
+  const stockInBaseUnits = stock * (packSize || 1);
+  if (!Number.isFinite(stockInBaseUnits)) {
+    errEl.textContent = 'The stock quantity is too large.';
+    errEl.classList.add('show');
+    return;
+  }
+  if (pricePerPackValue !== '') {
+    const pricePerPack = Number(pricePerPackValue);
+    if (!Number.isFinite(pricePerPack) || pricePerPack < 0) {
+      errEl.textContent = 'Enter a valid price per pack.';
+      errEl.classList.add('show');
+      return;
+    }
+    if (!packSize) {
+      errEl.textContent = 'Enter a positive pack size to calculate unit cost.';
+      errEl.classList.add('show');
+      return;
+    }
+    cost = Number((pricePerPack / packSize).toFixed(2));
+    document.getElementById('itemUnitCost').value = cost.toFixed(2);
+  }
+  if (isNaN(cost) || cost < 0)   { errEl.textContent = 'Enter valid unit cost.'; errEl.classList.add('show'); return; }
 
   let skuVal = document.getElementById('itemSku').value.trim();
   if (!skuVal && cat) {
@@ -1120,9 +1391,9 @@ async function saveItem() {
     name,
     category: cat,
     sku: skuVal || null,
-    stock_quantity: stock,
-    pack_size: packSize,
+    stock_quantity: stockInBaseUnits,
     unit: unit || 'pcs',
+    pack_size: packSizeValue || null,
     unit_cost: cost,
     reorder_level: reorder,
     supplier: document.getElementById('itemSupplier').value.trim() || null,
@@ -1221,7 +1492,12 @@ function openIncidentModal() {
   select.innerHTML = '<option value="">Select inventory item…</option>' + allItems.map(item =>
     `<option value="${item.id}">${escapeHtml(item.name)} — ${item.stock_quantity} ${escapeHtml(item.unit || 'pcs')} available</option>`
   ).join('');
-  document.getElementById('incidentType').value = 'spoilage';
+  
+  populateIncidentTypeDropdown('spoilage');
+  const customTypeInp = document.getElementById('incidentTypeCustom');
+  customTypeInp.value = '';
+  customTypeInp.style.display = 'none';
+
   document.getElementById('incidentQty').value = '';
   document.getElementById('incidentOccurredAt').value = toLocalDateTimeValue();
   document.getElementById('incidentDescription').value = '';
@@ -1233,14 +1509,25 @@ function openIncidentModal() {
 
 async function saveIncident() {
   const inventoryId = Number(document.getElementById('incidentItem').value);
+  const typeSel = document.getElementById('incidentType').value;
+  const typeCustom = document.getElementById('incidentTypeCustom').value.trim();
+  const incidentType = typeSel === '__new_type__' ? typeCustom.toLowerCase() : typeSel;
   const quantity = Number(document.getElementById('incidentQty').value);
   const description = document.getElementById('incidentDescription').value.trim();
   const errEl = document.getElementById('incidentError');
+
   if (!inventoryId) { errEl.textContent = 'Select the affected inventory item.'; errEl.classList.add('show'); return; }
-  const incidentType = document.getElementById('incidentType').value.trim();
-  if (!incidentType) { errEl.textContent = 'Enter an incident type.'; errEl.classList.add('show'); return; }
+  if (!incidentType) {
+    errEl.textContent = typeSel === '__new_type__' ? 'Please enter a name for the new incident type.' : 'Select an incident type.';
+    errEl.classList.add('show');
+    return;
+  }
   if (!Number.isFinite(quantity) || quantity <= 0) { errEl.textContent = 'Enter a positive quantity lost.'; errEl.classList.add('show'); return; }
   if (!description) { errEl.textContent = 'Describe what happened.'; errEl.classList.add('show'); return; }
+
+  if (typeSel === '__new_type__' && typeCustom) {
+    addCustomIncidentType(typeCustom);
+  }
 
   const saveBtn = document.getElementById('incidentSaveBtn');
   saveBtn.disabled = true; saveBtn.textContent = 'Submitting…';
@@ -1277,14 +1564,20 @@ async function loadIncidents() {
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Could not load incident reports.');
     const reports = data.incidents || [];
+
+    // Sync any existing incident types
+    reports.forEach(r => {
+      if (r.incident_type) addCustomIncidentType(r.incident_type);
+    });
+
     if (!reports.length) {
-      wrap.innerHTML = '<div class="inv-empty"><p>No spoilage or theft incidents have been reported.</p></div>';
+      wrap.innerHTML = '<div class="inv-empty"><p>No inventory incidents have been reported.</p></div>';
       return;
     }
     wrap.innerHTML = `<table class="inv-table"><thead><tr><th>Occurred</th><th>Type</th><th>Item</th><th class="right">Lost</th><th>Description</th><th>Location / Ref.</th><th>Reported By</th></tr></thead><tbody>${reports.map(report => `
       <tr>
         <td style="font-size:0.78rem; color:var(--ink-muted);">${formatDate(report.occurred_at)}</td>
-        <td><span class="pill ${report.incident_type === 'theft' ? 'pill-danger' : 'pill-neutral'}">${escapeHtml(report.incident_type)}</span></td>
+        <td><span class="pill ${getIncidentPillClass(report.incident_type)}">${escapeHtml(formatIncidentType(report.incident_type))}</span></td>
         <td style="font-weight:600;">${escapeHtml(report.item_name)}</td>
         <td class="right" style="font-family:'DM Sans',sans-serif; font-weight:700; color:var(--danger);">-${report.quantity} ${escapeHtml(report.unit || '')}</td>
         <td style="font-size:0.78rem; color:var(--ink-muted);">${escapeHtml(report.description)}</td>

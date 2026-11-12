@@ -1,11 +1,11 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
-<head>
+<head><base href="/admin/">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Point of Sale — A&J's Foodflix Admin</title>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="admin-shell.css?v=7">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&family=JetBrains+Mono:wght@500;700&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="admin-shell.css?v=9">
 <style>
 
 /* ================================================================
@@ -51,7 +51,7 @@
   text-transform: uppercase; letter-spacing: 0.04em;
   cursor: pointer; transition: all 0.14s; white-space: nowrap;
 }
-.pos-cat-pill:hover { border-color: var(--brass); color: var(--brass-dark); background: rgba(0,0,0,0.07); }
+.pos-cat-pill:hover { border-color: var(--brass); color: var(--brass-dark); background: rgba(207,74,20,0.07); }
 .pos-cat-pill.active { background: var(--brass); border-color: var(--brass); color: #fff; }
 
 .pos-product-scroll { flex: 1; overflow-y: auto; padding: 20px 22px; overscroll-behavior: contain; }
@@ -88,18 +88,18 @@
 .addon-flag {
   display: inline-block; margin-left: 6px; padding: 2px 6px; border-radius: 20px;
   font-family: 'DM Sans', sans-serif; font-size: 0.52rem; font-weight: 700; text-transform: uppercase;
-  background: rgba(0,0,0,0.14); color: var(--brass-dark); vertical-align: middle;
+  background: rgba(207,74,20,0.14); color: var(--brass-dark); vertical-align: middle;
 }
 
 /* RIGHT PANEL */
-.pos-right { display: flex; flex-direction: column; background: var(--component-bg); overflow: hidden; }
+.pos-right { display: flex; flex-direction: column; min-height: 0; background: var(--component-bg); overflow-y: auto; }
 .pos-orders-head {
   flex-shrink: 0; display: flex; align-items: center;
   justify-content: space-between; gap: 10px; padding: 16px 20px;
   border-bottom: 1px solid var(--line);
-  background: linear-gradient(to bottom, #ffffff, #fff);
+  background: linear-gradient(to bottom, #fdfaf5, #fff);
 }
-.pos-orders-head h3 { margin: 0; font-family: 'Bricolage Grotesque', sans-serif; text-transform: uppercase; font-size: 0.95rem; letter-spacing: 0.03em; }
+.pos-orders-head h3 { margin: 0; font-family: 'Outfit', sans-serif; text-transform: uppercase; font-size: 0.95rem; letter-spacing: 0.03em; }
 .pos-orders-head select {
   padding: 7px 12px; border: 1px solid var(--line); border-radius: 6px;
   background: var(--bone); font-family: 'DM Sans', sans-serif; font-size: 0.8rem; color: var(--ink); cursor: pointer;
@@ -116,7 +116,7 @@
 .pos-order-thead span:nth-child(3),
 .pos-order-thead span:nth-child(4) { text-align: right; }
 
-.pos-cart-scroll { flex: 1; overflow-y: auto; overscroll-behavior: contain; }
+.pos-cart-scroll { flex: 1 1 0; min-height: 140px; overflow-y: auto; overscroll-behavior: contain; }
 .pos-empty-orders { padding: 50px 20px; text-align: center; color: var(--ink-muted); font-size: 0.85rem; }
 .pos-empty-orders svg { display: block; margin: 0 auto 12px; opacity: 0.25; }
 
@@ -157,7 +157,7 @@
 }
 .remove-line-btn:hover { opacity: 1; }
 
-.pos-summary { flex-shrink: 0; padding: 14px 20px; border-top: 2px solid var(--line); background: #ffffff; }
+.pos-summary { flex-shrink: 0; padding: 14px 20px; border-top: 2px solid var(--line); background: #fdfaf5; }
 .pos-summary .sum-row {
   display: flex; justify-content: space-between; align-items: center; padding: 5px 0; font-size: 0.84rem;
 }
@@ -171,7 +171,7 @@
   font-weight: 700; font-size: 1rem; border-top: 2px solid var(--ink); margin-top: 8px; padding-top: 10px;
 }
 
-.pos-actions { flex-shrink: 0; max-height: 48vh; overflow-y: auto; padding: 14px 20px; border-top: 1px solid var(--line); background: #fff; overscroll-behavior: contain; }
+.pos-actions { flex-shrink: 0; padding: 14px 20px; border-top: 1px solid var(--line); background: #fff; }
 .pos-payment-select {
   width: 100%; padding: 9px 12px; border: 1px solid var(--line); border-radius: 7px; margin-bottom: 10px;
   font-family: 'DM Sans', sans-serif; font-size: 0.84rem; background: var(--bone); color: var(--ink); cursor: pointer;
@@ -224,7 +224,7 @@
   padding: 10px 14px; border-bottom: 1px solid var(--line); transition: background .12s;
 }
 .cust-addon-row:last-child { border-bottom: none; }
-.cust-addon-row.is-selected { background: rgba(0,0,0,0.06); }
+.cust-addon-row.is-selected { background: rgba(207,74,20,0.06); }
 .cust-addon-row.is-disabled { opacity: 0.5; }
 .cust-addon-check { display: flex; align-items: center; gap: 10px; cursor: pointer; }
 .cust-addon-check input { width: 16px; height: 16px; accent-color: var(--brass-dark); flex-shrink: 0; }
@@ -245,9 +245,9 @@
   background: transparent; color: var(--ink, #f0f0f0); font-size: 0.83rem; font-family: inherit;
   cursor: pointer; transition: border-color 0.15s, background 0.15s, color 0.15s;
 }
-.cust-flavor-pill:hover { border-color: var(--brass-dark, #404040); color: var(--brass-dark, #404040); }
+.cust-flavor-pill:hover { border-color: var(--brass-dark, #b8932a); color: var(--brass-dark, #b8932a); }
 .cust-flavor-pill.selected {
-  background: var(--brass-dark, #404040); border-color: var(--brass-dark, #404040);
+  background: var(--brass-dark, #b8932a); border-color: var(--brass-dark, #b8932a);
   color: #fff; font-weight: 700;
 }
 @keyframes shake {
@@ -341,7 +341,7 @@
   margin-bottom: 7px;
 }
 .pay-total-amount {
-  font-family: 'Bricolage Grotesque', sans-serif;
+  font-family: 'Outfit', sans-serif;
   font-weight: 800;
   font-size: 2.15rem;
   color: var(--ink);
@@ -382,10 +382,10 @@
   text-align: center;
   transition: all 0.14s;
 }
-.pay-method-pill:hover { border-color: var(--brass); color: var(--brass-dark); background: rgba(0,0,0,0.08); }
+.pay-method-pill:hover { border-color: var(--brass); color: var(--brass-dark); background: rgba(207,74,20,0.08); }
 .pay-method-pill.active {
   background: var(--brass-dark); border-color: var(--brass-dark); color: #fff;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.28);
+  box-shadow: 0 4px 12px rgba(138,109,58,0.28);
 }
 .pay-method-icon {
   width: 18px;
@@ -429,12 +429,12 @@
   cursor: pointer;
   transition: all 0.14s;
 }
-.pay-split-btn:hover { border-color: var(--brass); background: rgba(0,0,0,0.08); }
+.pay-split-btn:hover { border-color: var(--brass); background: rgba(207,74,20,0.08); }
 .pay-split-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
 
 .pay-received-display {
   padding: 13px 16px 11px;
-  font-family: 'Bricolage Grotesque', sans-serif;
+  font-family: 'Outfit', sans-serif;
   font-weight: 800;
   font-size: 2rem;
   color: var(--ink);
@@ -470,8 +470,8 @@
   user-select: none;
   -webkit-user-select: none;
 }
-.pay-key:hover { background: rgba(0,0,0,0.08); border-color: var(--brass); color: var(--brass-dark); }
-.pay-key:active { transform: scale(0.96); background: rgba(0,0,0,0.16); }
+.pay-key:hover { background: rgba(207,74,20,0.08); border-color: var(--brass); color: var(--brass-dark); }
+.pay-key:active { transform: scale(0.96); background: rgba(207,74,20,0.16); }
 .pay-key.backspace { color: var(--ink-muted); font-size: 1.1rem; }
 .pay-key.backspace:hover { border-color: var(--danger); background: rgba(192,57,43,0.06); color: var(--danger); }
 
@@ -494,7 +494,7 @@
   cursor: pointer;
   transition: all 0.14s;
 }
-.pay-key-action:hover { background: rgba(0,0,0,0.08); border-color: var(--brass); }
+.pay-key-action:hover { background: rgba(207,74,20,0.08); border-color: var(--brass); }
 .pay-key-action.clear { color: var(--ink-muted); }
 
 /* Change display */
@@ -619,7 +619,7 @@
 .pay-success-icon svg { width: 32px; height: 32px; fill: none; stroke: #fff; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
 .pay-success h3 {
   margin: 0 0 6px;
-  font-family: 'Bricolage Grotesque', sans-serif;
+  font-family: 'Outfit', sans-serif;
   font-weight: 900;
   font-size: 1.3rem;
   text-transform: uppercase;
@@ -654,8 +654,9 @@
   .pos-left { border-right: none; border-bottom: 1px solid var(--line); }
   .pos-product-scroll { overflow: visible; max-height: none; }
   .pos-right { overflow: visible; }
-  .pos-cart-scroll { overflow: visible; max-height: none; }
-  .admin-body { overflow: auto !important; }
+  .pos-cart-scroll { flex: 0 0 auto; min-height: 0; overflow: visible; max-height: none; }
+  .pos-actions { max-height: none; overflow: visible; }
+  .admin-body { overflow: visible !important; }
   .admin-section { overflow: visible !important; }
   .pay-card { max-height: none; }
 }
@@ -681,8 +682,14 @@
     normalizeOrderData,
     openReceiptModal,
     printReceiptSystem,
+    printReceiptAutomatic,
     openPrinterSettingsModal
-  } from "./receipt-printer.js";
+  } from "./receipt-printer.js?v=4";
+
+  // Other admin pages opened over the POS (see adminFeatureFrame below) reuse
+  // this manager, so the Bluetooth printer stays connected while staff check
+  // sales or reservations and come back.
+  window.__ajsPrinterManager = printerManager;
 
   const session = renderAdminShell({ active: 'pos', title: 'Point of Sale' });
   if (session) init();
@@ -1088,6 +1095,61 @@
       counterConnected: printerManager.isConnected('counter'),
       kitchenConnected: printerManager.isConnected('kitchen'),
     });
+    let printerRestorePromise = null;
+    const restorePrinterConnections = () => {
+      if (printerRestorePromise) return printerRestorePromise;
+      printerRestorePromise = printerManager.restoreConnections()
+        .catch(err => {
+          console.warn('Could not restore Bluetooth printer connections:', err);
+        })
+        .finally(() => {
+          printerRestorePromise = null;
+        });
+      return printerRestorePromise;
+    };
+    restorePrinterConnections();
+    window.addEventListener('pageshow', restorePrinterConnections);
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) restorePrinterConnections();
+    });
+
+    let adminFeatureFrame = null;
+    document.getElementById('adminShell').addEventListener('click', (event) => {
+      const link = event.target.closest('a.admin-nav-link');
+      if (
+        !link ||
+        link.dataset.adminNavKey === 'pos' ||
+        event.button !== 0 ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        event.altKey
+      ) return;
+
+      const destination = new URL(link.href, window.location.href);
+      if (destination.origin !== window.location.origin) return;
+
+      event.preventDefault();
+      if (!adminFeatureFrame) {
+        adminFeatureFrame = document.createElement('iframe');
+        adminFeatureFrame.title = `${link.textContent.trim()} admin feature`;
+        adminFeatureFrame.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;border:0;z-index:2147483000;background:#fff;';
+        document.body.appendChild(adminFeatureFrame);
+      }
+      adminFeatureFrame.src = destination.href;
+    });
+
+    window.addEventListener('message', (event) => {
+      if (
+        event.origin !== window.location.origin ||
+        event.source !== adminFeatureFrame?.contentWindow ||
+        event.data?.type !== 'ajs:return-to-pos'
+      ) return;
+
+      adminFeatureFrame.remove();
+      adminFeatureFrame = null;
+    });
+
     document.getElementById('posPrinterBtn').addEventListener('click', () => {
       openPrinterSettingsModal(() => {
         updatePrinterToolbarUI({
@@ -1255,6 +1317,8 @@
 
   function getAddonsForProduct(menuId) {
     return addons.filter(a => {
+      // Exclude add-ons that are unavailable or out of stock
+      if (a.status !== 'available') return false;
       if (!a.products || a.products.length === 0) return true;
       return a.products.some(p => String(p.menu_id) === String(menuId));
     });
@@ -1512,7 +1576,7 @@
       emptyState.style.display = 'none';
       rowsWrap.innerHTML = cart.map(c => {
         const flavorBadge = c.flavor
-          ? `<span style="display:inline-block;background:var(--brass-dark,#404040);color:#fff;border-radius:20px;padding:1px 9px;font-size:0.7rem;font-weight:700;margin-left:2px;">${escapeHtml(c.flavor)}</span>`
+          ? `<span style="display:inline-block;background:var(--brass-dark,#b8932a);color:#fff;border-radius:20px;padding:1px 9px;font-size:0.7rem;font-weight:700;margin-left:2px;">${escapeHtml(c.flavor)}</span>`
           : '';
         const displayNotes = c.flavor && c.notes && c.notes.startsWith(c.flavor)
           ? c.notes.slice(c.flavor.length).replace(/^\s*\|\s*/, '').trim()
@@ -2023,12 +2087,9 @@
       };
     }
 
-    // Auto-print if enabled and any printer is connected
-    if (printerManager.settings.autoPrintPos && printerManager.isAnyConnected() && activeReceipt) {
-      const target = printerManager.settings.autoPrintTarget || 'both';
-      printerManager.printReceiptBluetooth(activeReceipt, target).catch((err) => {
-        console.warn('Auto-print error:', err);
-      });
+    // Auto-print: try BT (reconnecting if needed), fall back to system print
+    if (activeReceipt) {
+      printReceiptAutomatic(activeReceipt, noticeEl, printBothBtn);
     }
 
     document.getElementById('paySuccess').classList.add('active');

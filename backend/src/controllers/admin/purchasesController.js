@@ -11,7 +11,7 @@ async function ensureStockInColumns() {
         ALTER TABLE stock_in ADD COLUMN IF NOT EXISTS supplier VARCHAR(150);
         ALTER TABLE stock_in ADD COLUMN IF NOT EXISTS unit_cost NUMERIC(10,4);
         ALTER TABLE stock_in ADD COLUMN IF NOT EXISTS total_cost NUMERIC(10,2);
-      `);
+      `).catch((err) => console.warn('[purchases] stock_in column check skipped:', err.message));
     })().catch(err => {
       stockInColsReady = null;
       throw err;

@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+<head><base href="/admin/">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sales Transactions — A&J's Foodflix Admin</title>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="admin-shell.css?v=7">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&family=JetBrains+Mono:wght@500;700&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="admin-shell.css?v=9">
 <style>
   /* ============================================================
      SALES TRANSACTIONS — scoped design system (gold/brown theme)
@@ -22,18 +22,30 @@
   .stx-tab svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 
   /* ---- Summary cards ---- */
-  .stx-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-bottom: 22px; }
+  .stx-cards { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.45fr); gap: 12px; margin-bottom: 22px; }
   .stx-card {
-    background: var(--component-bg); border: 1px solid var(--line); border-radius: 12px;
-    padding: 20px 22px; display: flex; align-items: center; justify-content: space-between; gap: 14px;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    min-width: 0; background: var(--component-bg); border: 1px solid var(--line); border-radius: 12px;
+    padding: 18px 20px; display: flex; flex-direction: column; justify-content: space-between; gap: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04); transition: box-shadow var(--transition-base), border-color var(--transition-fast);
   }
   .stx-card .label { font-family: 'DM Sans', sans-serif; font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.5; }
-  .stx-card .value { font-family: 'Bricolage Grotesque', sans-serif; font-weight: 900; font-size: 1.55rem; line-height: 1.15; color: var(--ink); margin-top: 5px; }
-  .stx-card .value.brass { color: var(--brass-dark); }
-  .stx-card .value.green { color: var(--success); }
-  .stx-card .sub { font-size: 0.72rem; opacity: 0.45; margin-top: 4px; }
-  .stx-ring { flex-shrink: 0; color: var(--ink); }
+  .stx-card .value { font-family: 'Outfit', sans-serif; font-weight: 900; font-size: clamp(1.4rem, 2.2vw, 2rem); line-height: 1.15; color: var(--ink); margin-top: 7px; overflow-wrap: anywhere; }
+  .stx-card .sub { font-size: 0.72rem; color: var(--ink-muted); margin-top: 5px; }
+  .stx-card-main { min-width: 0; }
+  .stx-card-footer { display: flex; gap: 18px; border-top: 1px solid var(--line); padding-top: 11px; }
+  .stx-card-foot-metric { display: flex; flex-direction: column; gap: 2px; font-size: 0.7rem; color: var(--ink-muted); }
+  .stx-card-foot-metric strong { color: var(--ink); font-size: 0.82rem; font-weight: 700; }
+  .stx-card-margin { background: #1b1410; border-color: #1b1410; color: #fff; padding: 18px 20px 16px; }
+  .stx-card-margin .label { color: rgba(255,255,255,0.68); opacity: 1; }
+  .stx-card-margin .value { color: #78d6a5; font-size: clamp(1.8rem, 2.8vw, 2.45rem); }
+  .stx-margin-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+  .stx-margin-badge { border-radius: 999px; padding: 4px 9px; background: rgba(120,214,165,0.18); color: #9aebbb; font-size: 0.65rem; font-weight: 800; white-space: nowrap; }
+  .stx-margin-track { height: 7px; border-radius: 999px; overflow: hidden; background: rgba(255,255,255,0.12); }
+  .stx-margin-fill { display: block; width: 0; height: 100%; border-radius: inherit; background: #78d6a5; transition: width 250ms ease; }
+  .stx-margin-legend { display: flex; justify-content: space-between; gap: 10px; color: rgba(255,255,255,0.64); font-size: 0.62rem; margin-top: 6px; }
+  .stx-card-margin.is-negative .value, .stx-card-margin.is-negative .stx-margin-badge { color: #ff9b91; }
+  .stx-card-margin.is-negative .stx-margin-badge { background: rgba(255,130,120,0.16); }
+  .stx-card-margin.is-negative .stx-margin-fill { background: #ff8278; }
 
   /* ---- Period controls ---- */
   .stx-controls {
@@ -55,7 +67,7 @@
   .stx-period-btn:hover { border-color: var(--brass); color: var(--brass-dark); }
   .stx-period-btn.active {
     background: var(--brass-dark); color: #fff; border-color: var(--brass-dark);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    box-shadow: 0 2px 8px rgba(207,74,20,0.3);
   }
   .stx-period-divider { width: 1px; height: 28px; background: var(--line); margin: 0 4px; flex-shrink: 0; }
   .stx-date-wrap { display: flex; align-items: center; gap: 8px; }
@@ -108,7 +120,7 @@
   }
   .stx-search-wrap input[type="search"] { padding-left: 30px; }
   .stx-filters select { padding-right: 28px; }
-  .stx-filters select.filtered { border-color: var(--brass); color: var(--brass-dark); background: rgba(0,0,0,.06); font-weight: 600; }
+  .stx-filters select.filtered { border-color: var(--brass); color: var(--brass-dark); background: rgba(207,74,20,.06); font-weight: 600; }
   .stx-filters .stx-filter-dim {
     padding: 7px 11px; border: 1px solid var(--line); border-radius: 8px;
     background: var(--stone); font-family: 'DM Sans', sans-serif;
@@ -120,7 +132,7 @@
     border: 1px solid var(--line); background: var(--stone); border-radius: 8px;
     cursor: pointer; color: var(--ink); transition: all .15s ease;
   }
-  .stx-icon-btn:hover { border-color: var(--brass); color: var(--brass-dark); background: rgba(0,0,0,.06); }
+  .stx-icon-btn:hover { border-color: var(--brass); color: var(--brass-dark); background: rgba(207,74,20,.06); }
   .stx-icon-btn svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
   .stx-pos { position: relative; }
   .stx-pop {
@@ -155,7 +167,7 @@
   /* ---- Table ---- */
   .stx-table-wrap { overflow-x: auto; background: var(--component-bg); border: 1px solid var(--line); border-radius: 12px; }
   .stx-table-wrap .admin-table { min-width: 980px; }
-  .stx-table-wrap .admin-table th { background: #f6f6f6; white-space: nowrap; }
+  .stx-table-wrap .admin-table th { background: #faf8f4; white-space: nowrap; }
   .stx-table-wrap th.sortable { cursor: pointer; user-select: none; }
   .stx-table-wrap th.sortable:hover { color: var(--brass-dark); opacity: 1; }
   .stx-table-wrap .caret {
@@ -174,21 +186,21 @@
     display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 20px;
     font-size: 0.66rem; font-family: 'DM Sans', sans-serif; font-weight: 700; text-transform: uppercase;
   }
-  .source-online { background: rgba(0,0,0,0.15); color: var(--brass-dark); }
+  .source-online { background: rgba(207,74,20,0.15); color: var(--brass-dark); }
   .source-pos { background: rgba(21,23,26,0.08); color: var(--ink); opacity: 0.7; }
-  .source-reservation { background: rgba(0,0,0,0.2); color: var(--brass-dark); }
-  .view-daily-orders-btn, .view-daily-order-detail { border:1px solid rgba(0,0,0,.38); border-radius:6px; background:#fff; color:var(--brass-dark); padding:6px 9px; font:700 .67rem 'DM Sans', sans-serif; text-transform:uppercase; cursor:pointer; }
-  .view-daily-orders-btn:hover, .view-daily-order-detail:hover { background:rgba(0,0,0,.12); border-color:var(--brass); }
+  .source-reservation { background: rgba(207,74,20,0.2); color: var(--brass-dark); }
+  .view-daily-orders-btn, .view-daily-order-detail { border:1px solid rgba(207,74,20,.38); border-radius:6px; background:#fff; color:var(--brass-dark); padding:6px 9px; font:700 .67rem 'DM Sans', sans-serif; text-transform:uppercase; cursor:pointer; }
+  .view-daily-orders-btn:hover, .view-daily-order-detail:hover { background:rgba(207,74,20,.12); border-color:var(--brass); }
   .status-pill { padding: 4px 10px; border-radius: 20px; font-size: 0.66rem; font-family: 'DM Sans', sans-serif; font-weight: 700; text-transform: uppercase; white-space: nowrap; }
   .status-pending { background: rgba(184,134,11,0.14); color: var(--warning); }
-  .status-confirmed { background: rgba(0,0,0,0.15); color: var(--brass-dark); }
+  .status-confirmed { background: rgba(207,74,20,0.15); color: var(--brass-dark); }
   .status-preparing { background: rgba(52,109,196,0.14); color: #2c5fb0; }
   .status-ready { background: rgba(46,125,79,0.14); color: #23633e; }
   .status-completed { background: rgba(46,125,79,0.14); color: var(--success); }
   .status-cancelled { background: rgba(192,57,43,0.14); color: var(--danger); }
   .needs-action td:first-child { border-left: 3px solid var(--warning); }
-  .reservation-order td { background: rgba(0,0,0,0.03); }
-  .reservation-order:hover td { background: rgba(0,0,0,0.06); }
+  .reservation-order td { background: rgba(207,74,20,0.03); }
+  .reservation-order:hover td { background: rgba(207,74,20,0.06); }
 
   .row-actions { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
   .row-actions button {
@@ -249,12 +261,13 @@
 
   /* ---- Reports ---- */
   .report-section-title {
-    font-family: 'Bricolage Grotesque', sans-serif; text-transform: uppercase; font-size: 0.85rem;
+    font-family: 'Outfit', sans-serif; text-transform: uppercase; font-size: 0.85rem;
     margin: 0 0 12px; display: flex; align-items: center; justify-content: space-between; gap: 10px;
   }
 
   @media (max-width: 900px) {
-    .stx-cards { grid-template-columns: 1fr; }
+    .stx-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .stx-card-margin { grid-column: 1 / -1; }
     .stx-toolbar { align-items: stretch; }
     .stx-filters { width: 100%; }
     .stx-filters input[type="search"] { flex: 1; width: auto; }
@@ -271,7 +284,7 @@
   .stx-dialog-backdrop { position:fixed; inset:0; z-index:400; display:none; align-items:center; justify-content:center; padding:18px; background:rgba(15,16,18,0.5); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
   .stx-dialog-backdrop.active { display:flex; }
   .stx-dialog { width:min(100%,430px); max-height:calc(100vh - 36px); overflow:auto; background:#fff; border-radius:var(--radius-lg); box-shadow: var(--shadow-lg); color:var(--ink); border: 1px solid var(--line); animation: modalSlideIn 0.22s cubic-bezier(0.16,1,0.3,1) both; }
-  .stx-dialog-head { display:flex; align-items:center; justify-content:space-between; padding:15px 16px; border-bottom:1px solid var(--line); font-weight:700; font-size:.9rem; font-family: 'Bricolage Grotesque', sans-serif; text-transform: uppercase; letter-spacing: 0.02em; }
+  .stx-dialog-head { display:flex; align-items:center; justify-content:space-between; padding:15px 16px; border-bottom:1px solid var(--line); font-weight:700; font-size:.9rem; font-family: 'Outfit', sans-serif; text-transform: uppercase; letter-spacing: 0.02em; }
   .stx-dialog-close { border:0; background:none; color:var(--ink-muted); cursor:pointer; font-size:1rem; padding:2px 6px; transition: color .15s ease; }
   .stx-dialog-close:hover { color: var(--danger); }
   .stx-dialog-body { padding:10px 16px 16px; }
@@ -282,15 +295,15 @@
   .stx-column-option:hover { background: var(--stone); }
   .stx-column-option input, .stx-setting-card input { accent-color: var(--brass); }
   .stx-export-option { display:flex; align-items:center; gap:8px; width:100%; padding:9px 6px; border:0; background:#fff; text-align:left; color:var(--ink); font:500 .82rem 'DM Sans',sans-serif; cursor:pointer; border-radius:6px; transition: all .15s ease; }
-  .stx-export-option:hover { background: rgba(0,0,0,0.08); color: var(--brass-dark); }
+  .stx-export-option:hover { background: rgba(207,74,20,0.08); color: var(--brass-dark); }
   .stx-dialog-footer { padding:0 16px 16px; }
   .stx-dialog-footer button { width:100%; border:1px solid var(--line); border-radius:8px; padding:10px; background: var(--stone); color:var(--ink); cursor:pointer; font-weight: 600; transition: all .15s ease; }
-  .stx-dialog-footer button:hover { border-color: var(--brass); color: var(--brass-dark); background: rgba(0,0,0,0.08); }
+  .stx-dialog-footer button:hover { border-color: var(--brass); color: var(--brass-dark); background: rgba(207,74,20,0.08); }
   .stx-setting-title { font-weight:800; font-size:.82rem; margin:4px 0 2px; }
   .stx-setting-help { color:var(--ink-muted); font-size:.72rem; margin-bottom:8px; }
   .stx-setting-card { display:flex; align-items:flex-start; gap:10px; border:1px solid var(--line); border-radius:8px; padding:11px; margin-bottom:9px; cursor:pointer; transition: all .15s ease; }
   .stx-setting-card:hover { border-color: var(--line-strong); background: var(--stone); }
-  .stx-setting-card.selected { border-color: var(--brass); background: rgba(0,0,0,0.07); }
+  .stx-setting-card.selected { border-color: var(--brass); background: rgba(207,74,20,0.07); }
   .stx-setting-card b { display:block; font-size:.82rem; }
   .stx-setting-card span { display:block; color:var(--ink-muted); font-size:.7rem; margin-top:3px; }
   .stx-settings-divider { border:0; border-top:1px solid var(--line); margin:13px 0; }
@@ -300,7 +313,7 @@
   .stx-hours-line { width:66px; height:2px; background: var(--brass-light); position:relative; }
   .stx-hours-line:before,.stx-hours-line:after { content:''; position:absolute; top:-3px; width:8px; height:8px; border-radius:50%; background: var(--brass-dark); }
   .stx-hours-line:before { left:0; }.stx-hours-line:after { right:0; }
-  @media(max-width:700px){ .stx-cards{grid-template-columns:1fr}.stx-dialog{max-width:100%}.stx-filters input[type="search"]{width:100%} }
+  @media(max-width:700px){ .stx-cards{grid-template-columns:1fr}.stx-card-margin{grid-column:auto}.stx-dialog{max-width:100%}.stx-filters input[type="search"]{width:100%} }
   .stx-report-fields { display:grid; grid-template-columns:minmax(180px,1fr) minmax(180px,2fr); gap:8px; margin-bottom:12px; align-items:end; }
   .stx-report-field { position:relative; display:block; border:1px solid var(--line); border-radius:8px; background:#fff; padding:11px 9px 5px; transition: border-color .15s ease; }
   .stx-report-field:focus-within { border-color: var(--brass); }
@@ -314,9 +327,9 @@
     to { opacity: 1; transform: none; }
   }
 
-  /* ---- Extra hover polish for summary cards ---- */
-  .stx-card { transition: box-shadow var(--transition-base), transform var(--transition-fast), border-color var(--transition-base); }
-  .stx-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); border-color: var(--line-strong); }
+  /* ---- Summary card hover polish ---- */
+  .stx-card:hover { box-shadow: var(--shadow-md); border-color: var(--line-strong); }
+  .stx-card-margin:hover { border-color: #393631; }
 </style>
 </head>
 <body>
@@ -328,8 +341,9 @@
   import { adminFetch, peso, formatDate, escapeHtml } from "./admin-api.js";
   import {
     openReceiptModal,
-    normalizeOrderData
-  } from "./receipt-printer.js";
+    normalizeOrderData,
+    printReceiptAutomatic
+  } from "./receipt-printer.js?v=4";
 
   const session = renderAdminShell({ active: 'sales', title: 'Sales Transactions' });
 
@@ -369,18 +383,6 @@
 
   function statusLabel(s) { return String(s || '').charAt(0).toUpperCase() + String(s || '').slice(1); }
 
-  function ringSVG(pct) {
-    const r = 18, c = 2 * Math.PI * r;
-    const val = Math.round(Math.max(0, Math.min(100, Number(pct) || 0)));
-    const filled = (val / 100) * c;
-    return `<svg class="stx-ring" viewBox="0 0 48 48" width="50" height="50" aria-hidden="true">
-      <circle cx="24" cy="24" r="${r}" fill="none" stroke="var(--line)" stroke-width="4.5"/>
-      <circle cx="24" cy="24" r="${r}" fill="none" stroke="currentColor" stroke-width="4.5" stroke-linecap="round"
-              stroke-dasharray="${filled} ${c - filled}" transform="rotate(-90 24 24)"/>
-      <text x="24" y="27" text-anchor="middle" font-size="10.5" font-weight="700" fill="currentColor">${val}%</text>
-    </svg>`;
-  }
-
   function init() {
     const content = document.getElementById('adminContent');
     content.innerHTML = `
@@ -400,27 +402,39 @@
         ${canReports ? `
         <div class="stx-cards">
           <div class="stx-card">
-            <div>
+            <div class="stx-card-main">
               <div class="label">Sales</div>
               <div class="value" id="sumSales">₱0.00</div>
-              <div class="sub" id="sumSalesSub">—</div>
+            </div>
+            <div class="stx-card-footer">
+              <div class="stx-card-foot-metric"><span>Orders</span><strong id="sumSalesOrders">—</strong></div>
+              <div class="stx-card-foot-metric"><span>Avg. order</span><strong id="sumSalesAov">—</strong></div>
             </div>
           </div>
           <div class="stx-card">
-            <div>
+            <div class="stx-card-main">
               <div class="label">Cost of Goods Sold</div>
               <div class="value" id="sumCogs">₱0.00</div>
               <div class="sub">ingredients + add-ons</div>
             </div>
-            <span id="sumCogsRing" style="color:var(--brass-dark);">${ringSVG(0)}</span>
-          </div>
-          <div class="stx-card">
-            <div>
-              <div class="label">Margin</div>
-              <div class="value green" id="sumMargin">₱0.00</div>
-              <div class="sub" id="sumMarginSub">gross profit</div>
+            <div class="stx-card-footer">
+              <div class="stx-card-foot-metric"><span>Share of sales</span><strong id="sumCogsShare">0%</strong></div>
             </div>
-            <span id="sumMarginRing" style="color:var(--success);">${ringSVG(0)}</span>
+          </div>
+          <div class="stx-card stx-card-margin" id="sumMarginCard">
+            <div class="stx-card-main">
+              <div class="stx-margin-head">
+                <div class="label">Gross Margin</div>
+                <span class="stx-margin-badge" id="sumMarginBadge">0%</span>
+              </div>
+              <div class="value" id="sumMargin">₱0.00</div>
+            </div>
+            <div>
+              <div class="stx-margin-track" id="sumMarginTrack" role="progressbar" aria-label="Gross margin share of sales" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                <span class="stx-margin-fill" id="sumMarginFill"></span>
+              </div>
+              <div class="stx-margin-legend"><span id="sumMarginKept">Kept ₱0.00</span><span id="sumMarginCost">Cost ₱0.00</span></div>
+            </div>
           </div>
         </div>` : ''}
 
@@ -722,20 +736,26 @@
     initializeSettingsControls();
 
     /* ---- Order modal ---- */
-    document.getElementById('orderModalCloseBtn').addEventListener('click', () => {
+    const _backParam = new URLSearchParams(window.location.search).get('back');
+    const _closeOrderModal = () => {
       document.getElementById('orderModal').classList.remove('active');
-    });
+      if (_backParam === 'dashboard') window.location.href = 'dashboard';
+    };
+    document.getElementById('orderModalCloseBtn').addEventListener('click', _closeOrderModal);
     document.getElementById('orderModalPrintBtn')?.addEventListener('click', () => {
       if (currentModalOrder) {
         openReceiptModal(normalizeOrderData(currentModalOrder));
       }
     });
     document.getElementById('orderModal').addEventListener('click', (e) => {
-      if (e.target === e.currentTarget) e.currentTarget.classList.remove('active');
+      if (e.target === e.currentTarget) _closeOrderModal();
     });
 
     refresh();
     startAutoRefresh();
+
+    const requestedOrderId = new URLSearchParams(window.location.search).get('orderId');
+    if (/^\d+$/.test(requestedOrderId || '')) openOrderModal(requestedOrderId);
   }
 
   function activePeriod() {
@@ -958,12 +978,17 @@
       const marginPct = Number(s.margin) || 0;
 
       document.getElementById('sumSales').textContent = peso(sales);
-      document.getElementById('sumSalesSub').textContent = `${s.order_count} orders · avg ${peso(s.aov)}`;
+      document.getElementById('sumSalesOrders').textContent = s.order_count;
+      document.getElementById('sumSalesAov').textContent = peso(s.aov);
       document.getElementById('sumCogs').textContent = peso(cogs);
-      document.getElementById('sumCogsRing').innerHTML = ringSVG(sales > 0 ? (cogs / sales) * 100 : 0);
+      document.getElementById('sumCogsShare').textContent = `${sales > 0 ? ((cogs / sales) * 100).toFixed(2) : '0.00'}%`;
       document.getElementById('sumMargin').textContent = peso(profit);
-      document.getElementById('sumMarginRing').innerHTML = ringSVG(marginPct);
-      document.getElementById('sumMarginSub').textContent = `Margin ${marginPct}%`;
+      document.getElementById('sumMarginBadge').textContent = `${marginPct}%`;
+      document.getElementById('sumMarginKept').textContent = `Kept ${peso(profit)}`;
+      document.getElementById('sumMarginCost').textContent = `Cost ${peso(cogs)}`;
+      document.getElementById('sumMarginFill').style.width = `${Math.max(0, Math.min(100, marginPct))}%`;
+      document.getElementById('sumMarginTrack').setAttribute('aria-valuenow', String(Math.max(0, Math.min(100, marginPct))));
+      document.getElementById('sumMarginCard').classList.toggle('is-negative', profit < 0);
     } catch (err) {
       console.error('Summary error:', err.message);
     }
@@ -1184,7 +1209,7 @@
     
     switch (o.status) {
       case 'pending':
-        return `${view}<button class="primary" data-action="confirmed" data-id="${id}">Confirm</button><button class="danger" data-action="cancelled" data-id="${id}">Cancel</button>`;
+        return `<button class="primary" data-view="${id}">View &amp; Confirm</button><button class="danger" data-action="cancelled" data-id="${id}">Cancel</button>`;
       case 'confirmed':
         return `${view}<button class="primary" data-action="preparing" data-id="${id}">Prepare</button><button class="danger" data-action="cancelled" data-id="${id}">Cancel</button>`;
       case 'preparing':
@@ -1213,6 +1238,20 @@
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Could not update order status.');
+
+      // Auto-print receipt when order is confirmed or completed
+      if (newStatus === 'confirmed' || newStatus === 'completed') {
+        try {
+          const orderRes = await adminFetch(`/api/admin/sales/orders/${orderId}`);
+          const orderData = await orderRes.json();
+          if (orderRes.ok && orderData.order) {
+            const receiptData = normalizeOrderData(orderData.order);
+            printReceiptAutomatic(receiptData, null, null);
+          }
+        } catch (printErr) {
+          console.warn('Auto-print after status change failed:', printErr);
+        }
+      }
 
       loadOrders();
       loadSummary();
@@ -1351,6 +1390,17 @@
     }
   }
 
+  function parseCustomItemsFromNotes(notesStr) {
+    if (!notesStr) return [];
+    const marker = '---CUSTOM_ITEMS_JSON---';
+    const idx = notesStr.indexOf(marker);
+    if (idx === -1) return [];
+    try {
+      const parsed = JSON.parse(notesStr.slice(idx + marker.length).trim());
+      return Array.isArray(parsed) ? parsed : [];
+    } catch { return []; }
+  }
+
   function renderOrderDetail(o) {
     currentModalOrder = o;
     const source = o.source === 'online' ? 'Online (Customer)' : `POS · ${escapeHtml(o.staff_name || 'Staff')}`;
@@ -1362,7 +1412,7 @@
     // than the actual fulfillment method, so fall back to whether we have
     // delivery-specific data on the order to decide if this is a delivery.
     const isDelivery = o.order_type === 'delivery' || (o.order_type === 'online' && !!o.delivery_address);
-    const typeLabel = (o.order_type === 'online' && isDelivery) ? 'Delivery' : orderTypeLabel(o.order_type);
+    const typeLabel = (o.order_type === 'delivery') ? 'Delivery' : ((o.order_type === 'online' && isDelivery) ? 'Delivery' : orderTypeLabel(o.order_type));
 
     const deliveryBlock = isDelivery ? `
       <div class="om-delivery">
@@ -1377,6 +1427,8 @@
           ${o.special_instructions ? `<div class="row" style="grid-column:1/-1;"><span>Special Prep Instructions</span><b>${escapeHtml(o.special_instructions)}</b></div>` : ''}
         </div>
       </div>` : '';
+
+    const cleanNotes = (o.clean_notes != null) ? o.clean_notes : (o.notes || '').split('---CUSTOM_ITEMS_JSON---')[0].trim();
 
     const itemsRows = (o.items || []).map(it => `
       <tr>
@@ -1393,6 +1445,27 @@
         <td class="right">${peso(Number(it.subtotal) + (it.add_ons || []).reduce((s, a) => s + Number(a.subtotal), 0))}</td>
       </tr>`).join('');
 
+    const customList = (Array.isArray(o.custom_items) && o.custom_items.length)
+      ? o.custom_items
+      : parseCustomItemsFromNotes(o.notes || '');
+
+    const customItemsRows = customList.map(ci => {
+      const qty = Number(ci.quantity || ci.qty || 1);
+      const price = Number(ci.price || 0);
+      const subtotal = qty * price;
+      return `
+        <tr>
+          <td>
+            <span style="display:inline-block; font-size:0.65rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; padding:2px 6px; border-radius:4px; background:#f0e6d2; color:#8b6b23; margin-right:6px;">Custom</span>
+            <b>${escapeHtml(ci.name || ci.product_name || 'Custom Order Item')}</b>
+            ${ci.notes ? `<div style="font-size:0.72rem; color:var(--ink-muted);">${escapeHtml(ci.notes)}</div>` : ''}
+          </td>
+          <td class="right">${peso(price)}</td>
+          <td class="right">${qty}</td>
+          <td class="right">${peso(subtotal)}</td>
+        </tr>`;
+    }).join('');
+
     const body = document.getElementById('orderModalBody');
     body.innerHTML = `
       <div class="om-meta">
@@ -1403,13 +1476,18 @@
         <div class="row"><span>Payment</span><b>${payment}</b></div>
         <div class="row"><span>Placed</span><b>${formatDate(o.datetime_ordered)}</b></div>
         ${o.reservation_date ? `<div class="row"><span>Reservation Date</span><b>${formatDate(o.reservation_date)} at ${String(o.reservation_time || '').slice(0, 5)}</b></div>` : ''}
+        ${cleanNotes ? `<div class="row" style="grid-column:1/-1;"><span>Order Notes</span><b>${escapeHtml(cleanNotes)}</b></div>` : ''}
       </div>
 
       ${deliveryBlock}
 
       <table class="om-items">
         <thead><tr><th>Item</th><th class="right">Unit Price</th><th class="right">Qty</th><th class="right">Total</th></tr></thead>
-        <tbody>${itemsRows}</tbody>
+        <tbody>
+          ${itemsRows}
+          ${customItemsRows}
+          ${(!itemsRows && !customItemsRows) ? `<tr><td colspan="4" style="text-align:center; color:var(--ink-muted); padding:16px;">No items in this order</td></tr>` : ''}
+        </tbody>
       </table>
 
       <div class="om-totals">

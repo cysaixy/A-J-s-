@@ -1,11 +1,11 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
-<head>
+<head><base href="/admin/">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Reservations — A&J's Foodflix Admin</title>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="admin-shell.css?v=7">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&family=JetBrains+Mono:wght@500;700&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="admin-shell.css?v=9">
 <style>
   /* ================================================================
      RESERVATIONS — Scoped Design System
@@ -56,7 +56,7 @@
   .res-filters input:focus, .res-filters select:focus {
     outline: none;
     border-color: var(--brass);
-    box-shadow: 0 0 0 3px rgba(0,0,0,0.12);
+    box-shadow: 0 0 0 3px rgba(207,74,20,0.12);
   }
   .res-filters input[type="text"] {
     width: 220px;
@@ -67,7 +67,7 @@
   .res-filters select.filtered {
     border-color: var(--brass);
     color: var(--brass-dark);
-    background: rgba(0,0,0,0.08);
+    background: rgba(207,74,20,0.08);
     font-weight: 600;
   }
 
@@ -95,14 +95,14 @@
     font-weight: 600;
     cursor: pointer;
     text-decoration: none;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+    box-shadow: 0 3px 10px rgba(138,109,58,0.2);
     transition: all 0.15s ease;
     white-space: nowrap;
   }
   .res-add-btn:hover {
     background: linear-gradient(135deg, #b8924e 0%, #7a5e2c 100%);
     transform: translateY(-1px);
-    box-shadow: 0 5px 14px rgba(0,0,0,0.28);
+    box-shadow: 0 5px 14px rgba(138,109,58,0.28);
   }
   .res-add-btn svg {
     width: 15px;
@@ -140,7 +140,7 @@
     background: var(--stone);
     border-color: var(--brass);
     color: var(--brass-dark);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    box-shadow: 0 2px 8px rgba(207,74,20,0.15);
   }
   .res-chip-badge {
     display: inline-flex;
@@ -155,7 +155,7 @@
     font-weight: 700;
   }
   .res-chip.chip-pending .res-chip-badge { background: rgba(184,134,11,0.15); color: var(--warning); }
-  .res-chip.chip-today .res-chip-badge { background: rgba(0,0,0,0.18); color: var(--brass-dark); }
+  .res-chip.chip-today .res-chip-badge { background: rgba(207,74,20,0.18); color: var(--brass-dark); }
   .res-chip.chip-overdue .res-chip-badge { background: rgba(192,57,43,0.15); color: var(--danger); }
   .res-chip.chip-all .res-chip-badge { background: rgba(21,23,26,0.08); color: var(--ink-muted); }
 
@@ -273,7 +273,7 @@
     border-color: var(--brass);
     border-style: solid;
     color: var(--brass-dark);
-    background: rgba(0,0,0,0.08);
+    background: rgba(207,74,20,0.08);
   }
   .table-badge-empty.clickable:active { transform: translateY(1px); }
   .table-badge-empty .plus-icon { font-size: 0.8rem; line-height: 1; }
@@ -321,16 +321,16 @@
     white-space: nowrap;
   }
   .res-status-pending { background: rgba(184,134,11,0.14); color: #9e7308; }
-  .res-status-contact_customer { background: rgba(0,0,0,0.16); color: var(--brass-dark); }
+  .res-status-contact_customer { background: rgba(207,74,20,0.16); color: var(--brass-dark); }
   .res-status-order_preparing { background: rgba(52,109,196,0.12); color: #2c5fb0; }
-  .res-status-order_finalized { background: rgba(0,0,0,0.22); color: var(--brass-dark); }
+  .res-status-order_finalized { background: rgba(207,74,20,0.22); color: var(--brass-dark); }
   .res-status-confirmed { background: rgba(46,125,79,0.14); color: #23633e; }
   .res-status-cancelled { background: rgba(192,57,43,0.12); color: #c0392b; }
   .res-status-completed { background: rgba(46,125,79,0.14); color: var(--success); }
 
   .order-status-no_order { background: rgba(21,23,26,0.06); color: var(--ink-muted); }
   .order-status-editable { background: rgba(46,125,79,0.12); color: #23633e; }
-  .order-status-finalized { background: rgba(0,0,0,0.16); color: var(--brass-dark); }
+  .order-status-finalized { background: rgba(207,74,20,0.16); color: var(--brass-dark); }
   .order-status-locked { background: rgba(192,57,43,0.12); color: #c0392b; }
 
   /* Deadline indicator */
@@ -372,7 +372,7 @@
   .res-btn:hover {
     border-color: var(--brass);
     color: var(--brass-dark);
-    background: rgba(0,0,0,0.06);
+    background: rgba(207,74,20,0.06);
   }
   .res-btn.res-btn-primary {
     background: var(--brass);
@@ -381,7 +381,7 @@
   }
   .res-btn.res-btn-primary:hover {
     background: var(--brass-dark);
-    box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+    box-shadow: 0 2px 6px rgba(138,109,58,0.25);
   }
   .res-btn.res-btn-danger {
     color: var(--danger);
@@ -401,7 +401,7 @@
     gap: 10px;
     padding: 12px 16px;
     border-top: 1px solid var(--line);
-    background: #f6f6f6;
+    background: #faf8f4;
     font-family: 'DM Sans', sans-serif;
     font-size: 0.68rem;
     text-transform: uppercase;
@@ -526,6 +526,93 @@
     font-weight: 700;
   }
 
+  /* Custom Advance Items table in order editor */
+  .custom-items-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+    margin-top: 8px;
+  }
+  .custom-items-table th {
+    text-align: left;
+    padding: 6px 8px;
+    background: var(--stone);
+    border-bottom: 1px solid var(--line);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.60rem;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    font-weight: 700;
+  }
+  .custom-items-table td {
+    padding: 4px 6px;
+    border-bottom: 1px dashed var(--line);
+    vertical-align: middle;
+  }
+  .custom-items-table input {
+    width: 100%;
+    padding: 5px 8px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: #fff;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.80rem;
+    color: var(--ink);
+    box-sizing: border-box;
+  }
+  .custom-items-table input:focus {
+    outline: none;
+    border-color: var(--brass);
+    box-shadow: 0 0 0 2px rgba(207,74,20,0.12);
+  }
+  .custom-items-table input[type="number"] {
+    width: 64px;
+    text-align: center;
+  }
+  .custom-items-table .del-custom-row {
+    background: none;
+    border: none;
+    color: var(--danger);
+    cursor: pointer;
+    font-size: 1.1rem;
+    line-height: 1;
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: background 0.12s;
+  }
+  .custom-items-table .del-custom-row:hover { background: rgba(192,57,43,0.08); }
+  .add-custom-row-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: none;
+    border: 1px dashed var(--line-strong);
+    color: var(--brass-dark);
+    border-radius: 6px;
+    padding: 5px 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: all 0.14s;
+  }
+  .add-custom-row-btn:hover { border-color: var(--brass); background: rgba(207,74,20,0.06); }
+
+  /* Print receipt styles */
+  @media print {
+    body * { visibility: hidden; }
+    #receiptPrintArea, #receiptPrintArea * { visibility: visible; }
+    #receiptPrintArea {
+      position: fixed; top: 0; left: 0;
+      width: 80mm;
+      font-family: 'Courier New', monospace;
+      font-size: 11px;
+      color: #000;
+      padding: 8px;
+    }
+  }
+
   /* Toast Notification */
   .toast {
     position: fixed; bottom: 22px; right: 22px; z-index: 250;
@@ -556,6 +643,13 @@
 <script type="module">
   import { renderAdminShell, confirmDialog } from "./admin-shell.js";
   import { adminFetch, formatDate, escapeHtml, peso } from "./admin-api.js";
+  import {
+    printerManager,
+    normalizeOrderData,
+    openReceiptModal,
+    printReceiptSystem,
+    printReceiptAutomatic
+  } from "./receipt-printer.js?v=4";
 
   const session = renderAdminShell({ active: 'reservations', title: 'Reservations' });
   if (session) init();
@@ -778,6 +872,8 @@
         else if (action === 'contact') updateReservationStatus(id, 'contact_customer');
         else if (action === 'order') openManageModal(id);
         else if (action === 'finalize') updateReservationStatus(id, 'order_finalized');
+        else if (action === 'completed') openCompleteModal(id);
+        else if (action === 'receipt') openReservationReceipt(id);
         else updateStatus(id, action);
       });
     });
@@ -795,6 +891,7 @@
     const tag = !terminal && diff === 0 ? '<span class="urgency-tag today">Today</span>'
               : !terminal && diff < 0 ? '<span class="urgency-tag overdue">Overdue</span>' : '';
     const notes = r.notes || '';
+    const dispNotes = notes ? formatNotesForDisplay(notes) : '';
     
     // Order deadline display
     const deadline = r.order_editing_deadline ? fmtDate(r.order_editing_deadline) : '—';
@@ -835,7 +932,7 @@
         <td><span class="res-status-pill ${STATUS_PILL[resStatusLabel] || 'res-status-pending'}">${escapeHtml(resStatusLabel.replace(/_/g, ' '))}</span></td>
         <td><span class="order-status-pill ${ORDER_STATUS_PILL[orderStatusLabel] || 'order-status-no_order'}">${escapeHtml(orderStatusLabel.replace(/_/g, ' '))}</span></td>
         <td><span class="deadline-value ${deadlineClass}">${deadline}</span></td>
-        <td><div class="notes-cell${notes ? '' : ' empty'}" title="${escapeHtml(notes)}">${notes ? escapeHtml(notes) : '—'}</div></td>
+        <td><div class="notes-cell${dispNotes ? '' : ' empty'}" title="${escapeHtml(dispNotes)}">${dispNotes ? escapeHtml(dispNotes) : '—'}</div></td>
         <td style="text-align:right;"><div class="res-actions-wrap" style="justify-content:flex-end;">${actionButtons(r)}</div></td>
       </tr>
     `;
@@ -886,14 +983,17 @@
               <button class="res-btn res-btn-primary" data-action="completed" data-id="${r.id}">Complete</button>
               <button class="res-btn res-btn-danger" data-action="cancelled" data-id="${r.id}">Cancel</button>`;
     }
+    if (r.status === 'completed' && r.order_status !== 'no_order') {
+      return `${viewBtn}
+              <button class="res-btn" data-action="receipt" data-id="${r.id}">Receipt</button>`;
+    }
     return `${viewBtn}`;
   }
 
-  // ---- Confirm modal: table assignment is optional ----
+  // ---- Confirm modal — no table assignment needed (staff assigns table on arrival) ----
   function openConfirmModal(id) {
     const r = reservations.find(x => x.id == id);
     if (!r) return;
-    const currentTable = r.table_no || "";
 
     const backdrop = document.createElement("div");
     backdrop.className = "modal-backdrop active";
@@ -902,13 +1002,13 @@
         <h3>Confirm Reservation #${r.id}</h3>
         <div class="detail-list" style="margin-bottom:18px;">
           <dt>Customer</dt><dd><b>${escapeHtml(r.customer_name)}</b></dd>
-          <dt>Date & Time</dt><dd>${r.reservation_date ? fmtDate(r.reservation_date) : "—"} at ${String(r.reservation_time || "").slice(0, 5)}</dd>
+          <dt>Date &amp; Time</dt><dd>${r.reservation_date ? fmtDate(r.reservation_date) : "—"} at ${String(r.reservation_time || "").slice(0, 5)}</dd>
           <dt>Guests</dt><dd><span class="guests-badge">${r.guests} guests</span></dd>
         </div>
-        <div class="form-field" style="margin-top:16px;">
-          <label for="confirmTable">Assign Table (optional)</label>
-          <input type="text" id="confirmTable" placeholder="e.g. Table 1, T-02, Patio A" value="${escapeHtml(currentTable)}">
-        </div>
+        <p style="font-size:0.82rem; color:var(--ink-muted); margin:0 0 18px; line-height:1.55;">
+          Confirming this reservation will lock the order and notify the customer.
+          The table will be assigned by staff when the guest arrives.
+        </p>
         <div class="modal-error" id="confirmError"></div>
         <div class="modal-close-row">
           <button class="btn btn-outline" id="confirmClose">Back</button>
@@ -918,42 +1018,41 @@
     `;
     document.body.appendChild(backdrop);
 
-    const input = backdrop.querySelector("#confirmTable");
-
     backdrop.querySelector("#confirmClose").addEventListener("click", close);
     backdrop.addEventListener("click", (e) => { if (e.target === backdrop) close(); });
     backdrop.querySelector("#confirmSubmit").addEventListener("click", async () => {
       const btn = backdrop.querySelector("#confirmSubmit");
       const errEl = backdrop.querySelector("#confirmError");
       errEl.classList.remove("show");
-      const tableNo = input.value.trim();
       btn.disabled = true;
+      btn.textContent = 'Confirming…';
       try {
         const res = await adminFetch(`/api/admin/reservations/${id}/confirm`, {
           method: "PATCH",
-          body: JSON.stringify({ table_no: tableNo || null }),
+          body: JSON.stringify({}),
         });
         const data = await res.json();
         if (!res.ok) {
           errEl.textContent = data.error || "Could not confirm this reservation.";
           errEl.classList.add("show");
           btn.disabled = false;
+          btn.textContent = 'Confirm Reservation';
           return;
         }
         const r0 = reservations.find(x => x.id == id);
-        if (r0) { 
-          r0.status = "confirmed"; 
-          r0.table_no = data.reservation.table_no;
+        if (r0) {
+          r0.status = "confirmed";
           r0.reservation_status = "confirmed";
           r0.order_status = "finalized";
         }
         close();
-        toast(data.reservation.table_no ? `Confirmed — Table ${data.reservation.table_no} assigned.` : "Reservation confirmed.", "success");
+        toast('Reservation confirmed! Table will be assigned on arrival.', 'success');
         render();
       } catch (err) {
         errEl.textContent = err.message;
         errEl.classList.add("show");
         btn.disabled = false;
+        btn.textContent = 'Confirm Reservation';
       }
     });
 
@@ -963,12 +1062,14 @@
   function openWalkinModal() {
     const minDate = new Date();
     minDate.setDate(minDate.getDate() + 4);
-    const minDateStr = minDate.toISOString().split('T')[0];
+    const minDateStr = `${minDate.getFullYear()}-${String(minDate.getMonth() + 1).padStart(2, '0')}-${String(minDate.getDate()).padStart(2, '0')}`;
+
+    let walkinCustomItems = []; // [{ name: '', qty: 1, price: 0 }]
 
     const backdrop = document.createElement('div');
     backdrop.className = 'modal-backdrop active';
     backdrop.innerHTML = `
-      <div class="modal-box" style="max-width:540px;">
+      <div class="modal-box" style="max-width:620px; max-height:90vh; overflow-y:auto;">
         <h3>Add Walk-in Reservation</h3>
         <p style="font-size:0.80rem; color:var(--ink-muted); margin:0 0 16px;">Record a reservation for a customer visiting the store in-person.</p>
         <div class="form-grid" style="margin-bottom:14px;">
@@ -992,7 +1093,7 @@
           </div>
           <div class="form-field">
             <label for="walkinTime">Time *</label>
-            <input type="time" id="walkinTime" min="09:00" max="21:00" value="18:00" required>
+            <input type="time" id="walkinTime" min="08:00" max="20:00" value="18:00" required>
           </div>
           <div class="form-field">
             <label for="walkinGuests">Number of Guests *</label>
@@ -1003,11 +1104,17 @@
           <label for="walkinNotes">Notes / Special Requests</label>
           <textarea id="walkinNotes" placeholder="Birthday celebration, high chair, dietary needs, etc."></textarea>
         </div>
+
         <div class="form-field" style="margin-bottom:14px;">
-          <label for="walkinCustomOrder">Custom Advance Order Details</label>
-          <textarea id="walkinCustomOrder" placeholder="e.g. 360 pcs wings, 20 packs spaghetti, 50 pcs burger steak...&#10;Each line: quantity + item name"></textarea>
-          <small style="color:var(--ink-muted); font-size:0.70rem; margin-top:3px; display:block;">Enter preliminary food items for kitchen pre-order preparation.</small>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+            <label style="margin-bottom:0;">Custom Advance Order Details</label>
+            <span id="walkinTotalBadge" style="font-family:'DM Sans',sans-serif; font-size:0.75rem; font-weight:700; color:var(--brass-dark); display:none;">Total: ₱0.00</span>
+          </div>
+          <small style="color:var(--ink-muted); font-size:0.70rem; margin-bottom:8px; display:block;">Add preliminary food items, quantity, and unit price for kitchen pre-order preparation.</small>
+
+          <div id="walkinCustomItemsWrap"></div>
         </div>
+
         <div class="modal-error" id="walkinError"></div>
         <div class="modal-close-row">
           <button class="btn btn-outline" id="walkinClose">Cancel</button>
@@ -1016,6 +1123,121 @@
       </div>
     `;
     document.body.appendChild(backdrop);
+
+    function syncWalkinFromDOM() {
+      const wrap = backdrop.querySelector('#walkinCustomItemsWrap');
+      if (!wrap) return;
+      wrap.querySelectorAll('.wci-name').forEach(el => {
+        const i = +el.dataset.i;
+        if (walkinCustomItems[i]) walkinCustomItems[i].name = el.value;
+      });
+      wrap.querySelectorAll('.wci-qty').forEach(el => {
+        const i = +el.dataset.i;
+        if (walkinCustomItems[i]) walkinCustomItems[i].qty = parseFloat(el.value) || 1;
+      });
+      wrap.querySelectorAll('.wci-price').forEach(el => {
+        const i = +el.dataset.i;
+        if (walkinCustomItems[i]) walkinCustomItems[i].price = parseFloat(el.value) || 0;
+      });
+    }
+
+    function updateWalkinTotal() {
+      const totalBadge = backdrop.querySelector('#walkinTotalBadge');
+      const countEl = backdrop.querySelector('#walkinItemCount');
+      let total = 0;
+      let count = 0;
+      walkinCustomItems.forEach(ci => {
+        if (ci.name && ci.name.trim()) {
+          const q = parseFloat(ci.qty) || 1;
+          const p = parseFloat(ci.price) || 0;
+          total += (q * p);
+          count++;
+        }
+      });
+      if (totalBadge) {
+        if (count > 0) {
+          totalBadge.textContent = `Advance Order Total: ₱${total.toFixed(2)}`;
+          totalBadge.style.display = 'inline-block';
+        } else {
+          totalBadge.style.display = 'none';
+        }
+      }
+      if (countEl) {
+        countEl.textContent = count > 0 ? `${count} item${count > 1 ? 's' : ''}` : '';
+      }
+    }
+
+    function renderWalkinItems() {
+      const wrap = backdrop.querySelector('#walkinCustomItemsWrap');
+      if (!wrap) return;
+
+      let html = `
+        <table class="custom-items-table">
+          <thead><tr>
+            <th style="width:48%;">Item / Description</th>
+            <th style="width:16%; text-align:center;">Qty</th>
+            <th style="width:24%;">Price (₱)</th>
+            <th style="width:12%; text-align:center;"></th>
+          </tr></thead>
+          <tbody>
+      `;
+
+      if (walkinCustomItems.length === 0) {
+        html += `<tr><td colspan="4" style="text-align:center; color:var(--ink-muted); padding:10px; font-size:0.75rem;">No advance order items added yet. Click "+ Add Item" below.</td></tr>`;
+      } else {
+        walkinCustomItems.forEach((row, i) => {
+          html += `
+            <tr>
+              <td><input type="text" class="wci-name" data-i="${i}" placeholder="e.g. 360 pcs wings" value="${escapeHtml(row.name || '')}"></td>
+              <td><input type="number" class="wci-qty" data-i="${i}" min="1" step="1" placeholder="1" value="${row.qty ?? 1}"></td>
+              <td><input type="number" class="wci-price" data-i="${i}" min="0" step="0.01" placeholder="0.00" value="${row.price ?? 0}"></td>
+              <td style="text-align:center;"><button type="button" class="del-custom-row wci-del" data-i="${i}" title="Remove item">×</button></td>
+            </tr>`;
+        });
+      }
+
+      html += `</tbody></table>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
+        <button type="button" class="add-custom-row-btn" id="walkinAddRowBtn">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          Add Item
+        </button>
+        <span id="walkinItemCount" style="font-size:0.72rem; color:var(--ink-muted);"></span>
+      </div>`;
+
+      wrap.innerHTML = html;
+
+      updateWalkinTotal();
+
+      wrap.querySelectorAll('.wci-name, .wci-qty, .wci-price').forEach(el => {
+        el.addEventListener('input', () => {
+          syncWalkinFromDOM();
+          updateWalkinTotal();
+        });
+        el.addEventListener('change', () => {
+          syncWalkinFromDOM();
+          updateWalkinTotal();
+        });
+      });
+
+      wrap.querySelectorAll('.wci-del').forEach(el => {
+        el.addEventListener('click', () => {
+          syncWalkinFromDOM();
+          walkinCustomItems.splice(+el.dataset.i, 1);
+          renderWalkinItems();
+        });
+      });
+
+      wrap.querySelector('#walkinAddRowBtn').addEventListener('click', () => {
+        syncWalkinFromDOM();
+        walkinCustomItems.push({ name: '', qty: 1, price: 0 });
+        renderWalkinItems();
+        const inputs = wrap.querySelectorAll('.wci-name');
+        if (inputs.length > 0) inputs[inputs.length - 1].focus();
+      });
+    }
+
+    renderWalkinItems();
 
     const close = () => backdrop.remove();
     backdrop.querySelector('#walkinClose').addEventListener('click', close);
@@ -1031,7 +1253,15 @@
       const time = document.getElementById('walkinTime').value;
       const guests = parseInt(document.getElementById('walkinGuests').value) || 1;
       const notes = document.getElementById('walkinNotes').value.trim();
-      const customOrder = document.getElementById('walkinCustomOrder').value.trim();
+
+      syncWalkinFromDOM();
+      const validCustom = walkinCustomItems
+        .map(ci => ({
+          name: (ci.name || '').trim(),
+          qty: parseFloat(ci.qty) || 1,
+          price: parseFloat(ci.price) || 0,
+        }))
+        .filter(ci => ci.name);
 
       if (!name || !phone || !date || !time) {
         errEl.textContent = 'Name, phone, date, and time are required.';
@@ -1040,6 +1270,12 @@
       }
       if (!/^\d{11}$/.test(phone)) {
         errEl.textContent = 'Contact number must be exactly 11 digits.';
+        errEl.classList.add('show');
+        return;
+      }
+
+      if (time < '08:00' || time > '20:00') {
+        errEl.textContent = 'Shop is open 8:00 AM to 8:00 PM. Please select a time within opening hours.';
         errEl.classList.add('show');
         return;
       }
@@ -1059,7 +1295,9 @@
         const customerData = await customerRes.json();
         const customerId = customerData.customer.id;
 
-        const combinedNotes = [notes, customOrder].filter(Boolean).join('\n\n--- CUSTOM ORDER ---\n');
+        const finalNotes = buildNotesWithCustomItems(notes, validCustom);
+        const hasCustomOrder = validCustom.length > 0;
+
         const res = await adminFetch('/api/admin/reservations', {
           method: 'POST',
           body: JSON.stringify({
@@ -1067,10 +1305,10 @@
             reservation_date: date,
             reservation_time: time,
             guests,
-            notes: combinedNotes || null,
+            notes: finalNotes || null,
             status: 'pending',
-            reservation_status: 'pending',
-            order_status: 'no_order',
+            reservation_status: hasCustomOrder ? 'order_preparing' : 'pending',
+            order_status: hasCustomOrder ? 'editable' : 'no_order',
           }),
         });
         const data = await res.json();
@@ -1087,6 +1325,22 @@
             return;
           }
           throw new Error(data.error || 'Could not create reservation.');
+        }
+
+        // When custom advance order items are present, also save the order so it is linked to the reservation in the database
+        if (hasCustomOrder && data.reservation?.id) {
+          try {
+            await adminFetch(`/api/admin/reservations/${data.reservation.id}/order`, {
+              method: 'POST',
+              body: JSON.stringify({
+                items: [],
+                notes: finalNotes,
+                status: 'editable',
+              }),
+            });
+          } catch (orderErr) {
+            console.warn('Note: order link will be saved via reservation notes:', orderErr);
+          }
         }
 
         close();
@@ -1106,7 +1360,7 @@
 
   // ---- Manage Reservation Order Modal ----
   async function openManageModal(id) {
-    const r = reservations.find(x => x.id == id);
+    let r = reservations.find(x => x.id == id);
     if (!r) return;
 
     let orderData = null;
@@ -1117,16 +1371,131 @@
       console.error('Failed to load order:', err);
     }
 
-    const resStatus = r.reservation_status || r.status;
+    if (orderData?.reservation) {
+      Object.assign(r, orderData.reservation);
+    }
+
+    const resStatus = r.reservation_status || r.status || 'pending';
     const orderStatus = r.order_status || 'no_order';
     const today = startOfDay(new Date());
     const deadline = r.order_editing_deadline ? new Date(r.order_editing_deadline) : null;
     const isPastDeadline = deadline && today > deadline;
-    const canEdit = (orderStatus === 'editable' || orderStatus === 'finalized') && !isPastDeadline;
     const isAdmin = session?.staff?.role === 'Admin';
+    const canEdit = !isPastDeadline || isAdmin;
 
     const order = orderData?.order;
     const fetchedMenuItems = orderData?.menu_items || menuItems || [];
+
+    // Custom items from order or reservation
+    const customItems = (order?.custom_items && order.custom_items.length)
+      ? order.custom_items
+      : (parseCustomItemsFromNotes(order?.notes || '') || parseCustomItemsFromNotes(r?.notes || ''));
+    const menuItemsList = order?.items || [];
+    const hasMenuItems = menuItemsList.length > 0;
+    const hasCustomItems = customItems && customItems.length > 0;
+    const hasAnyItems = hasMenuItems || hasCustomItems;
+
+    let itemsContentHtml = '';
+    let calculatedGrandTotal = 0;
+
+    if (hasAnyItems) {
+      let menuTableHtml = '';
+      if (hasMenuItems) {
+        menuTableHtml = `
+          <div style="margin-bottom:14px;">
+            <h4 style="font-family:'Outfit',sans-serif; text-transform:uppercase; font-size:0.82rem; margin:0 0 8px; color:var(--ink);">Menu Items</h4>
+            <table class="order-items-table">
+              <thead><tr>
+                <th style="width:40%;">Item</th>
+                <th class="item-qty">Qty</th>
+                <th class="item-price">Price</th>
+                <th class="item-subtotal">Subtotal</th>
+              </tr></thead>
+              <tbody>
+                ${menuItemsList.map(item => {
+                  const itemSub = Number(item.subtotal) || (Number(item.price) * Number(item.quantity));
+                  calculatedGrandTotal += itemSub;
+                  let addonSubtotalSum = 0;
+                  const addonRows = (item.add_ons || []).map(a => {
+                    const asub = Number(a.price) * Number(a.quantity);
+                    addonSubtotalSum += asub;
+                    return `<div class="addon-row">+ ${escapeHtml(a.name)} × ${a.quantity} (${peso(asub)})</div>`;
+                  }).join('');
+                  calculatedGrandTotal += addonSubtotalSum;
+                  return `
+                    <tr>
+                      <td>
+                        <div class="item-name">${escapeHtml(item.name || item.item_name)}</div>
+                        ${addonRows}
+                        ${item.notes ? `<div class="item-notes">${escapeHtml(item.notes)}</div>` : ''}
+                      </td>
+                      <td class="item-qty">${item.quantity}</td>
+                      <td class="item-price">${peso(item.price)}</td>
+                      <td class="item-subtotal">${peso(itemSub + addonSubtotalSum)}</td>
+                    </tr>
+                  `;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+        `;
+      }
+
+      let customTableHtml = '';
+      if (hasCustomItems) {
+        customTableHtml = `
+          <div style="margin-bottom:14px;">
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+              <h4 style="font-family:'Outfit',sans-serif; text-transform:uppercase; font-size:0.82rem; margin:0; color:var(--ink);">Custom / Advance Order Items</h4>
+              <span style="font-family:'DM Sans',sans-serif; font-size:0.68rem; color:var(--ink-muted); background:var(--stone); border-radius:4px; padding:2px 7px;">Special order</span>
+            </div>
+            <table class="order-items-table">
+              <thead><tr>
+                <th style="width:40%;">Item / Description</th>
+                <th class="item-qty">Qty</th>
+                <th class="item-price">Price</th>
+                <th class="item-subtotal">Subtotal</th>
+              </tr></thead>
+              <tbody>
+                ${customItems.map(ci => {
+                  const qty = Number(ci.qty) || 1;
+                  const price = Number(ci.price) || 0;
+                  const sub = qty * price;
+                  calculatedGrandTotal += sub;
+                  return `
+                    <tr>
+                      <td><div class="item-name">${escapeHtml(ci.name)}</div></td>
+                      <td class="item-qty">${qty}</td>
+                      <td class="item-price">${peso(price)}</td>
+                      <td class="item-subtotal">${peso(sub)}</td>
+                    </tr>
+                  `;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+        `;
+      }
+
+      const totalToShow = (order && Number(order.total_amount) > 0) ? Math.max(Number(order.total_amount), calculatedGrandTotal) : calculatedGrandTotal;
+
+      itemsContentHtml = `
+        <div style="border-top:1px solid var(--line); padding-top:14px;">
+          ${menuTableHtml}
+          ${customTableHtml}
+          <div class="order-total-row">
+            <span>Grand Total:</span>
+            <span>${peso(totalToShow)}</span>
+          </div>
+        </div>
+      `;
+    } else {
+      itemsContentHtml = `
+        <div style="border-top:1px solid var(--line); padding:24px 10px; text-align:center; color:var(--ink-muted);">
+          No menu or custom order items attached to this reservation yet.
+        </div>
+      `;
+    }
 
     const backdrop = document.createElement('div');
     backdrop.className = 'modal-backdrop active';
@@ -1151,65 +1520,23 @@
           </dd>
         </div>
 
-        ${order && ((order.items?.length || 0) + (order.custom_items?.length || 0) > 0) ? `
-        <div style="border-top:1px solid var(--line); padding-top:14px;">
-          <h4 style="font-family:'Bricolage Grotesque',sans-serif; text-transform:uppercase; font-size:0.85rem; margin:0 0 10px;">Order Items</h4>
-          <table class="order-items-table">
-            <thead><tr>
-              <th style="width:40%;">Item</th>
-              <th class="item-qty">Qty</th>
-              <th class="item-price">Price</th>
-              <th class="item-subtotal">Subtotal</th>
-            </tr></thead>
-            <tbody>
-              ${(order.items || []).map(item => `
-                <tr>
-                  <td>
-                    <div class="item-name">${escapeHtml(item.name || item.item_name)}</div>
-                    ${item.add_ons?.length ? item.add_ons.map(a => `<div class="addon-row">+ ${escapeHtml(a.name)} × ${a.quantity}</div>`).join('') : ''}
-                    ${item.notes ? `<div class="item-notes">${escapeHtml(item.notes)}</div>` : ''}
-                  </td>
-                  <td class="item-qty">${item.quantity}</td>
-                  <td class="item-price">${peso(item.price)}</td>
-                  <td class="item-subtotal">${peso(item.subtotal)}</td>
-                </tr>
-              `).join('')}
-              ${(order.custom_items || []).map(item => {
-                const quantity = Number(item.qty ?? item.quantity) || 1;
-                const price = Number(item.price) || 0;
-                return `
-                  <tr>
-                    <td><div class="item-name">${escapeHtml(item.name || item.product_name || 'Custom Item')}</div></td>
-                    <td class="item-qty">${quantity}</td>
-                    <td class="item-price">${peso(price)}</td>
-                    <td class="item-subtotal">${peso(quantity * price)}</td>
-                  </tr>
-                `;
-              }).join('')}
-            </tbody>
-          </table>
-          <div class="order-total-row">
-            <span>Total:</span>
-            <span>${peso(order.total_amount)}</span>
-          </div>
-        </div>
-        ` : `
-        <div style="border-top:1px solid var(--line); padding:24px 10px; text-align:center; color:var(--ink-muted);">
-          No menu order attached to this reservation yet.
-        </div>
-        `}
+        ${itemsContentHtml}
 
         <div style="margin-top:22px; display:flex; gap:10px; flex-wrap:wrap;">
-          ${!order ? `
+          ${!hasAnyItems ? `
             <button class="btn" id="addOrderBtn" style="flex:1;">+ Add Order Items</button>
           ` : `
+            <button class="btn btn-outline" id="printReceiptBtn" style="display:inline-flex; align-items:center; gap:6px;">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+              Print Receipt
+            </button>
             ${canEdit ? `
-              <button class="btn" id="editOrderBtn" style="flex:1;">Edit Order</button>
+              <button class="btn" id="editOrderBtn" style="flex:1;">Edit / Add More Items</button>
             ` : ''}
             ${resStatus === 'order_preparing' ? `
               <button class="btn" id="finalizeOrderBtn" style="flex:1; background:var(--success); border-color:var(--success);">Finalize Order</button>
             ` : ''}
-            ${resStatus === 'order_finalized' ? `
+            ${resStatus === 'order_finalized' || r.status === 'confirmed' ? `
               <button class="btn" id="confirmReservationBtn" style="flex:1;">Confirm Reservation</button>
             ` : ''}
             ${isAdmin && isPastDeadline ? `
@@ -1226,7 +1553,10 @@
     backdrop.addEventListener('click', (e) => { if (e.target === backdrop) close(); });
 
     const addOrderBtn = backdrop.querySelector('#addOrderBtn');
-    if (addOrderBtn) addOrderBtn.addEventListener('click', () => openOrderEditorModal(id, r, fetchedMenuItems, false));
+    if (addOrderBtn) addOrderBtn.addEventListener('click', () => openOrderEditorModal(id, r, fetchedMenuItems, false, order));
+
+    const printReceiptBtn = backdrop.querySelector('#printReceiptBtn');
+    if (printReceiptBtn) printReceiptBtn.addEventListener('click', () => printReservationReceipt(r, order || { items: [], custom_items: customItems }));
 
     const editOrderBtn = backdrop.querySelector('#editOrderBtn');
     if (editOrderBtn) editOrderBtn.addEventListener('click', () => openOrderEditorModal(id, r, fetchedMenuItems, true, order));
@@ -1241,6 +1571,139 @@
     if (adminOverrideEditBtn) adminOverrideEditBtn.addEventListener('click', () => openOrderEditorModal(id, r, fetchedMenuItems, true, order, true));
   }
 
+  // ---- Custom advance items state ----
+  let customAdvanceItems = []; // [{name, qty, price}]
+  let currentOrderBaseNotes = '';
+
+  function parseCustomItemsFromNotes(notesStr) {
+    if (!notesStr) return [];
+    const marker = '---CUSTOM_ITEMS_JSON---';
+    const idx = notesStr.indexOf(marker);
+    if (idx === -1) return [];
+    try {
+      const parsed = JSON.parse(notesStr.slice(idx + marker.length).trim());
+      return Array.isArray(parsed) ? parsed : [];
+    } catch { return []; }
+  }
+
+  function buildNotesWithCustomItems(baseNotes, items) {
+    const marker = '---CUSTOM_ITEMS_JSON---';
+    // Strip any existing custom items block
+    const clean = baseNotes ? baseNotes.split(marker)[0].trim() : '';
+    if (!items || items.length === 0) return clean || null;
+    const validItems = items.filter(i => i.name && i.name.trim());
+    if (validItems.length === 0) return clean || null;
+    return (clean ? clean + '\n' : '') + marker + JSON.stringify(validItems);
+  }
+
+  function formatNotesForDisplay(notesStr) {
+    if (!notesStr) return '—';
+    const marker = '---CUSTOM_ITEMS_JSON---';
+    const parts = notesStr.split(marker);
+    const textNote = parts[0].trim();
+    let customSummary = '';
+    if (parts[1]) {
+      try {
+        const items = JSON.parse(parts[1].trim());
+        if (Array.isArray(items) && items.length > 0) {
+          customSummary = '\n\nCustom Advance Items:\n' + items.map(i => `• ${i.name} (Qty: ${i.qty || 1}, ₱${Number(i.price || 0).toFixed(2)})`).join('\n');
+        }
+      } catch (e) {}
+    }
+    const combined = [textNote, customSummary].filter(Boolean).join('');
+    return combined || '—';
+  }
+
+  function syncCustomItemsFromDOM(backdrop) {
+    const wrap = backdrop.querySelector('#customItemsWrap');
+    if (!wrap) return;
+    const names = wrap.querySelectorAll('.ci-name');
+    const qtys = wrap.querySelectorAll('.ci-qty');
+    const prices = wrap.querySelectorAll('.ci-price');
+    const synced = [];
+    names.forEach((nameEl, idx) => {
+      const name = nameEl.value.trim();
+      const qty = parseFloat(qtys[idx]?.value) || 0;
+      const price = parseFloat(prices[idx]?.value) || 0;
+      if (name) {
+        synced.push({ name, qty: qty > 0 ? qty : 1, price: price >= 0 ? price : 0 });
+      }
+    });
+    customAdvanceItems = synced;
+  }
+
+  function renderCustomItemsSection(backdrop) {
+    const wrap = backdrop.querySelector('#customItemsWrap');
+    if (!wrap) return;
+    let html = `
+      <table class="custom-items-table">
+        <thead><tr>
+          <th style="width:48%;">Item / Description</th>
+          <th style="width:15%; text-align:center;">Qty</th>
+          <th style="width:22%;">Unit Price (₱)</th>
+          <th style="width:10%;"></th>
+        </tr></thead>
+        <tbody id="customItemsBody">
+    `;
+    if (customAdvanceItems.length === 0) {
+      html += `<tr><td colspan="4" style="text-align:center; color:var(--ink-muted); padding:10px; font-size:0.75rem;">No custom advance items added yet. Click "+ Add custom item" below.</td></tr>`;
+    } else {
+      customAdvanceItems.forEach((row, i) => {
+        html += `
+          <tr>
+            <td><input type="text" class="ci-name" data-i="${i}" placeholder="e.g. Spaghetti Pack" value="${escapeHtml(row.name || '')}"></td>
+            <td><input type="number" class="ci-qty" data-i="${i}" min="0.01" step="0.01" placeholder="1" value="${row.qty ?? 1}"></td>
+            <td><input type="number" class="ci-price" data-i="${i}" min="0" step="0.01" placeholder="0.00" value="${row.price ?? 0}"></td>
+            <td><button type="button" class="del-custom-row" data-i="${i}" title="Remove row">×</button></td>
+          </tr>`;
+      });
+    }
+    html += `</tbody></table>
+    <button type="button" class="add-custom-row-btn" id="addCustomRowBtn" style="margin-top:8px;">
+      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+      Add custom item
+    </button>`;
+    wrap.innerHTML = html;
+
+    const syncAndRefresh = () => {
+      wrap.querySelectorAll('.ci-name').forEach(el => {
+        const i = +el.dataset.i;
+        if (customAdvanceItems[i]) customAdvanceItems[i].name = el.value;
+      });
+      wrap.querySelectorAll('.ci-qty').forEach(el => {
+        const i = +el.dataset.i;
+        if (customAdvanceItems[i]) customAdvanceItems[i].qty = parseFloat(el.value) || 0;
+      });
+      wrap.querySelectorAll('.ci-price').forEach(el => {
+        const i = +el.dataset.i;
+        if (customAdvanceItems[i]) customAdvanceItems[i].price = parseFloat(el.value) || 0;
+      });
+      updateCurrentOrderDisplay(backdrop);
+    };
+
+    wrap.querySelectorAll('.ci-name, .ci-qty, .ci-price').forEach(el => {
+      el.addEventListener('input', syncAndRefresh);
+      el.addEventListener('change', syncAndRefresh);
+    });
+
+    wrap.querySelectorAll('.del-custom-row').forEach(el => {
+      el.addEventListener('click', () => {
+        customAdvanceItems.splice(+el.dataset.i, 1);
+        renderCustomItemsSection(backdrop);
+        updateCurrentOrderDisplay(backdrop);
+      });
+    });
+
+    wrap.querySelector('#addCustomRowBtn').addEventListener('click', () => {
+      syncAndRefresh();
+      customAdvanceItems.push({ name: '', qty: 1, price: 0 });
+      renderCustomItemsSection(backdrop);
+      updateCurrentOrderDisplay(backdrop);
+      const allNames = wrap.querySelectorAll('.ci-name');
+      if (allNames.length > 0) allNames[allNames.length - 1].focus();
+    });
+  }
+
   // Order Editor Modal
   function openOrderEditorModal(reservationId, reservation, fetchedMenuItems, isEdit, existingOrder = null, adminOverride = false) {
     closeModals();
@@ -1253,12 +1716,7 @@
     });
 
     orderEditorState.selectedItems.clear();
-    orderEditorState.customItems = (existingOrder?.custom_items || []).map(item => ({
-      name: String(item.name || ''),
-      qty: Number(item.qty ?? item.quantity) || 1,
-      price: Number(item.price) || 0,
-    }));
-    orderEditorState.baseNotes = existingOrder?.notes || reservation.notes || '';
+    // Restore existing menu items
     if (existingOrder?.items) {
       existingOrder.items.forEach(item => {
         const key = `${item.menu_id}||`;
@@ -1269,6 +1727,21 @@
           addons: new Map(item.add_ons?.map(a => [a.addon_id, { price: a.price, quantity: a.quantity }]) || [])
         });
       });
+    }
+
+    // Extract base notes (without custom items json)
+    const rawNotes = existingOrder?.notes || reservation?.notes || '';
+    currentOrderBaseNotes = rawNotes.split('---CUSTOM_ITEMS_JSON---')[0].trim();
+
+    // Restore existing custom advance items from custom_items or notes
+    if (existingOrder?.custom_items && existingOrder.custom_items.length) {
+      customAdvanceItems = existingOrder.custom_items.map(ci => ({
+        name: ci.name || '',
+        qty: parseFloat(ci.qty) || 1,
+        price: parseFloat(ci.price) || 0
+      }));
+    } else {
+      customAdvanceItems = parseCustomItemsFromNotes(rawNotes);
     }
 
     const backdrop = document.createElement('div');
@@ -1288,27 +1761,18 @@
 
         <div id="orderEditorContent"></div>
 
-        <div class="form-grid" style="margin-top:14px;">
-          <div class="form-field">
-            <label for="customItemName">Custom Item</label>
-            <input type="text" id="customItemName" maxlength="150">
+        <!-- Custom / Advance Items -->
+        <div style="margin-top:18px; border-top:2px dashed var(--line); padding-top:14px;">
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+            <h4 style="font-family:'Outfit',sans-serif; text-transform:uppercase; font-size:0.82rem; margin:0;">Custom / Advance Order Items</h4>
+            <span style="font-family:'DM Sans',sans-serif; font-size:0.68rem; color:var(--ink-muted); background:var(--stone); border-radius:4px; padding:2px 7px;">e.g. 20 packs spaghetti • set your own price</span>
           </div>
-          <div class="form-field">
-            <label for="customItemQty">Quantity</label>
-            <input type="number" id="customItemQty" min="0.01" step="0.01" value="1">
-          </div>
-          <div class="form-field">
-            <label for="customItemPrice">Price</label>
-            <input type="number" id="customItemPrice" min="0" step="0.01" value="0">
-          </div>
-          <div class="form-field">
-            <button type="button" class="res-btn res-btn-primary" id="addCustomItemBtn">Add Custom Item</button>
-          </div>
+          <div id="customItemsWrap"></div>
         </div>
 
         <div style="margin-top:16px; border-top:1px solid var(--line); padding-top:14px;">
-          <h4 style="font-family:'Bricolage Grotesque',sans-serif; text-transform:uppercase; font-size:0.82rem; margin:0 0 10px;">Selected Order Items</h4>
-          <div id="currentOrderItems" style="max-height:180px; overflow-y:auto;"></div>
+          <h4 style="font-family:'Outfit',sans-serif; text-transform:uppercase; font-size:0.82rem; margin:0 0 10px;">Order Summary</h4>
+          <div id="currentOrderItems" style="max-height:200px; overflow-y:auto;"></div>
           <div class="order-total-row" id="orderTotalRow" style="display:none;">
             <span>Total:</span>
             <span id="orderTotalDisplay">₱0.00</span>
@@ -1330,23 +1794,7 @@
     backdrop.addEventListener('click', (e) => { if (e.target === backdrop) close(); });
 
     renderOrderEditorCategories(backdrop, categories);
-    backdrop.querySelector('#addCustomItemBtn').addEventListener('click', () => {
-      const name = backdrop.querySelector('#customItemName').value.trim();
-      const qty = Number(backdrop.querySelector('#customItemQty').value);
-      const price = Number(backdrop.querySelector('#customItemPrice').value);
-      const error = backdrop.querySelector('#orderEditorError');
-      if (!name || !Number.isFinite(qty) || qty <= 0 || !Number.isFinite(price) || price < 0) {
-        error.textContent = 'Enter a name, positive quantity, and non-negative price for the custom item.';
-        error.classList.add('show');
-        return;
-      }
-      orderEditorState.customItems.push({ name, qty, price });
-      backdrop.querySelector('#customItemName').value = '';
-      backdrop.querySelector('#customItemQty').value = '1';
-      backdrop.querySelector('#customItemPrice').value = '0';
-      error.classList.remove('show');
-      updateCurrentOrderDisplay(backdrop);
-    });
+    renderCustomItemsSection(backdrop);
 
     backdrop.querySelector('#orderEditorSaveBtn').addEventListener('click', async () => {
       await saveOrderFromEditor(reservationId, backdrop, adminOverride);
@@ -1355,8 +1803,6 @@
 
   let orderEditorState = {
     selectedItems: new Map(),
-    customItems: [],
-    baseNotes: '',
   };
 
   function renderOrderEditorCategories(backdrop, categories) {
@@ -1480,50 +1926,53 @@
     const totalRow = backdrop.querySelector('#orderTotalRow');
     const totalDisplay = backdrop.querySelector('#orderTotalDisplay');
 
-    if (orderEditorState.selectedItems.size === 0 && orderEditorState.customItems.length === 0) {
+    const hasMenuItems = orderEditorState.selectedItems.size > 0;
+    const validCustom = customAdvanceItems.filter(i => i.name && i.name.trim() && (i.qty || 0) > 0);
+    const hasCustom = validCustom.length > 0;
+
+    if (!hasMenuItems && !hasCustom) {
       container.innerHTML = '<div style="padding:12px; color:var(--ink-muted); text-align:center; font-size:0.80rem;">No items selected yet.</div>';
       totalRow.style.display = 'none';
       return;
     }
 
     let total = 0;
-    const menuItemRows = Array.from(orderEditorState.selectedItems.entries()).map(([key, data]) => {
+    let rows = '';
+
+    // Menu items
+    Array.from(orderEditorState.selectedItems.entries()).forEach(([key, data]) => {
       const subtotal = data.menuItem.price * data.quantity;
       total += subtotal;
       const addonTotal = Array.from(data.addons.values()).reduce((sum, a) => sum + a.price * a.quantity, 0);
       total += addonTotal;
-
-      return `
+      rows += `
         <div style="display:flex; justify-content:space-between; align-items:center; padding:7px 0; border-bottom:1px dashed var(--line); font-size:0.82rem;">
           <div>
             <strong>${escapeHtml(data.menuItem.name)}</strong>
-            <span style="font-family:'DM Sans', sans-serif; color:var(--brass-dark); margin-left:6px;">× ${data.quantity}</span>
+            <span style="font-family:'DM Sans',sans-serif; color:var(--brass-dark); margin-left:6px;">× ${data.quantity}</span>
           </div>
-          <span style="font-family:'DM Sans', sans-serif; font-weight:700; color:var(--brass-dark);">
-            ₱${(subtotal + addonTotal).toFixed(2)}
-          </span>
-        </div>
-      `;
-    }).join('');
-    const customItemRows = orderEditorState.customItems.map((item, index) => {
-      const subtotal = item.qty * item.price;
-      total += subtotal;
-      return `
-        <div style="display:flex; justify-content:space-between; align-items:center; padding:7px 0; border-bottom:1px dashed var(--line); font-size:0.82rem;">
-          <div><strong>${escapeHtml(item.name)}</strong><span style="font-family:'DM Sans', sans-serif; color:var(--brass-dark); margin-left:6px;">× ${item.qty} · Custom</span></div>
-          <span style="font-family:'DM Sans', sans-serif; font-weight:700; color:var(--brass-dark);">₱${subtotal.toFixed(2)}</span>
-          <button type="button" class="res-btn" data-remove-custom="${index}">Remove</button>
-        </div>
-      `;
-    }).join('');
-    container.innerHTML = menuItemRows + customItemRows;
-    container.querySelectorAll('[data-remove-custom]').forEach(button => {
-      button.addEventListener('click', () => {
-        orderEditorState.customItems.splice(Number(button.dataset.removeCustom), 1);
-        updateCurrentOrderDisplay(backdrop);
-      });
+          <span style="font-family:'DM Sans',sans-serif; font-weight:700; color:var(--brass-dark);">₱${(subtotal + addonTotal).toFixed(2)}</span>
+        </div>`;
     });
 
+    // Custom advance items
+    if (hasCustom) {
+      rows += `<div style="font-family:'DM Sans',sans-serif; font-size:0.65rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--ink-muted); padding:8px 0 4px; border-bottom:1px dashed var(--line);">Custom / Advance Items</div>`;
+      validCustom.forEach(ci => {
+        const subtotal = (ci.price || 0) * (ci.qty || 1);
+        total += subtotal;
+        rows += `
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:7px 0; border-bottom:1px dashed var(--line); font-size:0.82rem;">
+            <div>
+              <strong>${escapeHtml(ci.name)}</strong>
+              <span style="font-family:'DM Sans',sans-serif; color:var(--brass-dark); margin-left:6px;">× ${ci.qty}</span>
+            </div>
+            <span style="font-family:'DM Sans',sans-serif; font-weight:700; color:var(--brass-dark);">₱${subtotal.toFixed(2)}</span>
+          </div>`;
+      });
+    }
+
+    container.innerHTML = rows;
     totalDisplay.textContent = `₱${total.toFixed(2)}`;
     totalRow.style.display = 'flex';
   }
@@ -1532,8 +1981,11 @@
     const errEl = backdrop.querySelector('#orderEditorError');
     const saveBtn = backdrop.querySelector('#orderEditorSaveBtn');
 
-    if (orderEditorState.selectedItems.size === 0 && orderEditorState.customItems.length === 0) {
-      errEl.textContent = 'Please add at least one item to the order.';
+    syncCustomItemsFromDOM(backdrop);
+    const validCustom = customAdvanceItems.filter(i => i.name && i.name.trim() && (i.qty || 0) > 0);
+
+    if (orderEditorState.selectedItems.size === 0 && validCustom.length === 0) {
+      errEl.textContent = 'Please add at least one menu item or custom advance item to the order.';
       errEl.classList.add('show');
       return;
     }
@@ -1547,10 +1999,9 @@
         quantity: addon.quantity
       }))
     }));
-    const baseNotes = orderEditorState.baseNotes.split('---CUSTOM_ITEMS_JSON---')[0].trim();
-    const notes = orderEditorState.customItems.length
-      ? `${baseNotes}${baseNotes ? '\n\n' : ''}---CUSTOM_ITEMS_JSON---${JSON.stringify(orderEditorState.customItems)}`
-      : baseNotes || null;
+
+    // Encode custom items into notes while preserving base notes
+    const notesWithCustom = buildNotesWithCustomItems(currentOrderBaseNotes, validCustom);
 
     saveBtn.disabled = true;
     saveBtn.textContent = 'Saving…';
@@ -1561,7 +2012,7 @@
         method: 'POST',
         body: JSON.stringify({ 
           items, 
-          notes,
+          notes: notesWithCustom,
           status: 'editable',
           admin_override: adminOverride
         }),
@@ -1570,6 +2021,7 @@
       if (!res.ok) throw new Error(data.error || 'Could not save order.');
 
       toast('Order saved successfully.', 'success');
+      await load();
       closeModals();
       openManageModal(reservationId);
     } catch (err) {
@@ -1605,6 +2057,94 @@
     document.querySelectorAll('.modal-backdrop').forEach(m => m.remove());
   }
 
+  // ---- Print Reservation Receipt ----
+  function printReservationReceipt(reservation, order) {
+    if (!order) return;
+    const customItems = (order.custom_items && order.custom_items.length)
+      ? order.custom_items
+      : (parseCustomItemsFromNotes(order.notes || '') || parseCustomItemsFromNotes(reservation.notes || ''));
+    const menuItems = order.items || [];
+
+    let menuTotal = 0;
+    let menuRows = menuItems.map(item => {
+      const sub = Number(item.subtotal) || (Number(item.price) * Number(item.quantity));
+      menuTotal += sub;
+      let addOnLines = '';
+      if (item.add_ons?.length) {
+        item.add_ons.forEach(a => {
+          addOnLines += `<tr><td style="padding-left:16px; color:#555;">  + ${escapeHtml(a.name)} ×${a.quantity}</td><td style="text-align:right; color:#555;">₱${(Number(a.price)*Number(a.quantity)).toFixed(2)}</td></tr>`;
+          menuTotal += Number(a.price) * Number(a.quantity);
+        });
+      }
+      return `<tr><td>${escapeHtml(item.name || item.item_name)} ×${item.quantity}</td><td style="text-align:right;">₱${sub.toFixed(2)}</td></tr>${addOnLines}`;
+    }).join('');
+
+    let customTotal = 0;
+    let customRows = '';
+    if (customItems.length > 0) {
+      customRows = `<tr><td colspan="2" style="padding-top:10px; padding-bottom:4px; font-weight:700; font-size:10px; text-transform:uppercase; letter-spacing:0.05em; border-top:1px dashed #000;">Custom / Advance Order Items</td></tr>`;
+      customItems.forEach(ci => {
+        if (!ci.name) return;
+        const sub = (ci.price || 0) * (ci.qty || 1);
+        customTotal += sub;
+        customRows += `<tr><td>${escapeHtml(ci.name)} ×${ci.qty}</td><td style="text-align:right;">₱${sub.toFixed(2)}</td></tr>`;
+      });
+    }
+
+    const grandTotal = menuTotal + customTotal;
+    const resDate = reservation.reservation_date ? fmtDate(reservation.reservation_date) : '—';
+    const resTime = String(reservation.reservation_time || '').slice(0, 5);
+    const now = new Date().toLocaleString('en-PH', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+    const win = window.open('', '_blank', 'width=420,height=680');
+    win.document.write(`<!DOCTYPE html><html><head><base href="/admin/">
+      <title>Reservation Receipt #${reservation.id}</title>
+      <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family: 'Courier New', monospace; font-size: 12px; color: #000; padding: 12px; width: 320px; }
+        h1 { font-size: 16px; text-align: center; margin-bottom: 2px; font-family: sans-serif; }
+        .sub { font-size: 11px; text-align: center; margin-bottom: 8px; color: #444; }
+        .divider { border: none; border-top: 1px dashed #000; margin: 8px 0; }
+        .divider-solid { border: none; border-top: 2px solid #000; margin: 8px 0; }
+        table { width: 100%; border-collapse: collapse; }
+        td { padding: 3px 2px; vertical-align: top; }
+        .total-row td { font-weight: bold; font-size: 14px; padding-top: 8px; border-top: 2px solid #000; }
+        .badge { display: inline-block; background: #000; color: #fff; padding: 2px 7px; border-radius: 3px; font-size: 10px; margin: 4px 0; }
+        .footer { text-align: center; margin-top: 12px; font-size: 10px; color: #555; }
+        @media print { body { width: 80mm; } }
+      </style>
+    </head><body>
+      <h1>A&J's Foodflix</h1>
+      <div class="sub">Reservation Receipt</div>
+      <hr class="divider-solid">
+      <table>
+        <tr><td><b>Reservation #</b></td><td style="text-align:right;">${reservation.id}</td></tr>
+        <tr><td><b>Customer</b></td><td style="text-align:right;">${escapeHtml(reservation.customer_name)}</td></tr>
+        <tr><td><b>Date &amp; Time</b></td><td style="text-align:right;">${resDate} ${resTime}</td></tr>
+        <tr><td><b>Guests</b></td><td style="text-align:right;">${reservation.guests}</td></tr>
+        ${reservation.table_no ? `<tr><td><b>Table</b></td><td style="text-align:right;">${escapeHtml(reservation.table_no)}</td></tr>` : ''}
+        <tr><td><b>Status</b></td><td style="text-align:right;">${(reservation.reservation_status || reservation.status || '').replace(/_/g,' ')}</td></tr>
+      </table>
+      <hr class="divider">
+      <table>
+        <tr><td colspan="2" style="font-weight:700; font-size:10px; text-transform:uppercase; letter-spacing:0.05em; padding-bottom:4px;">Order Items</td></tr>
+        ${menuRows || '<tr><td colspan="2" style="color:#888;">— No menu items —</td></tr>'}
+        ${customRows}
+        <tr class="total-row">
+          <td>TOTAL</td>
+          <td style="text-align:right;">₱${grandTotal.toFixed(2)}</td>
+        </tr>
+      </table>
+      <div class="footer">
+        <div>Printed: ${now}</div>
+        <div style="margin-top:6px;">Thank you for choosing A&J's Foodflix!</div>
+      </div>
+    </body></html>`);
+    win.document.close();
+    win.focus();
+    setTimeout(() => win.print(), 400);
+  }
+
   // ---- Customer details modal ----
   function openDetailsModal(id) {
     const r = reservations.find(x => x.id == id);
@@ -1630,7 +2170,7 @@
           <dt>Table</dt><dd>${r.table_no ? `<span class="table-badge">${escapeHtml(r.table_no)}</span>` : '<span class="table-badge-empty">Not yet assigned</span>'}</dd>
           <dt>Status</dt><dd><span class="res-status-pill ${STATUS_PILL[resStatusLabel] || 'res-status-pending'}">${escapeHtml(resStatusLabel.replace(/_/g, ' '))}</span></dd>
           <dt>Requested</dt><dd style="font-family:'DM Sans', sans-serif; font-size:0.74rem;">${formatDate(r.datetime_reserved)}</dd>
-          <dt>Notes</dt><dd style="white-space:pre-wrap; font-size:0.82rem;">${r.notes ? escapeHtml(r.notes) : '—'}</dd>
+          <dt>Notes</dt><dd style="white-space:pre-wrap; font-size:0.82rem;">${r.notes ? escapeHtml(formatNotesForDisplay(r.notes)) : '—'}</dd>
         </div>
         <div class="modal-close-row"><button class="btn" id="detailsClose">Close</button></div>
       </div>
@@ -1701,6 +2241,341 @@
     }
   }
 
+  // ---- Complete & Settlement Modal ----
+  async function openCompleteModal(id) {
+    const r = reservations.find(x => x.id == id);
+    if (!r) return;
+
+    // Show loading indicator
+    const backdrop = document.createElement('div');
+    backdrop.className = 'modal-backdrop active';
+    backdrop.innerHTML = `
+      <div class="modal-box" style="max-width:520px; text-align:center; padding:36px 24px;">
+        <div style="font-size:1.1rem; font-weight:700; margin-bottom:12px;">Loading reservation details…</div>
+        <div style="color:var(--ink-muted); font-size:0.85rem;">Checking order and bill amount for Reservation #${r.id}…</div>
+      </div>
+    `;
+    document.body.appendChild(backdrop);
+
+    let orderData = null;
+    try {
+      const res = await adminFetch(`/api/admin/reservations/${id}/order`);
+      if (res.ok) {
+        orderData = await res.json();
+      }
+    } catch (e) {
+      console.warn('Could not fetch reservation order details:', e);
+    }
+
+    const order = orderData?.order;
+    const totalAmount = Number(order?.total_amount) || 0;
+
+    // If no order or zero balance, simple confirmation
+    if (!order || totalAmount <= 0) {
+      backdrop.innerHTML = `
+        <div class="modal-box" style="max-width:480px;">
+          <h3>Complete Reservation #${r.id}</h3>
+          <div class="detail-list" style="margin-bottom:18px;">
+            <dt>Customer</dt><dd><b>${escapeHtml(r.customer_name)}</b></dd>
+            <dt>Date &amp; Time</dt><dd>${r.reservation_date ? fmtDate(r.reservation_date) : "—"} at ${String(r.reservation_time || "").slice(0, 5)}</dd>
+            <dt>Table</dt><dd>${r.table_no ? escapeHtml(r.table_no) : 'Not assigned'}</dd>
+            <dt>Order Bill</dt><dd><span style="color:var(--ink-muted);">No advance order billed</span></dd>
+          </div>
+          <p style="font-size:0.82rem; color:var(--ink-muted); margin:0 0 18px; line-height:1.55;">
+            This reservation has no advance food bill attached. Mark it as completed?
+          </p>
+          <div class="modal-error" id="completeErr"></div>
+          <div class="modal-close-row">
+            <button class="btn btn-outline" id="completeCancel">Back</button>
+            <button class="btn" id="completeSubmit">Mark Completed</button>
+          </div>
+        </div>
+      `;
+
+      backdrop.querySelector('#completeCancel').addEventListener('click', () => backdrop.remove());
+      backdrop.addEventListener('click', (e) => { if (e.target === backdrop) backdrop.remove(); });
+      backdrop.querySelector('#completeSubmit').addEventListener('click', async () => {
+        const btn = backdrop.querySelector('#completeSubmit');
+        const errEl = backdrop.querySelector('#completeErr');
+        btn.disabled = true;
+        btn.textContent = 'Completing…';
+        try {
+          const res = await adminFetch(`/api/admin/reservations/${id}/status`, {
+            method: 'PATCH',
+            body: JSON.stringify({ status: 'completed' }),
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'Could not complete reservation.');
+          r.status = 'completed';
+          r.reservation_status = 'completed';
+          backdrop.remove();
+          toast('Reservation completed.', 'success');
+          render();
+        } catch (err) {
+          errEl.textContent = err.message;
+          errEl.classList.add('show');
+          btn.disabled = false;
+          btn.textContent = 'Mark Completed';
+        }
+      });
+      return;
+    }
+
+    // Reservation HAS an order: Render Payment / Settlement Screen
+    let selectedMethod = 'cash';
+    let tendered = totalAmount;
+
+    const renderBillModal = () => {
+      const change = Math.max(0, tendered - totalAmount);
+      const isCash = selectedMethod === 'cash';
+
+      const itemsListHtml = (order.items || []).map(item => `
+        <div style="display:flex; justify-content:space-between; font-size:0.82rem; margin-bottom:4px;">
+          <span>${item.quantity || 1}x ${escapeHtml(item.name || 'Item')}</span>
+          <span style="font-family:'Space Mono', monospace;">₱${(Number(item.subtotal) || (Number(item.price) * (item.quantity || 1))).toFixed(2)}</span>
+        </div>
+        ${(item.add_ons || []).map(a => `
+          <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:var(--ink-muted); margin-bottom:2px; padding-left:12px;">
+            <span>+ ${escapeHtml(a.name)} (x${a.quantity || 1})</span>
+            <span style="font-family:'Space Mono', monospace;">₱${Number(a.subtotal || 0).toFixed(2)}</span>
+          </div>
+        `).join('')}
+      `).join('') + ((order.custom_items || []).map(ci => `
+        <div style="display:flex; justify-content:space-between; font-size:0.82rem; margin-bottom:4px; color:var(--brass);">
+          <span>[Custom] ${escapeHtml(ci.name || 'Custom Item')} (x${ci.quantity || ci.qty || 1})</span>
+          <span style="font-family:'Space Mono', monospace;">₱${((Number(ci.price) || 0) * (Number(ci.quantity || ci.qty) || 1)).toFixed(2)}</span>
+        </div>
+      `).join(''));
+
+      backdrop.innerHTML = `
+        <div class="modal-box" style="max-width:540px; max-height:92vh; overflow-y:auto;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; border-bottom:1px solid var(--line); padding-bottom:10px;">
+            <div>
+              <h3 style="margin:0; font-size:1.15rem;">Settle &amp; Complete Reservation #${r.id}</h3>
+              <div style="font-size:0.78rem; color:var(--ink-muted); margin-top:2px;">
+                Customer: <b>${escapeHtml(r.customer_name)}</b> &middot; Table: <b>${escapeHtml(r.table_no || '—')}</b>
+              </div>
+            </div>
+            <button type="button" class="res-btn" id="settleCloseBtn" style="padding:4px 8px;">&times;</button>
+          </div>
+
+          <!-- Order Items Summary Box -->
+          <div style="background:var(--bone); border:1px solid var(--line); border-radius:8px; padding:12px 14px; margin-bottom:16px;">
+            <div style="font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--ink-muted); margin-bottom:8px;">
+              Order Items Summary
+            </div>
+            <div style="max-height:140px; overflow-y:auto; padding-right:4px;">
+              ${itemsListHtml}
+            </div>
+            <div style="border-top:1px dashed var(--line); margin-top:10px; padding-top:8px; display:flex; justify-content:space-between; align-items:baseline;">
+              <span style="font-weight:700; font-size:0.92rem;">TOTAL DUE</span>
+              <span style="font-family:'Space Mono', monospace; font-weight:900; font-size:1.2rem; color:var(--brass);">
+                ₱${totalAmount.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </span>
+            </div>
+          </div>
+
+          <!-- Payment Method Selection -->
+          <div style="margin-bottom:16px;">
+            <label style="display:block; font-size:0.76rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:8px; color:var(--ink-muted);">
+              Payment Method
+            </label>
+            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;" id="pmButtonGroup">
+              <button type="button" class="res-btn ${selectedMethod === 'cash' ? 'res-btn-primary' : ''}" data-method="cash" style="justify-content:center; padding:10px;">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0;"><rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 9h.01M18 15h.01"/></svg>
+                Cash Drawer
+              </button>
+              <button type="button" class="res-btn ${selectedMethod === 'gcash' ? 'res-btn-primary' : ''}" data-method="gcash" style="justify-content:center; padding:10px;">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0;"><rect x="6" y="2.75" width="12" height="18.5" rx="2"/><path d="M10 5.5h4M11 18h2"/></svg>
+                GCash
+              </button>
+              <button type="button" class="res-btn ${selectedMethod === 'bank' ? 'res-btn-primary' : ''}" data-method="bank" style="justify-content:center; padding:10px;">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0;"><path d="m3 9 9-5 9 5"/><path d="M4 20h16M5 9v8M9.5 9v8M14.5 9v8M19 9v8M3 20v-2h18v2"/></svg>
+                Bank Transfer
+              </button>
+            </div>
+          </div>
+
+          <!-- Cash Tendered & Change -->
+          ${isCash ? `
+            <div style="background:#fff; border:1px solid var(--line); border-radius:8px; padding:12px 14px; margin-bottom:16px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <label for="cashTenderedInput" style="font-size:0.78rem; font-weight:700; text-transform:uppercase; color:var(--ink-muted);">
+                  Amount Received (₱)
+                </label>
+                <div style="display:flex; gap:6px;">
+                  <button type="button" class="res-btn quick-cash" data-val="${totalAmount}" style="font-size:0.72rem; padding:3px 7px;">Exact</button>
+                  <button type="button" class="res-btn quick-cash" data-val="500" style="font-size:0.72rem; padding:3px 7px;">₱500</button>
+                  <button type="button" class="res-btn quick-cash" data-val="1000" style="font-size:0.72rem; padding:3px 7px;">₱1,000</button>
+                  <button type="button" class="res-btn quick-cash" data-val="2000" style="font-size:0.72rem; padding:3px 7px;">₱2,000</button>
+                </div>
+              </div>
+              <input type="number" id="cashTenderedInput" step="any" min="${totalAmount}" value="${tendered}"
+                style="width:100%; font-size:1.15rem; font-family:'Space Mono', monospace; font-weight:700; padding:8px 12px; border:1px solid var(--line); border-radius:6px; box-sizing:border-box;">
+              
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px; font-size:0.88rem;">
+                <span style="color:var(--ink-muted);">Change:</span>
+                <span style="font-family:'Space Mono', monospace; font-weight:700; font-size:1.05rem; color:${change >= 0 ? 'var(--success)' : 'var(--danger)'};" id="cashChangeDisplay">
+                  ₱${change.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </span>
+              </div>
+            </div>
+          ` : `
+            <div style="background:#fff; border:1px solid var(--line); border-radius:8px; padding:12px 14px; margin-bottom:16px;">
+              <label for="refNoInput" style="display:block; font-size:0.78rem; font-weight:700; text-transform:uppercase; color:var(--ink-muted); margin-bottom:6px;">
+                ${selectedMethod === 'gcash' ? 'GCash Reference Number' : 'Bank Reference Number'} <span style="font-weight:400; text-transform:none;">(optional)</span>
+              </label>
+              <input type="text" id="refNoInput" placeholder="e.g. Ref # 10029384729"
+                style="width:100%; font-size:0.9rem; padding:8px 12px; border:1px solid var(--line); border-radius:6px; box-sizing:border-box;">
+            </div>
+          `}
+
+          <div class="modal-error" id="settleError"></div>
+
+          <div style="display:flex; justify-content:space-between; gap:10px; margin-top:20px;">
+            <button type="button" class="btn btn-outline" id="settleCancelBtn" style="flex:1;">Cancel</button>
+            <button type="button" class="btn" id="settleConfirmBtn" style="flex:2; justify-content:center; background:var(--brass); color:#fff; font-weight:700;">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin-right:6px;"><path d="m5 12 4 4L19 6"/></svg>
+              Complete &amp; Settle (₱${totalAmount.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})
+            </button>
+          </div>
+        </div>
+      `;
+
+      // Event bindings
+      backdrop.querySelector('#settleCloseBtn').onclick = () => backdrop.remove();
+      backdrop.querySelector('#settleCancelBtn').onclick = () => backdrop.remove();
+
+      backdrop.querySelectorAll('#pmButtonGroup button').forEach(b => {
+        b.onclick = () => {
+          selectedMethod = b.dataset.method;
+          tendered = totalAmount;
+          renderBillModal();
+        };
+      });
+
+      if (isCash) {
+        const inp = backdrop.querySelector('#cashTenderedInput');
+        const chgEl = backdrop.querySelector('#cashChangeDisplay');
+        inp.oninput = () => {
+          tendered = Number(inp.value) || 0;
+          const newChg = Math.max(0, tendered - totalAmount);
+          chgEl.textContent = `₱${newChg.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+          chgEl.style.color = tendered >= totalAmount ? 'var(--success)' : 'var(--danger)';
+        };
+
+        backdrop.querySelectorAll('.quick-cash').forEach(qc => {
+          qc.onclick = () => {
+            tendered = Number(qc.dataset.val) || totalAmount;
+            inp.value = tendered;
+            inp.dispatchEvent(new Event('input'));
+          };
+        });
+      }
+
+      backdrop.querySelector('#settleConfirmBtn').onclick = async () => {
+        const confirmBtn = backdrop.querySelector('#settleConfirmBtn');
+        const errEl = backdrop.querySelector('#settleError');
+        errEl.classList.remove('show');
+
+        if (isCash && tendered < totalAmount) {
+          errEl.textContent = `Amount received (₱${tendered}) is less than total amount (₱${totalAmount}).`;
+          errEl.classList.add('show');
+          return;
+        }
+
+        const refNo = backdrop.querySelector('#refNoInput')?.value?.trim() || null;
+
+        confirmBtn.disabled = true;
+        confirmBtn.textContent = 'Processing Settlement…';
+
+        try {
+          const res = await adminFetch(`/api/admin/reservations/${id}/status`, {
+            method: 'PATCH',
+            body: JSON.stringify({
+              status: 'completed',
+              payment_method: selectedMethod,
+              amount_received: isCash ? tendered : totalAmount,
+              reference_number: refNo,
+            }),
+          });
+
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'Could not complete and settle reservation.');
+
+          r.status = 'completed';
+          r.reservation_status = 'completed';
+          backdrop.remove();
+
+          toast(`Reservation #${r.id} completed! Payment of ₱${totalAmount.toFixed(2)} recorded in Cash Transactions.`, 'success');
+          render();
+
+          // Prepare receipt data
+          const fullOrder = data.order || order;
+          const receiptData = normalizeOrderData(fullOrder, {
+            orderId: fullOrder.id,
+            customerName: r.customer_name,
+            customerPhone: r.customer_phone,
+            staffName: session?.name || 'Staff',
+            totalAmount: totalAmount,
+            amountReceived: isCash ? tendered : totalAmount,
+            change: Math.max(0, (isCash ? tendered : totalAmount) - totalAmount),
+            paymentMethod: selectedMethod.toUpperCase(),
+          });
+
+          // Print automatic (if Bluetooth printer connected/configured) OR open modal
+          try {
+            await printReceiptAutomatic(receiptData);
+          } catch (pe) {
+            console.warn('Auto print error:', pe);
+          }
+          openReceiptModal(receiptData);
+
+        } catch (err) {
+          errEl.textContent = err.message;
+          errEl.classList.add('show');
+          confirmBtn.disabled = false;
+          confirmBtn.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin-right:6px;"><path d="m5 12 4 4L19 6"/></svg>Complete &amp; Settle (₱${totalAmount.toFixed(2)})`;
+        }
+      };
+    };
+
+    renderBillModal();
+  }
+
+  // ---- Open Receipt Modal for Completed Reservation ----
+  async function openReservationReceipt(id) {
+    const r = reservations.find(x => x.id == id);
+    if (!r) return;
+
+    try {
+      toast('Loading receipt…', 'info');
+      const res = await adminFetch(`/api/admin/reservations/${id}/order`);
+      if (!res.ok) throw new Error('Could not fetch reservation order.');
+      const data = await res.json();
+      const order = data.order;
+      if (!order || !order.id) {
+        toast('No advance order or bill found for this reservation.', 'error');
+        return;
+      }
+
+      const receiptData = normalizeOrderData(order, {
+        orderId: order.id,
+        customerName: r.customer_name,
+        customerPhone: r.customer_phone,
+        staffName: session?.name || 'Staff',
+        totalAmount: Number(order.total_amount) || 0,
+        amountReceived: Number(order.total_amount) || 0,
+        change: 0,
+        paymentMethod: (order.payment_method || 'CASH').toUpperCase(),
+      });
+
+      openReceiptModal(receiptData);
+    } catch (err) {
+      toast(err.message, 'error');
+    }
+  }
+
   // ---- Shared helpers ----
   function toast(msg, kind = '') {
     let el = document.querySelector('.toast');
@@ -1738,3 +2613,4 @@
 </script>
 </body>
 </html>
+

@@ -34,55 +34,7 @@
     });
   }
 
-  /* --------------------------------------------------------------------------
-     2. Header Scroll Blur Effect & Mobile Navigation
-     -------------------------------------------------------------------------- */
-  const header = document.getElementById('siteHeader');
-  if (header) {
-    window.addEventListener('scroll', () => {
-      if (window.scrollY > 40) {
-        header.classList.add('scrolled');
-      } else {
-        header.classList.remove('scrolled');
-      }
-    }, { passive: true });
-  }
-
-  const mobileToggle = document.getElementById('mobileNavToggle');
-  const mobileMenu = document.getElementById('mobileMenuOverlay');
-  const mobileNavLinks = document.querySelectorAll('.mobile-nav-links a');
-
-  function toggleMobileMenu(open) {
-    if (!mobileMenu || !mobileToggle) return;
-    const isOpen = open !== undefined ? open : !mobileMenu.classList.contains('open');
-    mobileMenu.classList.toggle('open', isOpen);
-    mobileToggle.classList.toggle('open', isOpen);
-    mobileToggle.setAttribute('aria-expanded', isOpen);
-    mobileToggle.setAttribute('aria-label', isOpen ? 'Close navigation menu' : 'Open navigation menu');
-    document.body.style.overflow = isOpen ? 'hidden' : '';
-
-    if (isOpen && typeof gsap !== 'undefined') {
-      gsap.fromTo('.mobile-nav-links li', 
-        { y: 30, opacity: 0 }, 
-        { y: 0, opacity: 1, duration: 0.4, stagger: 0.06, ease: 'power3.out' }
-      );
-    }
-  }
-
-  if (mobileToggle) {
-    mobileToggle.addEventListener('click', () => toggleMobileMenu());
-  }
-
-  mobileNavLinks.forEach(link => {
-    link.addEventListener('click', () => toggleMobileMenu(false));
-  });
-
-  window.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') toggleMobileMenu(false);
-  });
-  window.addEventListener('resize', () => {
-    if (window.innerWidth > 1150) toggleMobileMenu(false);
-  });
+  /* 2. Header + mobile navigation live in site.js (shared by every page). */
 
   /* --------------------------------------------------------------------------
      3. Hero Entrance Timeline

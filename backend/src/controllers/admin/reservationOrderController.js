@@ -1,5 +1,6 @@
 // src/controllers/admin/reservationOrderController.js
 import pool from '../../config/db.js';
+import { parseCustomItemsFromNotes } from '../../utils/customItems.js';
 
 const VALID_ORDER_STATUSES = ['no_order', 'editable', 'finalized', 'locked'];
 const VALID_RESERVATION_STATUSES = ['pending', 'contact_customer', 'order_preparing', 'order_finalized', 'confirmed', 'cancelled', 'completed'];
@@ -55,14 +56,7 @@ export async function getReservationOrder(req, res, next) {
     // Parse custom advance items from notes if present
     let customItems = [];
     const notesToParse = order?.notes || reservation.notes || '';
-    if (notesToParse.includes('---CUSTOM_ITEMS_JSON---')) {
-      const marker = '---CUSTOM_ITEMS_JSON---';
-      const raw = notesToParse.slice(notesToParse.indexOf(marker) + marker.length).trim();
-      customItems = JSON.parse(raw);
-      if (!Array.isArray(customItems)) {
-        throw new TypeError('Stored reservation custom items must be an array.');
-      }
-    }
+    customItems = parseCustomItemsFromNotes(notesToParse, 'reservationOrder');
 
     // Calculate order editing deadline status
     const today = new Date();

@@ -3,20 +3,34 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#faf6f1">
+<script>
+  /* Theme + page-transition state before first paint (no flash). */
+  (function (d) {
+    try {
+      var t = localStorage.getItem('ajsFoodflixTheme');
+      if (t !== 'light' && t !== 'dark') t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      d.dataset.theme = t; d.dataset.ajsTheme = t;
+      if (sessionStorage.getItem('ajs-nav') === '1' && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        d.classList.add('ajs-entering');
+        setTimeout(function () { d.classList.remove('ajs-entering'); }, 2500);
+      }
+      sessionStorage.removeItem('ajs-nav');
+    } catch (e) { d.dataset.theme = 'light'; }
+  })(document.documentElement);
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <title>A&J's Foodflix — Modern Milktea, Crispy Wings & Espresso</title>
   <meta name="description" content="A&J's Foodflix Flagship in Baggao, Cagayan. Artisanal milktea, specialty espresso, handcrafted wings, and comfort dining in an ultra-modern space.">
-  <script src="customer-theme.js"></script>
   
-  <!-- Preconnect to Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,500;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   
   <!-- Modern Black & White Design System -->
   <link rel="stylesheet" href="index.css?v=2">
-  <link rel="stylesheet" href="customer-nav.css">
+<link rel="stylesheet" href="site.css?v=1">
 </head>
-<body>
+<body data-page="home">
 
   <!-- Ambient Dynamic Mouse Spotlight -->
   <div class="mouse-spotlight" id="mouseSpotlight"></div>
@@ -27,99 +41,72 @@
   <!-- ==========================================================================
        SITE HEADER
        ========================================================================== -->
-  <header class="site-header" id="siteHeader">
-    <div class="container header-inner">
-      <a href="index.html" class="brand-emblem" aria-label="A&J's Foodflix Home">
-        <div class="brand-symbol">
-          <img src="../pics&vids/the-yo's_logo.jpg" alt="A&J's Emblem">
-        </div>
-        <div class="brand-meta">
-          <span class="brand-name">A&J'S FOODFLIX</span>
-          <span class="brand-sub">BAGGAO · EST. 2024</span>
-        </div>
-      </a>
+<a class="ajs-skip" href="#main">Skip to content</a>
+<div class="ajs-curtain" aria-hidden="true"><div class="ajs-curtain__mark"><img src="../pics&amp;vids/the-yo's_logo.jpg" alt=""><span>A&amp;J's Foodflix</span></div></div>
 
-      <!-- Desktop Navigation -->
-      <nav class="desktop-nav" aria-label="Main Navigation">
-        <ul class="nav-links-list">
-          <li><a href="about.html">About</a></li>
-          <li><a href="menu.html">Menu</a></li>
-          <li><a href="gallery.html">Gallery</a></li>
-          <li><a href="order.html#feedback">Reviews</a></li>
-          <li><a href="reservations.html">Reservations</a></li>
-          <li><a href="my-orders.html">My Orders</a></li>
-        </ul>
-      </nav>
+<header class="ajs-header" id="siteHeader" data-ajs-header>
+  <div class="ajs-header__bar">
+    <a href="index.html" class="ajs-brand" aria-label="A&amp;J's Foodflix home">
+      <img class="ajs-brand__mark" src="../pics&amp;vids/the-yo's_logo.jpg" alt="" width="40" height="40">
+      <span class="ajs-brand__text"><b>A&amp;J's</b><small>Foodflix</small></span>
+    </a>
 
-      <!-- Action Cluster -->
-      <div class="nav-action-cluster">
-        <button type="button" class="theme-toggle" id="themeToggle" aria-label="Switch to light theme" aria-pressed="false" title="Switch to light theme">
-          <svg class="theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
-            <circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"></path>
-          </svg>
-          <svg class="theme-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M20.9 13A9 9 0 0 1 11 3.1 9 9 0 1 0 20.9 13Z"></path>
-          </svg>
-        </button>
+    <nav class="ajs-nav" aria-label="Primary">
+      <span class="ajs-nav__pill" aria-hidden="true"></span>
+      <ul class="ajs-nav__list">
+        <li><a class="ajs-nav__link" href="about.html">About</a></li>
+        <li><a class="ajs-nav__link" href="menu.html">Menu</a></li>
+        <li><a class="ajs-nav__link" href="gallery.html">Gallery</a></li>
+        <li><a class="ajs-nav__link" href="order.html#feedback">Reviews</a></li>
+        <li><a class="ajs-nav__link" href="reservations.html">Reserve</a></li>
+        <li><a class="ajs-nav__link" href="my-orders.html">My Orders</a></li>
+      </ul>
+    </nav>
 
-        <div class="nav-account-wrap" id="navAccountItem">
-          <a href="account.html" class="nav-account-pill nav-account-signin" id="navAccountLink" title="Sign In / My Account" aria-label="Sign in or view your account">
-            <span class="nav-account-avatar">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
-              </svg>
-            </span>
-            <span class="nav-account-name">Sign In</span>
-          </a>
-        </div>
-
-        <!-- Primary Order CTA Button -->
-        <a href="order.html" class="btn-primary magnet-btn">
-          <span>Order Now</span>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="5" y1="12" x2="19" y2="12"></line>
-            <polyline points="12 5 19 12 12 19"></polyline>
-          </svg>
+    <div class="ajs-actions">
+      <button type="button" class="ajs-icon-btn ajs-theme-btn" data-theme-toggle aria-pressed="false" aria-label="Switch theme">
+        <svg class="ajs-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/></svg>
+        <svg class="ajs-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.9 13A9 9 0 0 1 11 3.1 9 9 0 1 0 20.9 13Z"/></svg>
+      </button>
+      <div class="nav-account-wrap" id="navAccountItem">
+        <a href="account.html" class="nav-account-pill nav-account-signin" id="navAccountLink" title="Sign in / My account" aria-label="Sign in or view your account">
+          <span class="nav-account-avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+          <span class="nav-account-name">Sign in</span>
         </a>
-
-        <!-- Mobile Menu Toggle Button -->
-        <button class="mobile-toggle" id="mobileNavToggle" type="button" aria-label="Toggle navigation menu" aria-expanded="false">
-          <svg class="nav-icon-menu" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
-            <line x1="3" y1="12" x2="21" y2="12"></line>
-            <line x1="3" y1="6" x2="21" y2="6"></line>
-            <line x1="3" y1="18" x2="21" y2="18"></line>
-          </svg>
-          <svg class="nav-icon-close" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
-            <line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>
-          </svg>
-        </button>
       </div>
-    </div>
-  </header>
-
-  <!-- Mobile Fullscreen Menu Overlay -->
-  <div class="mobile-menu-overlay" id="mobileMenuOverlay">
-    <div class="tag-label">
-      <span class="dot"></span> Navigation Hub
-    </div>
-    <ul class="mobile-nav-links">
-      <li><a href="about.html">About Us</a></li>
-      <li><a href="menu.html">Curated Menu</a></li>
-      <li><a href="gallery.html">Atmosphere & Gallery</a></li>
-      <li><a href="order.html#feedback">Verified Reviews</a></li>
-      <li><a href="reservations.html">Table Reservations</a></li>
-      <li><a href="my-orders.html">Track My Order</a></li>
-      <li><a href="account.html">My Account</a></li>
-    </ul>
-    <div class="mobile-menu-footer">
-      <a href="order.html" class="btn-primary" style="width: 100%;">Launch Order Kiosk →</a>
-      <div style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--silver); text-align: center;">
-        2ND FLOOR, DKB BLDG, BAGGAO, CAGAYAN
-      </div>
+      <a class="ajs-cta" href="order.html">Order now <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+      <button type="button" class="ajs-icon-btn ajs-burger" id="navToggle" aria-controls="ajsDrawer" aria-expanded="false" aria-label="Open menu">
+        <span class="ajs-burger__lines" aria-hidden="true"><span></span><span></span><span></span></span>
+      </button>
     </div>
   </div>
+</header>
 
-  <main>
+<div class="ajs-drawer" id="ajsDrawer" role="dialog" aria-modal="true" aria-label="Site menu" aria-hidden="true">
+  <p class="ajs-drawer__eyebrow">Navigate</p>
+  <ul class="ajs-drawer__list">
+    <li><a class="ajs-drawer__link" href="index.html" aria-current="page"><span>01</span>Home</a></li>
+    <li><a class="ajs-drawer__link" href="menu.html"><span>02</span>Menu</a></li>
+    <li><a class="ajs-drawer__link" href="about.html"><span>03</span>Our story</a></li>
+    <li><a class="ajs-drawer__link" href="gallery.html"><span>04</span>Gallery</a></li>
+    <li><a class="ajs-drawer__link" href="reservations.html"><span>05</span>Reserve a table</a></li>
+    <li><a class="ajs-drawer__link" href="my-orders.html"><span>06</span>Track my order</a></li>
+    <li><a class="ajs-drawer__link" href="order.html#feedback"><span>07</span>Reviews</a></li>
+  </ul>
+  <div class="ajs-drawer__foot">
+    <a class="ajs-cta" href="order.html">Order now <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+    <div class="ajs-drawer__row">
+      <a class="ajs-drawer__chip" href="account.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> My account</a>
+      <button type="button" class="ajs-drawer__chip ajs-theme-btn" data-theme-toggle aria-pressed="false"><svg class="ajs-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/></svg><svg class="ajs-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.9 13A9 9 0 0 1 11 3.1 9 9 0 1 0 20.9 13Z"/></svg><span data-theme-label>Dark mode</span></button>
+    </div>
+    <p class="ajs-drawer__meta">2nd Floor DKB Building, Poblacion, Baggao, Cagayan<br>Open daily · 8:00 AM – 8:00 PM</p>
+  </div>
+</div>
+
+  <!-- Mobile Fullscreen Menu Overlay -->
+  
+
+  <main id="main" tabindex="-1">
     <!-- ==========================================================================
          HERO SECTION (BESPOKE MONOCHROME & GSAP MOTION)
          ========================================================================== -->
@@ -617,64 +604,52 @@
   <!-- ==========================================================================
        SITE FOOTER
        ========================================================================== -->
-  <footer class="site-footer">
-    <div class="container">
-      <div class="footer-top-grid">
-        <div class="footer-brand">
-          <h3>A&J'S FOODFLIX</h3>
-          <p>
-            Reimagining modern dining in Baggao, Cagayan. Artisanal espresso, craft milk teas, golden crispy wings, and memorable gatherings.
-          </p>
-        </div>
-
-        <div class="footer-col">
-          <h4>Explore</h4>
-          <ul class="footer-nav-list">
-            <li><a href="menu.html">Curated Menu</a></li>
-            <li><a href="order.html">Online Ordering</a></li>
-            <li><a href="gallery.html">Photo Gallery</a></li>
-            <li><a href="about.html">About The Brand</a></li>
-          </ul>
-        </div>
-
-        <div class="footer-col">
-          <h4>Services</h4>
-          <ul class="footer-nav-list">
-            <li><a href="reservations.html">Table Reservations</a></li>
-            <li><a href="my-orders.html">Track My Order</a></li>
-            <li><a href="account.html">Customer Account</a></li>
-            <li><a href="../admin/login.html">Staff Portal</a></li>
-          </ul>
-        </div>
-
-        <div class="footer-col">
-          <h4>Connect</h4>
-          <ul class="footer-nav-list">
-            <li><a href="https://www.facebook.com/profile.php?id=61555628762441" target="_blank" rel="noopener">Facebook Page</a></li>
-            <li><a href="https://www.tiktok.com/@ajsfoodflix" target="_blank" rel="noopener">TikTok Channel</a></li>
-            <li><a href="order.html#feedback">Customer Reviews</a></li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="footer-bottom-bar">
-        <span>&copy; <span id="currentYear">2026</span> A&J's Foodflix. All rights reserved.</span>
-        <span>2nd Floor, DKB Building, Poblacion, Baggao, Cagayan</span>
-        <a href="#siteHeader" class="btn-back-to-top" id="backToTopBtn">
-          <span>Back to Top</span>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
-        </a>
+<footer class="ajs-footer">
+  <div class="ajs-footer__inner">
+    <div class="ajs-footer__brand">
+      <a href="index.html" class="ajs-brand" aria-label="A&amp;J's Foodflix home">
+        <img class="ajs-brand__mark" src="../pics&amp;vids/the-yo's_logo.jpg" alt="" width="40" height="40">
+        <span class="ajs-brand__text"><b>A&amp;J's</b><small>Foodflix</small></span>
+      </a>
+      <p>Rice meals, wings, pancit and handcrafted drinks — made fresh in Baggao, Cagayan since 2024.</p>
+      <div class="ajs-footer__ctas">
+        <a class="ajs-cta" href="order.html">Order now <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        <a class="ajs-btn-ghost" href="reservations.html">Reserve a table</a>
       </div>
     </div>
-  </footer>
+    <div class="ajs-footer__col">
+      <h4>Visit</h4>
+      <p>2nd Floor DKB Building,<br>Poblacion, Baggao, Cagayan</p>
+      <p class="ajs-footer__open">Open daily · 8 AM – 8 PM</p>
+    </div>
+    <div class="ajs-footer__col">
+      <h4>Explore</h4>
+      <a href="menu.html">Full menu</a>
+      <a href="gallery.html">Gallery</a>
+      <a href="my-orders.html">Track my order</a>
+      <a href="account.html">My account</a>
+    </div>
+    <div class="ajs-footer__col">
+      <h4>Follow</h4>
+      <a href="https://www.facebook.com/profile.php?id=61555628762441" target="_blank" rel="noopener">Facebook</a>
+      <a href="https://www.tiktok.com/@ajsfoodflix" target="_blank" rel="noopener">TikTok</a>
+    </div>
+  </div>
+  <div class="ajs-footer__word" aria-hidden="true">FOODFLIX</div>
+  <div class="ajs-footer__bar">
+    <span>&copy; <span id="year"></span> A&amp;J's Foodflix. All rights reserved.</span>
+    <span>Baggao, Cagayan · Made with care · <a href="/admin/login" class="ajs-staff-link">Staff login</a></span>
+  </div>
+</footer>
 
-  <!-- GSAP Animation Engine & ScrollTrigger -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
   
   <!-- Core Customer Scripts -->
   <script src="cart.js"></script>
   <script type="module" src="authNav.js"></script>
   <script src="home.js"></script>
+<script src="site.js?v=1"></script>
 </body>
 </html>

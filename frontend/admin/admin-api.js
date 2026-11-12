@@ -1,4 +1,4 @@
-// admin-api.js
+﻿// admin-api.js
 // Shared fetch wrapper + formatting helpers for every admin page.
 // Uses httpOnly cookie for authentication (set by /api/admin/staff/login).
 // No localStorage token storage — cookies are sent automatically with credentials: 'include'.
@@ -17,9 +17,11 @@ export const API_BASE_URL = "";
 
 function getCSRFToken() {
   if (typeof document === 'undefined') return '';
-  // Read csrf_token cookie; be tolerant of whitespace and ordering
-  const match = document.cookie.match(/^\s*csrf_token=([^;]*)/);
-  return match ? match[1].trim() : '';
+  const csrfCookie = document.cookie
+    .split(';')
+    .map(cookie => cookie.trim())
+    .find(cookie => cookie.startsWith('csrf_token='));
+  return csrfCookie ? decodeURIComponent(csrfCookie.slice('csrf_token='.length)) : '';
 }
 
 export function clearStaffSession() {
@@ -65,7 +67,7 @@ export async function adminFetch(path, options = {}) {
   if (res.status === 401) {
     // Session expired / not logged in - bounce back to login.
     clearStaffSession();
-    window.location.href = 'login.html';
+    window.location.href = 'login';
     throw new Error('Session expired. Redirecting to login…');
   }
 

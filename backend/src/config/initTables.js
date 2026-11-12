@@ -36,9 +36,9 @@ export async function initTables() {
         created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
       );
     `);
-    await pool.query('ALTER TABLE inventory_incidents DROP CONSTRAINT IF EXISTS inventory_incidents_incident_type_check');
-    await pool.query('ALTER TABLE inventory_incidents ALTER COLUMN incident_type TYPE VARCHAR(50)');
-    await pool.query('CREATE INDEX IF NOT EXISTS inventory_incidents_occurred_at_idx ON inventory_incidents(occurred_at DESC)');
+    await pool.query('ALTER TABLE inventory_incidents DROP CONSTRAINT IF EXISTS inventory_incidents_incident_type_check').catch((err) => console.warn('[initTables] optional migration skipped:', err.message));
+    await pool.query('ALTER TABLE inventory_incidents ALTER COLUMN incident_type TYPE VARCHAR(50)').catch((err) => console.warn('[initTables] optional migration skipped:', err.message));
+    await pool.query('CREATE INDEX IF NOT EXISTS inventory_incidents_occurred_at_idx ON inventory_incidents(occurred_at DESC)').catch((err) => console.warn('[initTables] optional migration skipped:', err.message));
 
     // 2. add_ons
     await pool.query(`

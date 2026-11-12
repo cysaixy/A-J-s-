@@ -3,13 +3,14 @@
 // Specially tailored for Xprinter XP-58IIH and ESC/POS compatible thermal printers.
 
 const STORAGE_KEY_SETTINGS = 'ajs_receipt_settings';
+const STORAGE_KEY_DEVICES = 'ajs_receipt_devices';
 const DEFAULT_SETTINGS = {
   storeName: "A&J'S FOODFLIX",
-  tagline: "Foodflix & Refreshments",
-  address: "General Santos City",
-  phone: "0912 345 6789",
-  footerNote: "Thank you for your visit!\nPlease come again.",
-  autoPrintPos: false,
+  tagline: 'Foodflix & Refreshments',
+  address: 'General Santos City',
+  phone: '0912 345 6789',
+  footerNote: 'Thank you for your visit!\nPlease come again.',
+  autoPrintPos: true,
   autoPrintTarget: 'both', // 'both', 'counter', 'kitchen'
   printDoubleIfSingle: true, // If only 1 printer is connected, print 2 copies (Customer + Kitchen)
   paperWidth: 58, // 58mm = 32 columns
@@ -45,7 +46,25 @@ class ReceiptPrinterManager {
   loadSettings() {
     try {
       const saved = localStorage.getItem(STORAGE_KEY_SETTINGS);
-      if (saved) return { ...DEFAULT_SETTINGS, ...JSON.parse(saved) };
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        const merged = { ...DEFAULT_SETTINGS, ...parsed };
+        // Migration: if autoPrintPos was never explicitly saved as true by the
+        // user (i.e. it was stored as false from the old default), upgrade it
+        // to the new default of true. We detect this by checking whether the
+        // saved JSON contains the key at all AND it equals false — meaning it
+        // was set from the old code default, not from a deliberate user choice
+        // to disable it (which would write the same value, but after this
+        // migration it won't matter because the user toggle will re-save it).
+        if (parsed.autoPrintPos === false && DEFAULT_SETTINGS.autoPrintPos === true) {
+          merged.autoPrintPos = true;
+          // Persist the migrated value so subsequent loads reflect it
+          try {
+            localStorage.setItem(STORAGE_KEY_SETTINGS, JSON.stringify(merged));
+          } catch (_) {}
+        }
+        return merged;
+      }
     } catch (e) {
       console.warn('Failed to load receipt settings:', e);
     }
@@ -122,57 +141,8 @@ class ReceiptPrinterManager {
         optionalServices: PRINTER_SERVICES,
       });
 
-      const slotObj = this.printers[slot] || this.printers.counter;
-      slotObj.device = device;
-      device.addEventListener('gattserverdisconnected', () => {
-        slotObj.characteristic = null;
-        slotObj.server = null;
-        this.notifyStatus();
-      });
-
-      const server = await device.gatt.connect();
-      slotObj.server = server;
-
-      let writeChar = null;
-      for (const serviceUuid of PRINTER_SERVICES) {
-        try {
-          const service = await server.getPrimaryService(serviceUuid);
-          const chars = await service.getCharacteristics();
-          for (const char of chars) {
-            if (char.properties.write || char.properties.writeWithoutResponse) {
-              writeChar = char;
-              break;
-            }
-          }
-          if (writeChar) break;
-        } catch (e) {}
-      }
-
-      if (!writeChar) {
-        try {
-          const allServices = await server.getPrimaryServices();
-          for (const service of allServices) {
-            try {
-              const chars = await service.getCharacteristics();
-              for (const char of chars) {
-                if (char.properties.write || char.properties.writeWithoutResponse) {
-                  writeChar = char;
-                  break;
-                }
-              }
-              if (writeChar) break;
-            } catch (e) {}
-          }
-        } catch (e) {}
-      }
-
-      if (!writeChar) {
-        throw new Error(
-          `Connected to ${device.name || 'device'}, but no writable printer characteristic was found. Ensure this is an ESC/POS Bluetooth printer.`
-        );
-      }
-
-      slotObj.characteristic = writeChar;
+      await this.connectDevice(slot, device);
+      this.saveDeviceId(slot, device.id);
       this.notifyStatus();
       return { success: true, slot, deviceName: this.getDeviceName(slot) };
     } catch (err) {
@@ -182,6 +152,101 @@ class ReceiptPrinterManager {
       }
       throw err;
     }
+  }
+
+  async connectDevice(slot, device) {
+    const slotObj = this.printers[slot] || this.printers.counter;
+    slotObj.device = device;
+    device.addEventListener('gattserverdisconnected', () => {
+      if (slotObj.device !== device) return;
+      slotObj.characteristic = null;
+      slotObj.server = null;
+      this.notifyStatus();
+    });
+
+    const server = await device.gatt.connect();
+    slotObj.server = server;
+
+    let writeChar = null;
+    for (const serviceUuid of PRINTER_SERVICES) {
+      try {
+        const service = await server.getPrimaryService(serviceUuid);
+        const chars = await service.getCharacteristics();
+        writeChar = chars.find(char => char.properties.write || char.properties.writeWithoutResponse) || null;
+        if (writeChar) break;
+      } catch (e) {}
+    }
+
+    if (!writeChar) {
+      try {
+        const allServices = await server.getPrimaryServices();
+        for (const service of allServices) {
+          try {
+            const chars = await service.getCharacteristics();
+            writeChar = chars.find(char => char.properties.write || char.properties.writeWithoutResponse) || null;
+            if (writeChar) break;
+          } catch (e) {}
+        }
+      } catch (e) {}
+    }
+
+    if (!writeChar) {
+      if (device.gatt.connected) device.gatt.disconnect();
+      slotObj.device = null;
+      slotObj.server = null;
+      throw new Error(
+        `Connected to ${device.name || 'device'}, but no writable printer characteristic was found. Ensure this is an ESC/POS Bluetooth printer.`
+      );
+    }
+
+    slotObj.characteristic = writeChar;
+  }
+
+  saveDeviceId(slot, deviceId) {
+    try {
+      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY_DEVICES) || '{}');
+      saved[slot] = deviceId;
+      localStorage.setItem(STORAGE_KEY_DEVICES, JSON.stringify(saved));
+    } catch (err) {
+      console.warn('Failed to save paired printer for reconnection:', err);
+    }
+  }
+
+  async restoreConnections() {
+    if (!this.isBluetoothSupported() || typeof navigator.bluetooth.getDevices !== 'function') return [];
+
+    let saved;
+    try {
+      saved = JSON.parse(localStorage.getItem(STORAGE_KEY_DEVICES) || '{}');
+    } catch (err) {
+      console.warn('Failed to read paired printers for reconnection:', err);
+      return [];
+    }
+
+    const entries = ['counter', 'kitchen']
+      .filter(slot => typeof saved[slot] === 'string' && saved[slot])
+      .map(slot => [slot, saved[slot]]);
+    if (!entries.length) return [];
+
+    const devices = await navigator.bluetooth.getDevices();
+    const restored = [];
+    for (const [slot, deviceId] of entries) {
+      if (this.isConnected(slot)) {
+        restored.push(slot);
+        continue;
+      }
+      const device = devices.find(candidate => candidate.id === deviceId);
+      if (!device) continue;
+      try {
+        await this.connectDevice(slot, device);
+        restored.push(slot);
+        this.notifyStatus();
+      } catch (err) {
+        console.warn(`Could not reconnect the ${slot} printer:`, err);
+        this.notifyStatus();
+      }
+    }
+    return restored;
   }
 
   async disconnect(slot = 'counter') {
@@ -197,6 +262,13 @@ class ReceiptPrinterManager {
       slotObj.device = null;
       slotObj.server = null;
       slotObj.characteristic = null;
+    }
+    try {
+      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY_DEVICES) || '{}');
+      delete saved[slot];
+      localStorage.setItem(STORAGE_KEY_DEVICES, JSON.stringify(saved));
+    } catch (err) {
+      console.warn('Failed to clear saved printer pairing:', err);
     }
     this.notifyStatus();
   }
@@ -391,7 +463,8 @@ class ReceiptPrinterManager {
       pushLine(`Customer: ${data.customerName}`);
       if (data.customerPhone) pushLine(`Phone: ${data.customerPhone}`);
     }
-    if (data.deliveryAddress) {
+    const isDeliveryOrder = String(data.orderType || '').toLowerCase() === 'delivery';
+    if (isDeliveryOrder && data.deliveryAddress) {
       pushLine(`Address: ${data.deliveryAddress}`);
     }
 
@@ -497,8 +570,17 @@ class ReceiptPrinterManager {
   }
 }
 
-// Global printer manager singleton
-export const printerManager = new ReceiptPrinterManager();
+// POS owns the live printer connection. Pages it opens in its overlay frame
+// reuse that manager, so checking another admin page from the POS
+// cannot drop the Bluetooth session. A page opened on its own still gets
+// its own manager as a safe fallback.
+let hostPrinterManager = null;
+try {
+  hostPrinterManager = window.parent !== window ? window.parent.__ajsPrinterManager : null;
+} catch {
+  // A cross-origin embed cannot share the host manager; use the local fallback.
+}
+export const printerManager = hostPrinterManager || new ReceiptPrinterManager();
 
 /* ================================================================
    HELPERS & FORMATTERS
@@ -572,19 +654,51 @@ export function normalizeOrderData(raw, extra = {}) {
     };
   });
 
+  // Custom order / advance items (from reservations or custom orders)
+  let customList = Array.isArray(raw.custom_items) ? raw.custom_items : [];
+  if (!customList.length && raw.notes && String(raw.notes).includes('---CUSTOM_ITEMS_JSON---')) {
+    try {
+      const marker = '---CUSTOM_ITEMS_JSON---';
+      const rawNotes = String(raw.notes);
+      const rawJson = rawNotes.slice(rawNotes.indexOf(marker) + marker.length).trim();
+      const parsed = JSON.parse(rawJson);
+      if (Array.isArray(parsed)) customList = parsed;
+    } catch (e) {}
+  }
+
+  const customItems = customList.map((ci) => {
+    const qty = Number(ci.quantity || ci.qty || 1);
+    const price = Number(ci.price || 0);
+    const subtotal = ci.subtotal != null ? Number(ci.subtotal) : price * qty;
+    return {
+      name: `[Custom] ${ci.name || ci.product_name || 'Custom Item'}`,
+      quantity: qty,
+      price: price,
+      subtotal: subtotal,
+      notes: ci.notes || '',
+      add_ons: [],
+      isCustom: true,
+    };
+  });
+
+  const allItems = [...items, ...customItems];
+
   const totalAmount = Number(raw.total_amount != null ? raw.total_amount : extra.totalAmount || 0);
   const deliveryFee = Number(raw.delivery_fee != null ? raw.delivery_fee : extra.deliveryFee || 0);
   const subtotal = extra.subtotal != null ? Number(extra.subtotal) : Math.max(0, totalAmount - deliveryFee);
 
+  const orderType = raw.order_type || extra.orderType || 'dine_in';
+  const isDelivery = String(orderType).toLowerCase() === 'delivery';
+
   return {
     orderId: raw.id || extra.orderId || '—',
     date: raw.datetime_ordered ? new Date(raw.datetime_ordered) : new Date(),
-    orderType: raw.order_type || extra.orderType || 'dine_in',
+    orderType: orderType,
     customerName: raw.customer_name || extra.customerName || 'Walk-in',
     customerPhone: raw.customer_phone || raw.customer_mobile || extra.customerPhone || '',
-    deliveryAddress: raw.delivery_address || extra.deliveryAddress || '',
+    deliveryAddress: isDelivery ? (raw.delivery_address || extra.deliveryAddress || '') : '',
     staffName: raw.staff_name || extra.staffName || '',
-    items: items,
+    items: allItems,
     subtotal: subtotal,
     deliveryFee: deliveryFee,
     totalAmount: totalAmount,
@@ -611,6 +725,85 @@ export function printReceiptSystem(receiptData, copyType = 'CUSTOMER RECEIPT') {
 
   // Trigger print
   window.print();
+}
+
+/**
+ * printReceiptAutomatic — called on every successful POS order confirm.
+ *
+ * Strategy (in order):
+ *  1. If a Bluetooth printer is already live → print BT immediately.
+ *  2. If no BT connection but a previously-paired device is stored →
+ *     silently try restoreConnections() (no user picker needed on Chrome
+ *     with getDevices() permission) then print BT.
+ *  3. If BT unavailable or reconnect fails → fall back to browser
+ *     system print (window.print) so a receipt always comes out.
+ *
+ * @param {object}  receiptData  — output of normalizeOrderData()
+ * @param {Element} noticeEl     — optional DOM element to show status text
+ * @param {Element} printBothBtn — optional "Print Both" button to update
+ */
+export async function printReceiptAutomatic(receiptData, noticeEl, printBothBtn) {
+  const setNotice = (html) => { if (noticeEl) noticeEl.innerHTML = html; };
+
+  // Guard: setting must be on
+  if (!printerManager.settings.autoPrintPos) return;
+
+  const target = printerManager.settings.autoPrintTarget || 'both';
+
+  // --- Step 1: Already connected? Print immediately via Bluetooth ---
+  if (printerManager.isAnyConnected()) {
+    setNotice(`<span style="color:#2e7d4f;">⏳ Sending to printer…</span>`);
+    try {
+      await printerManager.printReceiptBluetooth(receiptData, target);
+      setNotice(`<span style="color:#2e7d4f;">✓ Receipt printed automatically.</span>`);
+      if (printBothBtn) printBothBtn.textContent = '✓ Printed';
+    } catch (err) {
+      console.warn('Auto-print (BT connected) error:', err);
+      setNotice(`<span style="color:#c0392b;">⚠ Bluetooth print failed: ${err.message}</span>`);
+    }
+    return;
+  }
+
+  // --- Step 2: Try silent reconnect (Chrome getDevices — no picker) ---
+  if (printerManager.isBluetoothSupported() && typeof navigator.bluetooth.getDevices === 'function') {
+    let savedDevices;
+    try {
+      savedDevices = JSON.parse(localStorage.getItem('ajs_receipt_devices') || '{}');
+    } catch (_) { savedDevices = {}; }
+
+    const hasSavedDevice = Object.values(savedDevices).some(Boolean);
+    if (hasSavedDevice) {
+      setNotice(`<span style="color:#2e7d4f;">⏳ Reconnecting printer…</span>`);
+      try {
+        await printerManager.restoreConnections();
+      } catch (err) {
+        console.warn('Auto-print reconnect failed:', err);
+      }
+
+      if (printerManager.isAnyConnected()) {
+        setNotice(`<span style="color:#2e7d4f;">⏳ Sending to printer…</span>`);
+        try {
+          await printerManager.printReceiptBluetooth(receiptData, target);
+          setNotice(`<span style="color:#2e7d4f;">✓ Receipt printed automatically.</span>`);
+          if (printBothBtn) printBothBtn.textContent = '✓ Printed';
+        } catch (err) {
+          console.warn('Auto-print (BT reconnected) error:', err);
+          setNotice(`<span style="color:#c0392b;">⚠ Bluetooth print failed: ${err.message}</span>`);
+        }
+        return;
+      }
+    }
+  }
+
+  // --- Step 3: Fallback — browser system print (always works) ---
+  setNotice(`<span style="color:#2e7d4f;">⏳ Opening system print…</span>`);
+  try {
+    printReceiptSystem(receiptData, 'CUSTOMER RECEIPT');
+    setNotice(`<span style="color:#2e7d4f;">✓ System print dialog opened.</span>`);
+  } catch (err) {
+    console.warn('Auto-print (system) error:', err);
+    setNotice(`<span style="color:#c0392b;">⚠ Print failed: ${err.message}</span>`);
+  }
 }
 
 /**
@@ -1158,7 +1351,7 @@ function renderThermalReceiptHtml(data, settings, copyType = 'CUSTOMER RECEIPT')
             <span>Phone:</span>
             <span>${escapeHtml(data.customerPhone)}</span>
           </div>` : ''}
-        ${data.deliveryAddress ? `
+        ${(String(data.orderType || '').toLowerCase() === 'delivery' && data.deliveryAddress) ? `
           <div class="tr-address-box">
             <b>Delivery Address:</b><br>${escapeHtml(data.deliveryAddress)}
           </div>` : ''}
@@ -1284,8 +1477,8 @@ function ensureReceiptStyles() {
       background: #fff; font-size: 0.75rem; font-weight: 600; cursor: pointer; transition: all 0.12s;
     }
     .thermal-sm-btn:hover { background: #f2ede4; }
-    .thermal-sm-btn.primary { background: var(--brass, #a3844a); border-color: var(--brass, #a3844a); color: #fff; }
-    .thermal-sm-btn.primary:hover { background: var(--brass-dark, #8a6d3a); }
+    .thermal-sm-btn.primary { background: var(--brass, #cf4a14); border-color: var(--brass, #cf4a14); color: #fff; }
+    .thermal-sm-btn.primary:hover { background: var(--brass-dark, #a8390c); }
 
     .thermal-alert {
       padding: 8px 12px; border-radius: 6px; font-size: 0.8rem; margin-bottom: 12px;

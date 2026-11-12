@@ -219,14 +219,20 @@ export async function restoreStock(params) {
     throw new Error('Database client is required for stock restoration');
   }
 
-  // Find all inventory deductions for this order
+  // Find all inventory deductions for this order. Match the order number as a
+  // whole token: a plain LIKE '%Order #1%' would also pick up the sale rows of
+  // orders #10-#19, #100... and restore stock that was never ours to restore.
+  const safeOrderId = String(Number.parseInt(orderId, 10));
+  if (safeOrderId === 'NaN') {
+    throw new Error('A numeric order id is required for stock restoration');
+  }
   const { rows: logs } = await client.query(
-    `SELECT inventory_id, menu_id, quantity_change 
-     FROM inventory_log 
-     WHERE transaction_type = 'sale' 
-       AND remarks LIKE $1
+    `SELECT inventory_id, menu_id, quantity_change
+     FROM inventory_log
+     WHERE transaction_type = 'sale'
+       AND remarks ~ $1
      ORDER BY id`,
-    [`%Order #${orderId}%`]
+    [`Order #${safeOrderId}([^0-9]|$)`]
   );
 
   let restoredCount = 0;
