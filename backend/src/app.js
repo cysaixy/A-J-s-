@@ -53,7 +53,7 @@ app.use(helmet({
         'https://securetoken.googleapis.com',
         'https://www.googleapis.com',
       ],
-      frameSrc: ['\'self\'', 'https://*.firebaseapp.com', 'https://accounts.google.com', 'https://www.google.com'],
+      frameSrc: ['\'self\'', 'https://*.firebaseapp.com', 'https://accounts.google.com', 'https://www.google.com', 'https://www.facebook.com'],
     },
   },
 }));

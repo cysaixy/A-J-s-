@@ -7,8 +7,8 @@ const STORAGE_KEY_DEVICES = 'ajs_receipt_devices';
 const DEFAULT_SETTINGS = {
   storeName: "A&J'S FOODFLIX",
   tagline: 'Foodflix & Refreshments',
-  address: 'General Santos City',
-  phone: '0912 345 6789',
+  address: 'Alcala, Cagayan 3505',
+  phone: '0965 068 0288',
   footerNote: 'Thank you for your visit!\nPlease come again.',
   autoPrintPos: true,
   autoPrintTarget: 'both', // 'both', 'counter', 'kitchen'

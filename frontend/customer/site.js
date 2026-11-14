@@ -327,6 +327,7 @@
     '.section-head', '.about-figure', '.about-text', '.stat-row > div',
     '.menu-item', '.order-card', '.reserve-card', '.res-card', '.account-card',
     '.comment-card', '.checkout-step-panel', '.gallery-grid > *',
+    '.ajs-reels__head', '.ajs-reel',
     '.ajs-footer__inner > *',
   ].join(',');
   const isHome = document.body.dataset.page === 'home';
@@ -335,7 +336,7 @@
   function registerReveals() {
     const fresh = $$(REVEAL_SELECTOR).filter((el) => {
       if (seen.has(el)) return false;
-      if (isHome && !el.closest('.ajs-footer')) return false; // home.js animates its own sections
+      if (isHome && !el.closest('.ajs-footer, .ajs-reels')) return false; // home.js animates its own sections
       if (el.closest('#quickCartWidget, .modal, [role="dialog"]')) return false;
       seen.add(el);
       el.classList.add('in'); // legacy .reveal is hidden until .in

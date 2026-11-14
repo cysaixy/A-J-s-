@@ -308,7 +308,7 @@
   const copyAddressBtn = document.getElementById('copyAddressBtn');
   if (copyAddressBtn) {
     copyAddressBtn.addEventListener('click', async () => {
-      const addressText = '2nd Floor, DKB Building, Poblacion, Baggao, Cagayan';
+      const addressText = 'Alcala, Cagayan, Philippines 3505';
       try {
         await navigator.clipboard.writeText(addressText);
         const originalText = copyAddressBtn.innerHTML;
