@@ -279,31 +279,7 @@
   });
 
   /* --------------------------------------------------------------------------
-     9. Ambient Hero Video Control
-     -------------------------------------------------------------------------- */
-  const videoToggleBtn = document.getElementById('heroVideoToggle');
-  const heroVideo = document.getElementById('heroVideo');
-
-  if (videoToggleBtn && heroVideo) {
-    videoToggleBtn.addEventListener('click', () => {
-      if (heroVideo.paused) {
-        heroVideo.play();
-        videoToggleBtn.innerHTML = `
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
-          PAUSE REEL
-        `;
-      } else {
-        heroVideo.pause();
-        videoToggleBtn.innerHTML = `
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-          PLAY REEL
-        `;
-      }
-    });
-  }
-
-  /* --------------------------------------------------------------------------
-     10. Location Address Copy & Toast
+     9. Location Address Copy & Toast
      -------------------------------------------------------------------------- */
   const copyAddressBtn = document.getElementById('copyAddressBtn');
   if (copyAddressBtn) {
